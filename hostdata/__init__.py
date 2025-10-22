@@ -18,7 +18,7 @@ class AppDataReader:
         if base_dir:
             return Path(base_dir).resolve()
         root_path = Path('requirements.txt').resolve().parent
-        return root_path / 'appdata'
+        return root_path / 'hostdata'
     
     def _resolve_file_path(self, filename: str) -> Path:
         full_path = (self.base_dir / filename).with_suffix('.json')
