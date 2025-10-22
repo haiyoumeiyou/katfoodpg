@@ -1,0 +1,504 @@
+{
+    "title": "Administration Page Meta",
+    "sect_nav": [
+        {"name":"user", "path":"/admin/user", "page_title": "User Mgmt"},
+        {"name":"role", "path":"/admin/role", "page_title": "Role Mgmt"},
+        {"name":"option", "path":"/admin/option", "page_title": "Option Mgmt"},
+        {"name":"account", "path":"/admin/account", "page_title": "Account Mgmt"}
+    ],
+    "::user": {
+        "title": "User Page Meta",
+        "nav_bar": [
+            {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_type":"input", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::user_search"},
+            {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::user_search"},
+            {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_type":"button", "handler":"/js/part/fn_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::user_create"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"User Count", "f_type":"label"}
+            ],
+            "caption":"User Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"User ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"user_name", "d_name":"User Name", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"first_name", "d_name":"First Name", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"last_name", "d_name":"Last Name", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Title", "f_type":"thead"},
+                {"f_id":"default_page", "d_name":"Default Page", "f_type":"thead"},
+                {"f_id":"report_to", "d_name":"Supervisor", "f_type":"thead"},
+                {"f_id":"roles", "d_name":"Roles", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"vendor_of", "d_name":"Vendor", "f_type":"thead"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_type":"button", "f_event_id":"view", "handler": "/js/part/fn_modal_view.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::user_view"},
+                {"f_id":"eid", "d_name":"Password", "f_type":"button", "f_event_id":"password", "handler": "/js/part/fn_modal_view.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::user_password"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT eid, user_name, first_name, last_name, title, default_page, report_to, roles, vendor_of FROM users"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::user_view": {
+        "title": "User View Meta",
+        "modal_template": {
+            "header":[
+                {"f_id":"table_data", "d_name":"User Count", "f_type":"label"}
+            ],
+            "fields":[
+                {"f_id":"eid", "d_name":"User ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"user_name", "d_name":"User Name", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"first_name", "d_name":"First Name", "f_type":"text", "f_element":"input"},
+                {"f_id":"last_name", "d_name":"Last Name", "f_type":"text", "f_element":"input"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"default_page", "d_name":"Default Page", "f_type":"text", "f_element":"input"},
+                {"f_id":"report_to", "d_name":"Supervisor", "f_element":"select", "f_data":"/api/admin/user_report_to", "f_option_text":"user_name", "f_option_val":"eid"},
+                {"f_id":"vendor_of", "d_name":"Vendor Of", "f_element":"select", "f_data":"/api/admin/user_vendor_of", "f_option_text":"acct_code", "f_option_val":"eid"},
+                {"f_id":"roles", "d_name":"Roles", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::user_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT eid, user_name, first_name, last_name, title, default_page, report_to, roles FROM users WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::user_create": {
+        "title": "User Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"User ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"user_name", "d_name":"User Name", "f_type":"text", "f_element":"input"},
+                {"f_id":"first_name", "d_name":"First Name", "f_type":"text", "f_element":"input"},
+                {"f_id":"last_name", "d_name":"Last Name", "f_type":"text", "f_element":"input"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"default_page", "d_name":"Default Page", "f_type":"text", "f_element":"input"},
+                {"f_id":"report_to", "d_name":"Supervisor", "f_element":"select", "f_data":"/api/admin/user_report_to", "f_option_text":"user_name", "f_option_val":"eid"},
+                {"f_id":"vendor_of", "d_name":"Vendor Of", "f_element":"select", "f_data":"/api/admin/user_vendor_of", "f_option_text":"acct_code", "f_option_val":"eid"},
+                {"f_id":"roles", "d_name":"Roles", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::user_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "insert",
+                "query": "INSERT INTO users (user_name, first_name, last_name, title, default_page, report_to, roles) VALUES (:user_name, :first_name, :last_name, :title, :default_page, :report_to, :roles) RETURNING eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::user_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT eid, user_name, first_name, last_name, title, default_page, report_to, vendor_of FROM users WHERE eid like :search or user_name like :search or first_name like :search or last_name like :search"
+            }
+        },
+        "auth": []
+    },
+    "::user_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "modify",
+                "query": "UPDATE users SET user_name = :user_name, first_name = :first_name, last_name = :last_name, title = :title, default_page = :default_page, report_to = :report_to, vendor_of = :vendor_of, roles = :roles, last_user = :last_user, last_update = :last_update WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::user_report_to": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"users", "q_fields":["eid", "user_name"], "q_keyes":[]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::user_vendor_of": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"accounts", "q_fields":["eid", "acct_code"], "q_keyes":[]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::user_password": {
+        "title": "User Set Password Meta",
+        "modal_template": {
+            "header":[
+                {"f_id":"table_data", "d_name":"User Count", "f_type":"label"}
+            ],
+            "fields":[
+                {"f_id":"eid", "d_name":"User ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"user_name", "d_name":"User Name", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"password", "d_name":"Password", "f_type":"password", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Set Password", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::user_setpw"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT eid, user_name, first_name, last_name, title, report_to FROM users WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::user_setpw": {
+        "data_endpoint": {
+            "data": {
+                "handler": "set_password",
+                "query": "UPDATE users SET hash = :hash, last_user = :last_user, last_update = :last_update WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::user_login": {
+        "title": "User Login Meta",
+        "modal_template": {
+            "header":[
+                {"f_id":"table_data", "d_name":"User Count", "f_type":"label"}
+            ],
+            "fields":[
+                {"f_id":"user_name", "d_name":"User Name", "f_type":"text", "f_element":"input"},
+                {"f_id":"password", "d_name":"Password", "f_type":"password", "f_element":"input", "f_event_id":"login"}
+            ],
+            "events":[
+                {"f_id":"user_name", "d_name":"Login", "f_type":"button", "f_event_id":"login", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::user_gettoken"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "login",
+                "query": "SELECT eid, user_name, hash FROM users WHERE user_name = :user_name"
+            }
+        }
+    },
+    "::user_gettoken": {
+        "data_endpoint": {
+            "data": {
+                "handler": "get_token",
+                "query": ""
+            }
+        }
+    },
+    "::user_logout": {
+        "data_endpoint": {
+            "data": {
+                "handler": "modify",
+                "query": "DELETE FROM user_token WHERE token = :token"
+            }
+        }
+    },
+    "::role": {
+        "title": "Role Page Meta",
+        "nav_bar": [
+            {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_type":"input", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::role_search"},
+            {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::role_search"},
+            {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_type":"button", "handler":"/js/part/fn_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::role_create"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"User Count", "f_type":"label"}
+            ],
+            "fields":[
+                {"f_id":"eid", "d_name":"Role ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"role_name", "d_name":"Role Name", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"description", "d_name":"Title", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"event", "d_name":"Action", "f_type":"thead"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_type":"button", "f_event_id":"view", "handler": "/js/part/fn_modal_view.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::role_view"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "select * from roles"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::role_view": {
+        "title": "Role View Meta",
+        "modal_template": {
+            "header":[
+                {"f_id":"table_data", "d_name":"User Count", "f_type":"label"}
+            ],
+            "fields":[
+                {"f_id":"eid", "d_name":"Role ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"role_name", "d_name":"Role Name", "f_type":"text", "f_element":"input"},
+                {"f_id":"description", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::role_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM roles WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::role_create": {
+        "title": "Role Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"Role ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"role_name", "d_name":"Role Name", "f_type":"text", "f_element":"input"},
+                {"f_id":"description", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::role_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "insert",
+                "query": "INSERT INTO roles (role_name, description, is_active) VALUES (:role_name, :description, :is_active) RETURNING eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::role_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM roles WHERE eid like :search or role_name like :search or description like :search"
+            }
+        },
+        "auth": []
+    },
+    "::role_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"roles", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::option": {
+        "title": "Option Page Meta",
+        "nav_bar": [
+            {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_type":"input", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::option_search"},
+            {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::option_search"},
+            {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_type":"button", "handler":"/js/part/fn_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::option_create"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "caption":"Option List",
+            "header":[
+                {"f_id":"table_data", "d_name":"Option Count", "f_type":"label"}
+            ],
+            "fields":[
+                {"f_id":"eid", "d_name":"Option ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"refer_entity", "d_name":"Entity Name", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"refer_column", "d_name":"Field", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"option_code", "d_name":"Code", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"option_abbr", "d_name":"Abbreviation", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"option_description", "d_name":"Description", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_type":"button", "f_event_id":"view", "handler": "/js/part/fn_modal_view.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::option_view"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "select * from data_codes"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::option_view": {
+        "title": "OPtion View Meta",
+        "modal_template": {
+            "header":[
+                {"f_id":"table_data", "d_name":"Option Count", "f_type":"label"}
+            ],
+            "fields":[
+                {"f_id":"eid", "d_name":"Option ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"refer_entity", "d_name":"Entity Name", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"refer_column", "d_name":"Field", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"option_code", "d_name":"Code", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"option_abbr", "d_name":"Abbreviation", "f_type":"text", "f_element":"input"},
+                {"f_id":"option_description", "d_name":"Description", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::option_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM data_codes WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::option_create": {
+        "title": "Role Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"Option ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"refer_entity", "d_name":"Entity Name", "f_type":"text", "f_element":"input"},
+                {"f_id":"refer_column", "d_name":"Field", "f_type":"text", "f_element":"input"},
+                {"f_id":"option_code", "d_name":"Code", "f_type":"text", "f_element":"input"},
+                {"f_id":"option_abbr", "d_name":"Abbreviation", "f_type":"text", "f_element":"input"},
+                {"f_id":"option_description", "d_name":"Description", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::option_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"data_codes", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::option_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM data_codes WHERE eid like :search or refer_entity like :search or refer_column like :search or option_abbr like :search or option_description like :search"
+            }
+        },
+        "auth": []
+    },
+    "::option_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"data_codes", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::account": {
+        "title": "Account Page Meta",
+        "nav_bar": [
+            {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_type":"input", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::account_search"},
+            {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::account_search"},
+            {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_type":"button", "handler":"/js/part/fn_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::account_create"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "caption":"Account List",
+            "header":[
+                {"f_id":"table_data", "d_name":"Account Count", "f_type":"label"}
+            ],
+            "fields":[
+                {"f_id":"eid", "d_name":"Account ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"acct_code", "d_name":"Account Code", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"acct_name", "d_name":"Account Name", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"comment", "d_name":"Comment", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"acct_type", "d_name":"Account Type", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_type":"button", "f_event_id":"view", "handler": "/js/part/fn_modal_view.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::account_view"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "select * from accounts"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::account_view": {
+        "title": "Account View Meta",
+        "modal_template": {
+            "header":[
+                {"f_id":"table_data", "d_name":"Account Count", "f_type":"label"}
+            ],
+            "fields":[
+                {"f_id":"eid", "d_name":"Account ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"acct_code", "d_name":"Account Code", "f_type":"text", "f_element":"input"},
+                {"f_id":"acct_name", "d_name":"Account Name", "f_type":"text", "f_element":"input"},
+                {"f_id":"comment", "d_name":"Comment", "f_type":"text", "f_element":"input"},
+                {"f_id":"acct_type", "d_name":"Account Type", "f_element":"select", "f_data":"/api/admin/account_type", "f_option_text":"option_abbr", "f_option_val":"option_code"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::account_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM accounts WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::account_create": {
+        "title": "Role Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"Account ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"acct_code", "d_name":"Account Code", "f_type":"text", "f_element":"input"},
+                {"f_id":"acct_name", "d_name":"Account Name", "f_type":"text", "f_element":"input"},
+                {"f_id":"comment", "d_name":"Comment", "f_type":"text", "f_element":"input"},
+                {"f_id":"acct_type", "d_name":"Account Type", "f_element":"select", "f_data":"/api/admin/account_type", "f_option_text":"option_abbr", "f_option_val":"option_code"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json::account_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"accounts", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::account_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM accounts WHERE eid like :search or acct_code like :search or acct_name like :search or comment like :search or acct_type like :search"
+            }
+        },
+        "auth": []
+    },
+    "::account_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"accounts", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::account_type": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"accounts", "refer_column":"acct_type"}
+            }
+        },
+        "auth": ["admin"]
+    }
+}
