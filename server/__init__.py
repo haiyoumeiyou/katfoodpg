@@ -2,13 +2,10 @@ import datetime
 import cherrypy
 
 class AuthTool(cherrypy.Tool):
-    from hostdata import AppDataReader
-    from server.admin.model import AdminService
-    from hostdata import Settings
-
-    settings = Settings()
+    from appdata import AppDataReader
+    from server.model.admin import AdminModel
     endpoint_reader = AppDataReader()
-    auth_tool = AdminService(settings)
+    auth_tool = AdminModel()
 
     def __init__(self):
         cherrypy.Tool.__init__(
@@ -23,7 +20,7 @@ class AuthTool(cherrypy.Tool):
         req = cherrypy.request
         headers = req.headers
         path_info = req.path_info
-        permission_set = self.endpoint_reader.get_endpoint_permissions(path_info)
+        permission_set = self.endpoint_reader.getEndpointPermission(path_info)
         authorization = headers['Authorization'] if 'Authorization' in headers else None
         # print('authorization: ', authorization)
         # print(path_info, permission_set)
@@ -54,40 +51,40 @@ class Root(object):
     def default(self, *path):
         return open('client/app.html')
 
-from server.meta.api import MetaRest
-from server.admin.api import AdminRest
-# from server.api.inventory import InvtDataREST
-# from server.api.receiving import RecvDataREST
-# from server.api.shipping import ShipDataREST
-# from server.api.rma import RmaDataREST
-# from server.api.work import WorkDataREST
-# from server.api.track import TrackDataREST
-# from server.api.rework import ReworkDataREST
-# from server.api.misc import MiscDataREST
-# from server.api.vendor import VendorDataREST
-# from server.api.file import FileDataREST
-# from server.api.util import UtilREST
-# from server.api.report import ReportDataREST
-# from server.work.api import WorkV2Rest
+from server.api.meta import MetaDataREST
+from server.api.admin import AdminDataREST
+from server.api.inventory import InvtDataREST
+from server.api.receiving import RecvDataREST
+from server.api.shipping import ShipDataREST
+from server.api.rma import RmaDataREST
+from server.api.work import WorkDataREST
+from server.api.track import TrackDataREST
+from server.api.rework import ReworkDataREST
+from server.api.misc import MiscDataREST
+from server.api.vendor import VendorDataREST
+from server.api.file import FileDataREST
+from server.api.util import UtilREST
+from server.api.report import ReportDataREST
+from server.work.api import WorkV2Rest
 
 @cherrypy.config(**{'tools.auth.on':True})
 class API(object):
     def __init__(self):
-        self.meta = MetaRest()
-        self.admin = AdminRest()
-        # self.invt = InvtDataREST()
-        # self.recv = RecvDataREST()
-        # self.ship = ShipDataREST()
-        # self.rma = RmaDataREST()
-        # self.work = WorkDataREST()
-        # self.track = TrackDataREST()
-        # self.rework = ReworkDataREST()
-        # self.misc = MiscDataREST()
-        # self.vendor = VendorDataREST()
-        # self.file = FileDataREST()
-        # self.util = UtilREST()
-        # self.report = ReportDataREST()
-        # self.work_v2 = WorkV2Rest()
+        self.meta = MetaDataREST()
+        self.admin = AdminDataREST()
+        self.invt = InvtDataREST()
+        self.recv = RecvDataREST()
+        self.ship = ShipDataREST()
+        self.rma = RmaDataREST()
+        self.work = WorkDataREST()
+        self.track = TrackDataREST()
+        self.rework = ReworkDataREST()
+        self.misc = MiscDataREST()
+        self.vendor = VendorDataREST()
+        self.file = FileDataREST()
+        self.util = UtilREST()
+        self.report = ReportDataREST()
+        self.work_v2 = WorkV2Rest()
 
     @cherrypy.expose
     @cherrypy.tools.json_in()

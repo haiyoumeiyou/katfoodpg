@@ -1,0 +1,476 @@
+{
+    "title": "Rework Page Meta",
+    "sect_nav": [
+        {"name":"order", "path":"/rework/order", "page_title": "Order Mgmt"},
+        {"name":"model", "path":"/rework/rw_model", "page_title": "Rework Model Mgmt"},
+        {"name":"sn_type", "path":"/rework/sn_type", "page_title": "Serial No. Mgmt"}
+    ],
+    "::order": {
+        "title": "order Page Meta",
+        "nav_bar": [
+            {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_type":"input", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::order_search"},
+            {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::order_search"},
+            {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_type":"button", "handler":"/js/part/fn_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::order_create"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"order Count", "f_type":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Order ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Production Order", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"acct_name", "d_name":"Vendor", "f_type":"thead"},
+                {"f_id":"order_type", "d_name":"Order Type", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"model_name", "d_name":"Model", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"quantity", "d_name":"Pallet Count", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"status", "d_name":"Status", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"thead"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_type":"button", "f_event_id":"view", "handler": "/js/part/fn_modal_view.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::order_view"},
+                {"f_id":"eid", "d_name":"Detail", "f_type":"button", "f_event_id":"detail", "handler": "/js/part/fn_table_rework.js", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::order_detail"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT ro.*, ac.acct_name, rm.title as model_name, rcq.quantity FROM rw_orders ro LEFT OUTER JOIN accounts ac ON ro.vendor_id = ac.eid LEFT OUTER JOIN rw_model rm ON ro.rw_model_id = rm.eid LEFT OUTER JOIN (SELECT rc.rw_order_id, count(*) as quantity FROM rw_containers rc GROUP BY rc.rw_order_id) as rcq on ro.eid = rcq.rw_order_id ORDER BY ro.eid DESC"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::order_view": {
+        "title": "order View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"order_type", "d_name":"Order Type", "f_element":"select", "f_data":"/api/rework/order_type", "f_option_text":"option_abbr", "f_option_val":"option_code"},
+                {"f_id":"status", "d_name":"Status", "f_element":"select", "f_data":"/api/rework/order_status", "f_option_text":"option_abbr", "f_option_val":"option_code"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"},
+                {"f_id":"rw_model_id", "d_name":"Model", "f_element":"select", "f_data":"/api/rework/order_model", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"rw_sn_type_id", "d_name":"SN Type", "f_element":"select", "f_data":"/api/rework/order_sn_type", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"vendor_id", "d_name":"Vendor", "f_element":"select", "f_data":"/api/rework/order_vendor", "f_option_text":"acct_name", "f_option_val":"eid"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::order_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM rw_orders WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::order_detail": {
+        "title": "order View Meta",
+        "param":"param",
+        "fn_key":{"order_id":"eid"},
+        "title_template":{"f_id":"title","f_element":"label","f_data":"/api/rework/order_label","f_display_fields":{"title":"Order Title","status":"Status","create_date":"Creation Date"}},
+        "action_bar": [
+            {"f_id":"eid", "f_event_id":"report", "d_name":"Report", "f_type":"button", "handler":"self", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::order_report"},
+            {"f_id":"eid", "f_event_id":"new_container", "d_name":"New Pallet", "f_type":"button", "handler":{"rework":"/js/part/fn_v2_modal_rework.js", "repair":"/js/part/fn_modal_repair.js"}, "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section":{"rework":"rework.json::order_rework","repair":"rework.json::order_repair"}}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Pallet Label", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"container_sq", "d_name":"Container No.", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"quantity", "d_name":"Quantity", "f_type":"thead"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT rc.*, ro.order_type, ruc.quantity FROM rw_containers rc INNER JOIN rw_orders ro ON rc.rw_order_id = ro.eid LEFT OUTER JOIN (SELECT rus.rw_container_id, count(*) as quantity FROM rw_unit_serials rus GROUP BY rus.rw_container_id) as ruc ON rc.eid = ruc.rw_container_id WHERE rc.rw_order_id = :eid ORDER BY eid DESC"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::order_create": {
+        "title": "Order Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"order_type", "d_name":"Order Type", "f_element":"select", "f_data":"/api/rework/order_type", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_default_val":"rework"},
+                {"f_id":"status", "d_name":"Status", "f_element":"select", "f_data":"/api/rework/order_status", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_default_val":"onorder"},
+                {"f_id":"rw_model_id", "d_name":"Model", "f_element":"select", "f_data":"/api/rework/order_model", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"rw_sn_type_id", "d_name":"SN Type", "f_element":"select", "f_data":"/api/rework/order_sn_type", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"vendor_id", "d_name":"Vendor", "f_element":"select", "f_data":"/api/rework/order_vendor", "f_option_text":"acct_name", "f_option_val":"eid"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::order_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"rw_orders", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::order_rework": {
+        "param":"param",
+        "fn_key":{"order_id":"eid"},
+        "data_params": {"rw_order_id":"title_data.rw_order_id", "rw_container_id":"title_data.rw_container_id"},
+        "data_validate": {"rw_unit_sn":"validate_data"},
+        "title_template":{
+            "data_source":"title_data",
+            "fields":[
+                {"f_id":"title", "d_name":"Order", "f_element":"h3"},
+                {"f_id":"model", "d_name":"Model", "f_element":"h3"},
+                {"f_id":"container", "d_name":"Container", "f_element":"h3"},
+                {"f_id":"container_sq", "d_name":"Container No.", "f_element":"h3"}
+            ]
+        },
+        "action_template":{
+            "fields":[
+                {"f_id":"rw_unit_sn", "f_event_id":"sn_insert", "f_data_endpoint":"/api/rework/rw_sn_insert", "f_data_validate":"checkInputValidatePattern", "d_name":"Scan Serial No.", "f_type":"text", "f_element":"input", "f_focus":true}
+            ]
+        } ,
+        "table_template":{
+            "data_source":"table_data",
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"rw_unit_sn", "d_name":"Serial No.", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_element":"thead", "f_sort":"^"}
+            ],
+            "events":[]
+        },
+        "summ_template":{
+            "summ_source":"summ_data",
+            "fields":[
+                {"f_id":"quantity", "d_name":"SN Count", "f_element":"label"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"rw_container_id":"INSERT INTO rw_containers (title, rw_order_id, container_sq) SELECT ro.title || '-' || (MAX(IFNULL(rc.container_sq, 0))+1) as c_title, ro.eid, (MAX(IFNULL(rc.container_sq, 0))+1) as seq FROM rw_orders ro LEFT OUTER JOIN rw_containers rc WHERE ro.eid = :eid"},
+                    {"validate_data":"SELECT rst.sn_startswith, rst.sn_contains, rst.sn_length FROM rw_sn_type rst INNER JOIN rw_orders ro ON rst.eid = ro.rw_sn_type_id WHERE ro.eid = :eid"},
+                    {"title_data":"SELECT ro.eid as rw_order_id, ro.title, rm.title as model, rc.eid as rw_container_id, rc.title as container, rc.container_sq as seq FROM rw_orders ro INNER JOIN rw_containers rc ON ro.eid = rc.rw_order_id LEFT JOIN rw_model rm ON ro.rw_model_id = rm.eid WHERE rc.eid = :rw_container_id"},
+                    {"table_data":"SELECT * FROM rw_unit_serials rus WHERE rus.rw_container_id = :rw_container_id"},
+                    {"summ_data":"SELECT count(*) as quantity FROM rw_unit_serials rus WHERE rus.rw_container_id = :rw_container_id"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::order_repair": {
+        "title": "order View Meta",
+        "param":"param",
+        "fn_key":{"order_id":"eid"},
+        "title_template":{"f_id":"title","f_element":"label","f_data":"/api/rework/order_label","f_display_fields":{"title":"Order Title","status":"Status","create_date":"Creation Date"}},
+        "action_bar": [
+            {"f_id":"eid", "f_event_id":"report", "d_name":"Report", "f_type":"button", "handler":"self", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::order_report"},
+            {"f_id":"eid", "f_event_id":"new_container", "d_name":"New Pallet", "f_type":"button", "handler":{"rework":"/js/part/fn_modal_view.js", "repair":"/js/part/fn_modal_view.js"}, "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section":{"rework":"rework.json::order_rework","repair":"rework.json::order_repair"}}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Pallet Label", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"container_sq", "d_name":"Container No.", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"quantity", "d_name":"Quantity", "f_type":"thead"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT rc.*, ro.order_type, ruc.quantity FROM rw_containers rc INNER JOIN rw_orders ro ON rc.rw_order_id = ro.eid LEFT OUTER JOIN (SELECT rus.rw_container_id, count(*) as quantity FROM rw_unit_serials rus GROUP BY rus.rw_container_id) as ruc ON rc.eid = ruc.rw_container_id WHERE rc.rw_order_id = :eid ORDER BY eid DESC"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::order_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"rw_orders", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::order_label": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM rw_orders WHERE eid = :eid"
+            }
+        },
+        "auth": []
+    },
+    "::order_vendor": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"accounts", "q_fields":["eid", "acct_name"], "q_keyes":["acct_type", "is_active"], "q_params":{"acct_type":"rework", "is_active":1}
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::order_model": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"rw_model", "q_fields":["eid", "title"], "q_keyes":["is_active"], "q_params":{"is_active":1}
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::order_sn_type": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"rw_sn_type", "q_fields":["eid", "title"], "q_keyes":["is_active"], "q_params":{"is_active":1}
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::order_type": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"rw_orders", "refer_column":"order_type"}
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::order_status": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"rw_orders", "refer_column":"status"}
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::rw_sn_insert": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"rw_unit_serial_id":"INSERT INTO rw_unit_serials (rw_unit_sn, rw_order_id, rw_container_id) VALUES (:rw_unit_sn, :rw_order_id, :rw_container_id)"},
+                    {"validate_data":"SELECT rst.sn_startswith, rst.sn_contains, rst.sn_length FROM rw_sn_type rst INNER JOIN rw_orders ro ON rst.eid = ro.rw_sn_type_id WHERE ro.eid = :rw_order_id"},
+                    {"title_data":"SELECT ro.title, rm.title as model, rc.title as container, rc.container_sq as seq FROM rw_orders ro INNER JOIN rw_containers rc ON ro.eid = rc.rw_order_id LEFT JOIN rw_model rm ON ro.rw_model_id = rm.eid WHERE rc.eid = :rw_container_id"},
+                    {"table_data":"SELECT * FROM rw_unit_serials rus WHERE rus.rw_container_id = :rw_container_id"},
+                    {"summ_data":"SELECT count(*) as quantity FROM rw_unit_serials rus WHERE rus.rw_container_id = :rw_container_id"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::sn_type": {
+        "title": "SN Type Page Meta",
+        "title_template":{
+            "data_source":"local",
+            "fields":[
+                {"f_id":"title", "d_name":"Order", "f_element":"h3", "f_text":"SN Type List"}
+            ]
+        },
+        "action_template": {
+            "fields":[
+                {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_element":"input", "f_type":"text", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::sn_type_search"},
+                {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_element":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::sn_type_search"},
+                {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_element":"button", "handler":"/js/part/fn_v2_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::sn_type_create"}
+            ]
+        },
+        "table_template":{
+            "data_source":"table_data",
+            "template_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"order Count", "f_element":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Type ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Production Order", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"sn_startswith", "d_name":"SN Startswith", "f_type":"thead"},
+                {"f_id":"sn_contains", "d_name":"SN Contains", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"sn_length", "d_name":"SN Length", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"thead"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_element":"button", "f_event_id":"view", "handler": "/js/part/fn_v2_modal_view.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::sn_type_view"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"table_data":"SELECT * FROM rw_sn_type ORDER BY eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::sn_type_create": {
+        "title": "SN Type Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"sn_startswith", "d_name":"SN Startswith", "f_type":"text", "f_element":"input"},
+                {"f_id":"sn_contains", "d_name":"SN Contains", "f_type":"text", "f_element":"input"},
+                {"f_id":"sn_length", "d_name":"SN Length", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::sn_type_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"rw_sn_type", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::sn_type_view": {
+        "title": "order View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"sn_startswith", "d_name":"SN Startswith", "f_type":"text", "f_element":"input"},
+                {"f_id":"sn_contains", "d_name":"SN Contains", "f_type":"text", "f_element":"input"},
+                {"f_id":"sn_length", "d_name":"SN Length", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::sn_type_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM rw_sn_type WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::sn_type_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"rw_sn_type", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::rw_model": {
+        "title": "Rework Model Page Meta",
+        "title_template":{
+            "data_source":"local",
+            "fields":[
+                {"f_id":"title", "d_name":"Model", "f_element":"h3", "f_text":"Rework Model List"}
+            ]
+        },
+        "action_template": {
+            "fields":[
+                {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_element":"input", "f_type":"text", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::rw_model_search"},
+                {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_element":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::rw_model_search"},
+                {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_element":"button", "handler":"/js/part/fn_v2_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::rw_model_create"}
+            ]
+        },
+        "table_template":{
+            "data_source":"table_data",
+            "template_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"order Count", "f_element":"label"}
+            ],
+            "caption":"Model Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Type ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Rework Model", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"unit_per_container", "d_name":"Unit Per Pallet", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"is_unique", "d_name":"Is SN Unique", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"thead"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_element":"button", "f_event_id":"view", "handler": "/js/part/fn_v2_modal_view.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::rw_model_view"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"table_data":"SELECT * FROM rw_model ORDER BY eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::rw_model_create": {
+        "title": "Rework Model Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"unit_per_container", "d_name":"Unit Per Pallet", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_unique", "d_name":"Is SN Unique", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::rw_model_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"rw_model", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::rw_model_view": {
+        "title": "Rework Model View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"unit_per_container", "d_name":"Unit Per Pallet", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_unique", "d_name":"Is SN Unique", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rework.json::rw_model_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM rw_model WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::rw_model_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"rw_model", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    }
+}

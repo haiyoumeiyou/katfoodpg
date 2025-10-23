@@ -1,0 +1,55 @@
+{
+    "::order_serial_upload": {
+        "data_endpoint": {
+            "data": {
+                "handler": "serial_upload",
+                "query": "SELECT * FROM shipments WHERE eid = :eid",
+                "file_handle": "palletLabelHalfA4",
+                "content_type": "application/pdf",
+                "file_name": "ship_label.pdf"
+            },
+            "data_type":"file"
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_sndkp_upload": {
+        "data_endpoint": {
+            "data": {
+                "handler": "sndfk_upload",
+                "query": "SELECT * FROM shipments WHERE eid = :eid",
+                "file_handle": "palletLabelHalfA4",
+                "content_type": "application/pdf",
+                "file_name": "ship_label.pdf"
+            },
+            "data_type":"file"
+        },
+        "auth": ["admin","manager"]
+    },
+    "::part_sn_report_dl": {
+        "data_endpoint": {
+            "data": {
+                "handler": "part_report_download"
+            },
+            "data_type":"file"
+        },
+        "auth": ["admin","manager"]
+    },
+    "::item_report_download": {
+        "data_endpoint": {
+            "data": {
+                "handler": "item_report_download"
+            },
+            "data_type":"file"
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_search_download": {
+        "data_endpoint": {
+            "data": {
+                "handler": "order_search_download"
+            },
+            "data_type":"file"
+        },
+        "auth": ["admin","manager"]
+    }
+}

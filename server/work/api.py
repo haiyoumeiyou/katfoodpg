@@ -1,18 +1,17 @@
 import json
 import cherrypy
 
-from .model import MetaService
-from appdata import Settings
+from .model import WorkService
 
-settings = Settings()
-sevices = MetaService(settings)
+sevices = WorkService()
 
-class MetaRest:
+class WorkV2Rest:
     pass
+
 
 import inspect
 
-methods = inspect.getmembers(MetaService, predicate=inspect.isfunction)
+methods = inspect.getmembers(WorkService, predicate=inspect.isfunction)
 user_defined_methods = [name for name, _ in methods if not str(name).startswith('_')]
 
 def add_endpoint(cls, method):
@@ -41,4 +40,4 @@ def add_endpoint(cls, method):
 
 for method in user_defined_methods:
     print(method)
-    add_endpoint(MetaRest, method)
+    add_endpoint(WorkV2Rest, method)

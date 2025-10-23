@@ -2,7 +2,7 @@
     "title": "WMS",
     "organization": {"name": "Oragnization Name", "css_class":"H3"},
     "routes": [
-        {"name":"Root", "location":["header"], "path":"/", "page_title": "Home Class", "handler": "/js/page.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "home.json", "auth":[]},
+        {"name":"", "location":["header"], "path":"/", "page_title": "Home Class", "handler": "/js/page.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "home.json", "auth":[]},
         {"name":"Home", "location":["header"], "path":"/home", "page_title": "Home Class", "handler": "/js/page.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "home.json", "auth":[]},
         {"name":"Administration", "location":["left-nav"], "path":"/admin", "page_title": "Administration Class", "handler": "/js/page.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "admin.json", "auth":["metaadmin","admin"]},
         {"name":"Production", "location":["left-nav"], "path":"/work", "page_title": "Production Class", "handler": "/js/page.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json", "auth":["metaadmin","admin","bom","test","manager","prsentry"]},

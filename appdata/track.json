@@ -1,0 +1,1125 @@
+{
+    "title": "Production Tracking Page Meta",
+    "sect_nav": [
+        {"name":"action", "path":"/track/action", "page_title": "Action Mgmt"},
+        {"name":"track_set", "path":"/track/track_set", "page_title": "Track Set Mgmt"},
+        {"name":"set_step", "path":"/track/set_step", "page_title": "Set Step Mgmt"},
+        {"name":"line", "path":"/track/line", "page_title": "Line Mgmt"},
+        {"name":"line_order", "path":"/track/line_order", "page_title": "Line Order Mgmt"},
+        {"name":"line_station", "path":"/track/line_station", "page_title": "Station Register"},
+        {"name":"line_station_dispatch", "path":"/track/line_station_dispatch", "page_title": "Track Dispatch"},
+        {"name":"line_station_track", "path":"/track/line_station_track", "page_title": "Track Scan"},
+        {"name":"line_status", "path":"/track/line_status", "page_title": "Track Status"}
+    ],
+    "::action": {
+        "title": "Workflow Action Page Meta",
+        "title_template":{
+            "data_source":"local",
+            "fields":[
+                {"f_id":"title", "d_name":"Action", "f_element":"h3", "f_text":"Workflow Action List"}
+            ]
+        },
+        "action_template": {
+            "fields":[
+                {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_element":"input", "f_type":"text", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::action_search"},
+                {"f_id":"search", "f_event_id":"search_button", "f_event_data":"search", "d_name":"Search", "f_element":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::action_search"},
+                {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_element":"button", "handler":"/js/part/fn_v2_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::action_create"}
+            ]
+        },
+        "table_template":{
+            "data_source":"table_data",
+            "template_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"Action Count", "f_element":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Type ID", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Production Order", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"ui_handle", "d_name":"UI Handle", "f_element":"thead"},
+                {"f_id":"data_handle", "d_name":"Data Handle", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"is_active", "d_name":"Status", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"remark", "d_name":"Remark", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_element":"thead"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_element":"button", "f_event_id":"view", "handler": "/js/part/fn_v2_modal_view.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::action_view"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"table_data":"SELECT * FROM wf_action ORDER BY eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::action_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"table_data":"SELECT * FROM wf_action WHERE (eid like :search or title like :search or remark like :search) ORDER BY eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::action_create": {
+        "title": "Action Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"ui_handle", "d_name":"UI Handle", "f_type":"text", "f_element":"input"},
+                {"f_id":"data_handle", "d_name":"Data Handle", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::action_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"wf_action", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::action_view": {
+        "title": "Action View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"ui_handle", "d_name":"UI Handle", "f_type":"text", "f_element":"input"},
+                {"f_id":"data_handle", "d_name":"Data Handle", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::action_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM wf_action WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::action_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"wf_action", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::track_set": {
+        "title": "Workflow Set Page Meta",
+        "title_template":{
+            "data_source":"local",
+            "fields":[
+                {"f_id":"title", "d_name":"Workflow Set", "f_element":"h3", "f_text":"Workflow Set List"}
+            ]
+        },
+        "action_template": {
+            "fields":[
+                {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_element":"input", "f_type":"text", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::track_set_search"},
+                {"f_id":"search", "f_event_id":"search_button", "f_event_data":"search", "d_name":"Search", "f_element":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::track_set_search"},
+                {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_element":"button", "handler":"/js/part/fn_v2_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::track_set_create"}
+            ]
+        },
+        "table_template":{
+            "data_source":"table_data",
+            "template_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"Set Count", "f_element":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Set ID", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Title", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"is_active", "d_name":"Status", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"remark", "d_name":"Remark", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_element":"thead"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_element":"button", "f_event_id":"view", "handler": "/js/part/fn_v2_modal_view.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::track_set_view"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"table_data":"SELECT * FROM wf_set ORDER BY eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::track_set_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"table_data":"SELECT * FROM wf_set WHERE (eid like :search or title like :search or remark like :search) ORDER BY eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::track_set_create": {
+        "title": "Workflow Set Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::track_set_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"wf_set", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::track_set_view": {
+        "title": "Workflow Set View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::track_set_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM wf_set WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::track_set_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"wf_set", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::set_step": {
+        "title": "Workflow Set Page Meta",
+        "title_template":{
+            "data_source":"local",
+            "fields":[
+                {"f_id":"title", "d_name":"Workflow Set", "f_element":"h3", "f_text":"Workflow Set List"}
+            ]
+        },
+        "action_template": {
+            "fields":[
+                {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_element":"input", "f_type":"text", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::set_step_search"},
+                {"f_id":"search", "f_event_id":"search_button", "f_event_data":"search", "d_name":"Search", "f_element":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::set_step_search"},
+                {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_element":"button", "handler":"/js/part/fn_v2_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::set_step_create"}
+            ]
+        },
+        "table_template":{
+            "data_source":"table_data",
+            "template_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"Set Count", "f_element":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Type ID", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Set Step", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"set_title", "d_name":"Set Name", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"action_title", "d_name":"Action Name", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"step_sq", "d_name":"Step Sequence", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"is_active", "d_name":"Status", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"remark", "d_name":"Remark", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_element":"thead"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_element":"button", "f_event_id":"view", "handler": "/js/part/fn_v2_modal_view.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::set_step_view"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"table_data":"SELECT wss.*, ws.title as set_title, wa.title as action_title FROM wf_set_step wss INNER JOIN wf_set ws ON wss.set_id = ws.eid INNER JOIN wf_action wa ON wss.action_id = wa.eid ORDER BY eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::set_step_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"table_data":"SELECT * FROM wf_set_step WHERE (eid like :search or title like :search or remark like :search) ORDER BY eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::set_step_create": {
+        "title": "Workflow Set Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"set_id", "d_name":"Set Name", "f_element":"select", "f_data":"/api/track/set_step_track_set", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"action_id", "d_name":"Action Name", "f_element":"select", "f_data":"/api/track/set_step_action", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"step_sq", "d_name":"Step Sequence", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::set_step_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"wf_set_step", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::set_step_view": {
+        "title": "Workflow Set View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"set_id", "d_name":"Set Name", "f_element":"select", "f_data":"/api/track/set_step_track_set", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"action_id", "d_name":"Action Name", "f_element":"select", "f_data":"/api/track/set_step_action", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"step_sq", "d_name":"Step Sequence", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::set_step_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM wf_set_step WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::set_step_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"wf_set_step", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::set_step_track_set": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"wf_set", "q_fields":["eid", "title"], "q_keyes":["is_active"], "q_params":{"is_active":1}
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::set_step_action": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"wf_action", "q_fields":["eid", "title"], "q_keyes":["is_active"], "q_params":{"is_active":1}
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line": {
+        "title": "Workflow Line Page Meta",
+        "title_template":{
+            "data_source":"local",
+            "fields":[
+                {"f_id":"title", "d_name":"Workflow Line", "f_element":"h3", "f_text":"Workflow Line List"}
+            ]
+        },
+        "action_template": {
+            "fields":[
+                {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_element":"input", "f_type":"text", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_search"},
+                {"f_id":"search", "f_event_id":"search_button", "f_event_data":"search", "d_name":"Search", "f_element":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_search"},
+                {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_element":"button", "handler":"/js/part/fn_v2_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_create"}
+            ]
+        },
+        "table_template":{
+            "data_source":"table_data",
+            "template_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"Set Count", "f_element":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Line ID", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Title", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"default_set_title", "d_name":"Default Set", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"is_active", "d_name":"Status", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"remark", "d_name":"Remark", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_element":"thead"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_element":"button", "f_event_id":"view", "handler": "/js/part/fn_v2_modal_view.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_view"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"table_data":"SELECT wl.*, ws.title as default_set_title FROM wf_line wl LEFT JOIN wf_set ws ON wl.default_set = ws.eid ORDER BY eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"table_data":"SELECT wl.*, ws.title as default_set_title FROM wf_line wl LEFT JOIN wf_set ws ON wl.default_set = ws.eid WHERE (wl.eid like :search or wl.title like :search or wl.remark like :search) ORDER BY wl.eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_create": {
+        "title": "Workflow Line Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"default_set", "d_name":"Set Name", "f_element":"select", "f_data":"/api/track/line_track_set", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"wf_line", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_view": {
+        "title": "Workflow Line View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"default_set", "d_name":"Set Name", "f_element":"select", "f_data":"/api/track/line_track_set", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM wf_line WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"wf_line", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_track_set": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"wf_set", "q_fields":["eid", "title"], "q_keyes":["is_active"], "q_params":{"is_active":1}
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_order": {
+        "title": "Line Order Page Meta",
+        "title_template":{
+            "data_source":"local",
+            "fields":[
+                {"f_id":"title", "d_name":"Line Order", "f_element":"h3", "f_text":"Line Order List"}
+            ]
+        },
+        "action_template": {
+            "fields":[
+                {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_element":"input", "f_type":"text", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_order_search"},
+                {"f_id":"search", "f_event_id":"search_button", "f_event_data":"search", "d_name":"Search", "f_element":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_order_search"},
+                {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_element":"button", "handler":"/js/part/fn_v2_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_order_create"}
+            ]
+        },
+        "table_template":{
+            "data_source":"table_data",
+            "template_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"Set Count", "f_element":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Type ID", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"line_title", "d_name":"Line Name", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"set_title", "d_name":"Set Name", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"order_title", "d_name":"Order", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"status", "d_name":"Status", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"remark", "d_name":"Remark", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_element":"thead"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_element":"button", "f_event_id":"view", "handler": "/js/part/fn_v2_modal_view.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_order_view"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"table_data":"SELECT wlo.*, wl.title as line_title, ws.title as set_title, o.title as order_title FROM wf_line_order wlo INNER JOIN wf_line wl ON wlo.line_id = wl.eid INNER JOIN wf_set ws ON wlo.set_id = ws.eid INNER JOIN orders o ON wlo.order_id = o.eid ORDER BY wlo.eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_order_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"table_data":"SELECT wlo.*, wl.title as line_title, ws.title as set_title, o.title as order_title FROM wf_line_order wlo INNER JOIN wf_line wl ON wlo.line_id = wl.eid INNER JOIN wf_set ws ON wlo.set_id = ws.eid INNER JOIN orders o ON wlo.order_id = o.eid WHERE (wlo.eid like :search or wlo.title like :search or wlo.remark like :search) ORDER BY wlo.eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_order_create": {
+        "title": "Line Order Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"line_id", "d_name":"Line Name", "f_element":"select", "f_data":"/api/track/line_order_line", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"set_id", "d_name":"Set Name", "f_element":"select", "f_data":"/api/track/line_order_track_set", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"order_id", "d_name":"Order", "f_element":"select", "f_data":"/api/track/line_order_order", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"status", "d_name":"Status", "f_element":"select", "f_data":"/api/track/line_order_status", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_default_val":"onorder"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_order_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"wf_line_order", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_order_view": {
+        "title": "Line Order View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"line_id", "d_name":"Line Name", "f_element":"select", "f_data":"/api/track/line_order_line", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"set_id", "d_name":"Set Name", "f_element":"select", "f_data":"/api/track/line_order_track_set", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"order_id", "d_name":"Order", "f_element":"select", "f_data":"/api/track/line_order_order", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"status", "d_name":"Status", "f_element":"select", "f_data":"/api/track/line_order_status", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_default_val":"onorder"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_order_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM wf_line_order WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_order_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"wf_line_order", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_order_track_set": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"wf_set", "q_fields":["eid", "title"], "q_keyes":["is_active"], "q_params":{"is_active":1}
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_order_line": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"wf_line", "q_fields":["eid", "title"], "q_keyes":["is_active"], "q_params":{"is_active":1}
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_order_order": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"orders", "q_fields":["eid", "title"], "q_keyes":["status", "order_type"], "q_params":{"status":"onorder", "order_type":"work"}
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_order_status": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"orders", "refer_column":"status"}
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_station": {
+        "title": "Line Station Page Meta",
+        "title_template":{
+            "data_source":"localStorage",
+            "fields":[
+                {"f_id":"station_reg", "d_name":"Line Station", "f_element":"h3", "f_text":"Line Station List"}
+            ]
+        },
+        "list_template":{
+            "data_source":"list_data",
+            "template_key":"eid",
+            "header":[
+                {"f_id":"list_data", "d_name":"Set Count", "f_element":"label"}
+            ],
+            "caption":"Line Station Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Station ID", "f_element":"label"},
+                {"f_id":"line_id", "d_name":"Line ID", "f_element":"label"},
+                {"f_id":"line_title", "d_name":"Line Name", "f_element":"label"},
+                {"f_id":"set_id", "d_name":"Set ID", "f_element":"label"},
+                {"f_id":"set_step_id", "d_name":"Step ID", "f_element":"label"},
+                {"f_id":"set_step_title", "d_name":"Step Name", "f_element":"label"},
+                {"f_id":"step_sq", "d_name":"Step Number", "f_element":"label"},
+                {"f_id":"device_reg", "d_name":"Device Registered", "f_element":"label"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Register", "f_element":"button", "f_event_id":"register", "handler": "/js/part/fn_v2_modal_station_reg.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_station_register"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"list_data":"SELECT wl.eid || '-' || ws.eid || '-' || wss.eid as eid, wl.eid as line_id, wl.title as line_title, ws.eid as set_id, wss.eid as set_step_id, wss.title as set_step_title, wss.step_sq as step_sq, wls.device_reg FROM wf_line wl INNER JOIN wf_set ws ON wl.default_set = ws.eid AND ws.is_active = 1 INNER JOIN wf_set_step wss ON wss.set_id = ws.eid AND wss.is_active = 1 LEFT JOIN (SELECT line_id || '-' || set_id || '-' || set_step_id as station_id, * FROM wf_line_station) as wls ON wls.line_id = wl.eid AND wls.set_id = ws.eid and wls.set_step_id = wss.eid WHERE wl.is_active = 1 ORDER BY line_id, set_id, step_sq"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_station_register": {
+        "title": "Line Order View Meta",
+        "modal_template": {
+            "localStorage": {"DeviceId":"device_reg"},
+            "fields":[
+                {"f_id":"device_reg", "d_name":"Device Registered", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"eid", "d_name":"Station ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"line_id", "d_name":"Line ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"line_title", "d_name":"Line Name", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"set_id", "d_name":"Set Name", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"set_step_id", "d_name":"Step ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"set_step_title", "d_name":"Step Name", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"step_sq", "d_name":"Step Number", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"device_footprint", "d_name":"Device Footprint", "f_type":"text", "f_element":"input", "f_attr":"disabled"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Register", "f_type":"button", "f_event_id":"register", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::line_station_register"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"old_register_inact":"UPDATE wf_line_station SET is_active = FALSE WHERE EXISTS (SELECT * FROM wf_line_station subq WHERE subq.device_footprint = :device_footprint)"},
+                    {"station_id":"INSERT INTO wf_line_station (line_id, set_id, set_step_id, step_sq, device_footprint, device_reg, is_active) VALUES (:line_id, :set_id, :set_step_id, :step_sq, :device_footprint, :line_id || '-' || :set_id || '-' || :set_step_id || '-' || :step_sq || '-' || :device_footprint, TRUE) ON CONFLICT (line_id, set_id, set_step_id) DO UPDATE SET step_sq=excluded.step_sq, device_footprint=excluded.device_footprint, device_reg=excluded.device_reg, is_active=excluded.is_active WHERE line_id=excluded.line_id AND set_id=excluded.set_id AND set_step_id=excluded.set_step_id"},
+                    {"return_data":"SELECT * FROM wf_line_station WHERE line_id = :line_id AND set_id = :set_id AND set_step_id = :set_step_id"}
+                ]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::line_station_dispatch": {
+        "component_setup":{
+            "local_data":"localStorage",
+            "local_data_key":[
+                {"f_id":"device_reg", "local_key":"DeviceId"},
+                {"f_id":"device_footprint", "local_key":"MachineId"}
+            ],
+            "local_error_msg":"No Device Registration, Please check with supervisor"
+        },
+        "dispatch_template":{
+            "data_source":"dispatch_data",
+            "fields":[
+                {"f_id":"ui_handle", "f_default":"/js/part/fn_v2_scan_wf.js"},
+                {"f_id":"data_handle", "f_default":"/track/line_station_track"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"dispatch_data":"SELECT wac.* FROM wf_line_station wls JOIN wf_set_step wss ON wls.set_step_id = wss.eid JOIN wf_action wac ON wss.action_id = wac.eid WHERE wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"}
+                ]
+            }
+        },
+        "auth": ["admin", "linestation"]
+    },
+    "::line_station_track": {
+        "title": "Line Station Track Scan Page Meta",
+        "component_setup":{
+            "local_data":"localStorage",
+            "local_data_key":[
+                {"f_id":"device_reg", "local_key":"DeviceId"},
+                {"f_id":"device_footprint", "local_key":"MachineId"}
+            ],
+            "local_error_msg":"No Device Registration, Please check with supervisor"
+        },
+        "title_template":{
+            "data_source":"registrion_notfoundstop",
+            "fields":[
+                {"f_id":"station_title", "d_name":"Station", "f_element":"h3"},
+                {"f_id":"step_title", "d_name":"Function", "f_element":"h3"},
+                {"f_id":"local_error_msg", "d_name":"Error", "f_element":"h2"}
+            ]
+        },
+        "action_template": {
+            "fields":[
+                {"f_id":"serial_number", "f_event_id":"scan_input", "d_name":"Scan Serial Number", "f_element":"input", "f_type":"text", "handler":"self", "container":"list", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_track_scan"},
+                {"f_id":"serial_number", "f_event_id":"scan_button", "f_event_data":"serial_number", "d_name":"Scan Serial Number", "f_element":"button", "handler":"self", "container":"list", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_track_scan"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg AND wls.is_active = 1"}
+                ]
+            }
+        },
+        "auth": ["admin", "linestation"]
+    },
+    "::workflow_track_scan": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg"},
+                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = :serial_number AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
+                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = :serial_number"},
+                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
+                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
+                    {"line_track_id":"INSERT INTO wf_line_track (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
+                    {"list_data":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number ORDER BY wlt.step_sq DESC"}
+                ]
+            }
+        },
+        "auth": ["admin", "linestation"]
+    },
+    "::line_station_accs": {
+        "title": "Line Station Accessory Scan Page Meta",
+        "component_setup":{
+            "local_data":"localStorage",
+            "local_data_key":[
+                {"f_id":"device_reg", "local_key":"DeviceId"},
+                {"f_id":"device_footprint", "local_key":"MachineId"}
+            ],
+            "local_error_msg":"No Device Registration, Please check with supervisor"
+        },
+        "title_template":{
+            "data_source":"registrion_notfoundstop",
+            "fields":[
+                {"f_id":"station_title", "d_name":"Station", "f_element":"h3"},
+                {"f_id":"step_title", "d_name":"Fucntion", "f_element":"h3"},
+                {"f_id":"local_error_msg", "d_name":"Error", "f_element":"h2"}
+            ]
+        },
+        "action_template": {
+            "required_action_params":["serial_number", "accs_code", "kb_code", "mouse_code"],
+            "fields":[
+                {"f_id":"serial_number", "f_event_id":"serial_input", "f_handle":"trackScan", "d_name":"Scan Serial Number", "f_element":"input", "f_type":"text", "handler":"self", "container":"list", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_accs_precheck"},
+                {"f_id":"kb_code", "f_event_id":"kb_input", "f_handle":"accsScan", "d_name":"Scan Keyboard Number", "f_element":"input", "f_type":"text", "handler":"self", "container":"list", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_accs_scan"},
+                {"f_id":"mouse_code", "f_event_id":"mouse_input", "f_handle":"accsScan", "d_name":"Scan Mouse Number", "f_element":"input", "f_type":"text", "handler":"self", "container":"list", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_accs_scan"},
+                {"f_id":"accs_code", "f_event_id":"accs_input", "f_handle":"accsScan", "d_name":"Scan Accessory Bag Number", "f_element":"input", "f_type":"text", "handler":"self", "container":"list", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_accs_scan"},
+                {"f_id":"submit_button", "f_event_id":"serial_submit", "f_handle":"accsScan", "f_event_data":"accs_code", "d_name":"Submit Scan", "f_element":"button", "handler":"self", "container":"list", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_accs_scan"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg AND wls.is_active = 1"}
+                ]
+            }
+        },
+        "auth": ["admin", "linestation"]
+    },
+    "::workflow_accs_precheck": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg"},
+                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = :serial_number AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
+                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = :serial_number"},
+                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
+                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"}
+                ]
+            }
+        },
+        "auth": ["admin", "linestation"]
+    },
+    "::workflow_accs_scan": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg"},
+                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = :serial_number AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
+                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = :serial_number"},
+                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
+                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
+                    {"line_track_id":"INSERT INTO wf_line_track (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
+                    {"accs_unit_id":"INSERT INTO wf_accs_unit (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, accs_code, kb_code, mouse_code, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, :accs_code, :kb_code, :mouse_code, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
+                    {"list_data":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number ORDER BY wlt.step_sq DESC"}
+                ]
+            }
+        },
+        "auth": ["admin", "linestation"]
+    },
+    "::line_station_accs_2item": {
+        "title": "Line Station Accessory Scan Page Meta",
+        "component_setup":{
+            "local_data":"localStorage",
+            "local_data_key":[
+                {"f_id":"device_reg", "local_key":"DeviceId"},
+                {"f_id":"device_footprint", "local_key":"MachineId"}
+            ],
+            "local_error_msg":"No Device Registration, Please check with supervisor"
+        },
+        "title_template":{
+            "data_source":"registrion_notfoundstop",
+            "fields":[
+                {"f_id":"station_title", "d_name":"Station", "f_element":"h3"},
+                {"f_id":"step_title", "d_name":"Fucntion", "f_element":"h3"},
+                {"f_id":"local_error_msg", "d_name":"Error", "f_element":"h2"}
+            ]
+        },
+        "action_template": {
+            "required_action_params":["serial_number", "accs_code", "kb_code", "mouse_code"],
+            "fields":[
+                {"f_id":"serial_number", "f_event_id":"serial_input", "d_name":"Scan Serial Number", "f_element":"input", "f_type":"text", "handler":"self", "container":"list", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_accs_scan_2item"},
+                {"f_id":"kb_code", "f_event_id":"kb_input", "d_name":"Scan Keyboard Number", "f_element":"input", "f_type":"text", "handler":"self", "container":"list", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_accs_scan_2item"},
+                {"f_id":"mouse_code", "f_event_id":"mouse_input", "d_name":"Scan Mouse Number", "f_element":"input", "f_type":"text", "handler":"self", "container":"list", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_accs_scan_2item"},
+                {"f_id":"submit_button", "f_event_id":"submit_button", "f_event_data":"accs_code", "d_name":"Submit Scan", "f_element":"button", "handler":"self", "container":"list", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_accs_scan_2item"}
+            ]
+        },
+        "list_template":{
+            "data_source":"list_data",
+            "template_key":"eid",
+            "header":[
+                {"f_id":"list_data", "d_name":"Set Count", "f_element":"label"}
+            ],
+            "caption":"Line Station Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Station ID", "f_element":"label"},
+                {"f_id":"line_id", "d_name":"Line ID", "f_element":"label"},
+                {"f_id":"line_title", "d_name":"Line Name", "f_element":"label"},
+                {"f_id":"set_id", "d_name":"Set ID", "f_element":"label"},
+                {"f_id":"set_step_id", "d_name":"Step ID", "f_element":"label"},
+                {"f_id":"step_title", "d_name":"Step Name", "f_element":"label"},
+                {"f_id":"step_sq", "d_name":"Step Number", "f_element":"label"},
+                {"f_id":"device_reg", "d_name":"Device Registered", "f_element":"label"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg AND wls.is_active = 1"}
+                ]
+            }
+        },
+        "auth": ["admin", "linestation"]
+    },
+    "::workflow_accs_scan_2item": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg"},
+                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = :serial_number AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
+                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = :serial_number"},
+                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
+                    {"line_track_id":"INSERT INTO wf_line_track (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
+                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_track wlt WHERE wlt.eid = :line_track_id)"},
+                    {"accs_unit_id":"INSERT INTO wf_accs_unit (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, kb_code, mouse_code, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, :kb_code, :mouse_code, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
+                    {"list_data":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number ORDER BY wlt.step_sq DESC"}
+                ]
+            }
+        },
+        "auth": ["admin", "linestation"]
+    },
+    "::line_station_pack": {
+        "title": "Line Station Track Scan Page Meta",
+        "component_setup":{
+            "local_data":"localStorage",
+            "local_data_key":[
+                {"f_id":"device_reg", "local_key":"DeviceId"},
+                {"f_id":"device_footprint", "local_key":"MachineId"}
+            ],
+            "local_error_msg":"No Device Registration, Please check with supervisor"
+        },
+        "title_template":{
+            "data_source":"registrion_notfoundstop",
+            "fields":[
+                {"f_id":"station_title", "d_name":"Station", "f_element":"h3"},
+                {"f_id":"step_title", "d_name":"Function", "f_element":"h3"},
+                {"f_id":"local_error_msg", "d_name":"Error", "f_element":"h2"}
+            ]
+        },
+        "action_template": {
+            "fields":[
+                {"f_id":"container_code", "f_event_id":"scan_input", "d_name":"Scan Pallet Number", "f_element":"input", "f_type":"text", "handler":"/js/part/fn_v2_modal_pack_wf.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_pack_input"},
+                {"f_id":"container_code", "f_event_id":"scan_button", "f_event_data":"pallet_number", "d_name":"Scan Pallet Number", "f_element":"button", "handler":"/js/part/fn_v2_modal_pack_wf.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_pack_input"}
+            ]
+        },
+        "table_template":{
+            "data_source":"table_data",
+            "template_key":"container_code",
+            "header":[
+                {"f_id":"table_data", "d_name":"Set Count", "f_element":"label"}
+            ],
+            "caption":"Line Station Information",
+            "fields":[
+                {"f_id":"container_code", "d_name":"Pallet", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"line_id", "d_name":"Line ID", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"line_title", "d_name":"Line Name", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"order_title", "d_name":"Order Name", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"quantity", "d_name":"Quantity", "f_element":"thead", "f_sort":"^"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg AND wls.is_active = 1"},
+                    {"table_data":"SELECT DISTINCT wpu.container_code, wpu.line_id, wl.title as line_title, wpu.order_id, o.title as order_title, wpc.quantity FROM wf_pack_unit wpu INNER JOIN wf_line wl ON wpu.line_id = wl.eid INNER JOIN orders o ON wpu.order_id = o.eid INNER JOIN (SELECT wpu.container_code, wpu.line_order_id, wpu.line_station_id, count(wpu.container_code) as quantity FROM wf_pack_unit wpu GROUP BY wpu.container_code, wpu.line_order_id, wpu.line_station_id) wpc ON wpu.container_code = wpc.container_code WHERE wpu.device_footprint = :device_footprint AND o.status = 'onorder'"}
+                ]
+            }
+        },
+        "auth": ["admin", "linestation"]
+    },
+    "::workflow_pack_input": {
+        "title": "Line Station Track Scan Page Meta",
+        "component_setup":{
+            "local_data":"localStorage",
+            "local_data_key":[
+                {"f_id":"device_reg", "local_key":"DeviceId"},
+                {"f_id":"device_footprint", "local_key":"MachineId"}
+            ],
+            "local_error_msg":"No Device Registration, Please check with supervisor"
+        },
+        "title_template":{
+            "data_source":"registrion_notfoundstop",
+            "fields":[
+                {"f_id":"station_title", "d_name":"Station", "f_element":"h3"},
+                {"f_id":"step_title", "d_name":"Fucntion", "f_element":"h3"},
+                {"f_id":"local_error_msg", "d_name":"Error", "f_element":"h2"}
+            ]
+        },
+        "action_template": {
+            "fields":[
+                {"f_id":"serial_number", "f_event_id":"scan_input", "d_name":"Scan Serial Number", "f_element":"input", "f_type":"text", "handler":"self", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_pack_scan"},
+                {"f_id":"serial_number", "f_event_id":"scan_button", "f_event_data":"serial_number", "d_name":"Scan Serial Number", "f_element":"button", "handler":"self", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "track.json::workflow_pack_scan"},
+                {"f_id":"print_pallet_label", "f_event_id":"print_button", "d_name":"Print Pallet Label", "f_element":"button", "handler": "file",  "container":"self", "f_data":"/api/file/pallet_ship_label"}
+            ]
+        },
+        "table_template":{
+            "data_source":"table_data",
+            "template_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"Set Count", "f_element":"label"}
+            ],
+            "caption":"Pack Station Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"container_code", "d_name":"Pallet ID", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"unit_serial", "d_name":"Unit SN", "f_element":"thead", "f_sort":"^"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg AND wls.is_active = 1"},
+                    {"table_data":"SELECT * FROM wf_pack_unit wpu WHERE wpu.container_code = :container_code"}
+                ]
+            }
+        },
+        "auth": ["admin", "linestation"]
+    },
+    "::workflow_pack_scan": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg"},
+                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = :serial_number AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
+                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = :serial_number"},
+                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
+                    {"line_track_id":"INSERT INTO wf_line_track (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
+                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_track wlt WHERE wlt.eid = :line_track_id)"},
+                    {"pack_unit_id":"INSERT INTO wf_pack_unit (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, container_code, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, :container_code, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
+                    {"table_data":"SELECT * FROM wf_pack_unit wpu WHERE wpu.container_code = :container_code"}
+                ]
+            }
+        },
+        "auth": ["admin", "linestation"]
+    },
+    "::workflow_line_status": {
+        "title": "Line Station Status Page Meta",
+        "component_setup":{
+            "local_data":"localStorage",
+            "local_data_key":[
+                {"f_id":"device_reg", "local_key":"DeviceId"},
+                {"f_id":"device_footprint", "local_key":"MachineId"}
+            ],
+            "local_error_msg":"No Device Registration, Please check with supervisor"
+        },
+        "title_template":{
+            "data_source":"title_data",
+            "fields":[
+                {"f_id":"line_title", "d_name":"Line", "f_element":"h3"},
+                {"f_id":"step_title", "d_name":"Station", "f_element":"h3"},
+                {"f_id":"order_title", "d_name":"Current Order", "f_element":"h3"}
+            ]
+        },
+        "card_template":{
+            "data_source":"table_data",
+            "fields":[
+                {"f_id":"step_sq", "d_name":"Station (Step)", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"step_title", "d_name":"Station", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"unit_count", "d_name":"Scanned", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"in_station", "d_name":"In Current Station", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"order_title", "d_name":"Work Order", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"order_count", "d_name":"Ordered", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"station_color", "d_name":"Status", "f_element":"thead", "f_sort":"^"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg AND wls.is_active = 1"},
+                    {"title_data":"SELECT wl.title as line_title, wlo.order_id, o.title as order_title, wls.step_sq, wss.title as step_title, osum.order_count FROM wf_line_order wlo JOIN orders o ON wlo.order_id = o.eid AND o.order_type = 'work' AND o.status = 'onorder' JOIN wf_line wl ON wlo.line_id = wl.eid JOIN wf_line_station wls ON wls.line_id = wl.eid AND wls.device_footprint = :device_footprint JOIN wf_set_step wss ON wss.set_id = wls.set_id AND wss.step_sq = wls.step_sq JOIN (SELECT asl.order_id, count(asl.serial_number) as order_count FROM assm_serial asl GROUP by asl.order_id) AS osum ON wlo.order_id = osum.order_id GROUP BY wlo.line_id, wlo.order_id, wls.step_sq"},
+                    {"table_data":"SELECT wls.line_id, wls.set_id, wls.step_sq, wls.eid, wl.title as line_title, wss.title as step_title, ams.title as order_title, wlc.unit_count, nwlc.next_unit_count, wlc.unit_count - ifnull(nwlc.next_unit_count, 0) as in_station, ams.order_count from wf_line_station wls JOIN wf_line wl ON wl.eid = wls.line_id AND wls.step_sq != 99 JOIN wf_set_step wss ON wss.eid = wls.set_step_id JOIN (SELECT wls.line_id, wls.set_id FROM wf_line_station wls WHERE wls.device_reg = :device_reg) as dwls ON wls.line_id = dwls.line_id AND wls.set_id = dwls.set_id LEFT JOIN (SELECT wlt.line_id, wlt.set_id, wlt.step_sq, wlt.order_id, count(wlt.unit_serial) as unit_count FROM wf_line_track wlt JOIN wf_line_order wlo ON wlt.order_id = wlo.order_id AND wlo.status = 'onorder' GROUP BY wlt.line_id, wlt.set_id, wlt.step_sq, wlt.order_id) AS wlc ON wls.line_id = wlc.line_id AND wls.set_id = wlc.set_id AND wls.step_sq = wlc.step_sq LEFT JOIN (SELECT ams.order_id, o.title, count(ams.serial_number) as order_count FROM assm_serial ams JOIN orders o ON o.eid = ams.order_id GROUP BY ams.order_id, o.title) as ams ON ams.order_id = wlc.order_id LEFT JOIN (SELECT wlt.line_id, wlt.set_id, (wlt.step_sq - 1) as step_sq, wlt.order_id, count(wlt.unit_serial) as next_unit_count FROM wf_line_track wlt JOIN wf_line_order wlo ON wlt.order_id = wlo.order_id AND wlo.status = 'onorder' GROUP BY wlt.line_id, wlt.set_id, wlt.step_sq, wlt.order_id) AS nwlc ON wls.line_id = nwlc.line_id AND wls.set_id = nwlc.set_id AND wls.step_sq = nwlc.step_sq"}
+                ]
+            }
+        },
+        "auth": ["admin", "linestation"]
+    },
+    "::line_status": {
+        "title": "Line Scan Status Page Meta",
+        "card_template":{
+            "data_source":"card_data",
+            "group_key":{"key":"line_id", "css_class":"flex_container"},
+            "card_key":{"key":"step_sq", "css_class":"card"},
+            "header":[
+                {"f_id":"list_data", "d_name":"Set Count", "f_element":"label"}
+            ],
+            "caption":"Line Station Information",
+            "fields":[
+                {"f_id":"line_id", "d_name":"Line ID"},
+                {"f_id":"line_title", "d_name":"Line Name", "f_placement":"grp_header", "f_element":"h2"},
+                {"f_id":"order_id", "d_name":"Order ID", "f_placement":"car_content", "f_element":"h4"},
+                {"f_id":"order_title", "d_name":"Order Name", "f_placement":"car_content", "f_element":"h2"},
+                {"f_id":"step_sq", "d_name":"Step Number", "f_placement":"car_header", "f_element":"H1"},
+                {"f_id":"scan_count", "d_name":"Scan Count", "f_placement":"car_content", "f_element":"h4"},
+                {"f_id":"order_count", "d_name":"Order Count", "f_placement":"car_content", "f_element":"h4"}
+            ],
+            "chart_template": {
+                "static": {
+                    "gridColor": "black",
+                    "colors": ["red", "orange", "yellow", "green", "cyan", "blue", "purple"],
+                    "titleOptions": {
+                        "align": "center",
+                        "fill": "black",
+                        "font": {
+                            "weight": "bold",
+                            "size": "18px",
+                            "family": "Lato"
+                        }
+                    }
+                },
+                "variable_num": {
+                    "padding": "20",
+                    "gridScale": "5"
+                },
+                "variable_key": {
+                    "seriesName": "order_title",
+                    "maxValue": "order_count"
+                },
+                "variable_calc": {
+                    "size": "calcCanvasSize"
+                }
+            }
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"card_data":"SELECT wlt.line_id, wl.title as line_title, wlt.order_id, o.title as order_title, wlt.step_sq, count(wlt.unit_serial) as scan_count, osum.order_count FROM wf_line_track wlt JOIN orders o ON wlt.order_id = o.eid AND o.order_type = 'work' AND o.status = 'onorder' JOIN wf_line wl ON wlt.line_id = wl.eid JOIN (SELECT asl.order_id, count(asl.serial_number) as order_count FROM assm_serial asl GROUP by asl.order_id) AS osum ON wlt.order_id = osum.order_id GROUP BY wlt.line_id, wlt.order_id, wlt.step_sq"}
+                ]
+            }
+        },
+        "auth": ["admin", "tvstation"]
+    }
+}

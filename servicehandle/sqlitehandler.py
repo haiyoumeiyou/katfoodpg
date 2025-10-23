@@ -1,90 +1,18 @@
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import sqlite3
 
-
-class PostgresqlHandle(object):
-    def __init__(self, settings) -> None:
-        self.settings = settings
+class DatabaseHandler(object):
+    def __init__(self, db_name:str) -> None:
+        self.db_name = db_name
 
     def _create_conn(self):
-        return psycopg2.connect(
-            dbname=self.settings.pg_dbname, 
-            user=self.settings.pg_user, 
-            password=self.settings.pg_password, 
-            host=self.settings.pg_host, 
-            port=self.settings.pg_port
-        )
+        return sqlite3.connect(self.db_name, timeout=15)
 
     def _close_conn(self, conn):
         conn.close()
 
-    def _test_conn(self):
-        conn = self._create_conn()
-        cur = conn.cursor()
-        cur.execute("SELECT version();")
-        db_version = cur.fetchone()
-        print(db_version)
-        cur.close()
-        conn.close()
-        return db_version
-    
     def read(self, query, params=None):
-        try:
-            with self._create_conn() as conn:
-                with conn.cursor(cursor_factory=RealDictCursor) as c:
-                    if params:
-                        c.execute(query, params)
-                    else:
-                        c.execute(query)
-                    result = c.fetchall()
-                    return 'ok', result
-        except psycopg2.Error as e:
-            return 'ko', str(e)
-
-    def modify(self, query, params=None):
-        try:
-            with self._create_conn() as conn:
-                with conn.cursor() as c:
-                    if params is None:
-                        c.execute(query)
-                    else:
-                        if isinstance(params, list):
-                            c.executemany(query, params)
-                        else:
-                            c.execute(query, params)
-                    conn.commit()
-                    c_msg = "{} {} data row with {}.".format(
-                        str(query).split(' ')[0],
-                        c.rowcount,
-                        params
-                    )
-                    return 'ok', c_msg
-        except psycopg2.Error as e:
-            conn.rollback()  # Roll back the transaction on error
-            return 'ko', str(e)
-
-    def _build_where_clause(and_conditions=None, or_conditions=None):
-        clauses = []
-        params = []
-
-        if and_conditions:
-            and_clause = " AND ".join([f"{key} = ?" for key in and_conditions.keys()])
-            clauses.append(f"({and_clause})")
-            params.extend(and_conditions.values())
-        if or_conditions:
-            or_clause = " OR ".join([f"{key} = ?" for key in or_conditions.keys()])
-            clauses.append(f"({or_clause})")
-            params.extend(or_conditions.values())
-
-        where_clause = " AND ".join(clauses) if clauses else ""
-        return where_clause, tuple(params)
-
-    def execute_hybrid(self, hybrid_query, and_cooditions=None, or_conditions=None):
-        query = hybrid_query
-        where_clause, params = self._build_where_clause(and_cooditions, or_conditions)
-        if where_clause:
-            query += f" WHERE {where_clause}" 
         with self._create_conn() as conn:
+            # conn.row_factory = sqlite3.Row
             c = conn.cursor()
             try:
                 if params:
@@ -94,40 +22,19 @@ class PostgresqlHandle(object):
                 c_rst = c.fetchall()
                 if isinstance(c_rst, list):
                     columns = [tuple[0] for tuple in res.description]
+                    # columns = [column[0] for column in c_rst.description]
                     r_set = [dict(zip(columns, row)) for row in c_rst]
                     # print(r_set)
                     return 'ok', r_set
+                    # if len(r_set) > 1:
+                    #     return 'ok', r_set
+                    # if len(r_set) == 1:
+                    #     return 'ok', r_set[0]
                 return 'ko', c_rst
-            except psycopg2.Error as e:
+            except sqlite3.Error as e:
                 return 'ko', str(e)
-            
-    def execute_query(self, query, params=None):
-        with self._create_conn() as conn:
-            c = conn.cursor()
-            try:
-                if params:
-                    # res = c.execute(query, params)
-                    c.execute(query, params)
-                else:
-                    # res = c.execute(query)
-                    c.execute(query)
 
-                c_rst = None
-                if query.strip().lower().startswith('select'):
-                    c_rst = c.fetchall()
-                else:
-                    conn.commit()
-                    c_rst = "Query executed successfully. Row count is {}, query is {}".format(c.rowcount, query)
-                if isinstance(c_rst, list):
-                    columns = [tuple[0] for tuple in c.description]
-                    r_set = [dict(zip(columns, row)) for row in c_rst]
-                    # print(r_set)
-                    return 'ok', r_set
-                return 'ko', c_rst
-            except psycopg2.Error as e:
-                return 'ko', "Error message: {}, query is {}".format(str(e), query)
-
-    def execute_command(self, query, params=None):
+    def modify(self, query, params=None):
         with self._create_conn() as conn:
             c = conn.cursor()
             try:
@@ -141,10 +48,84 @@ class PostgresqlHandle(object):
                 conn.commit()
                 c_msg = "{} {} data row with {}.".format(str(query).split(' ')[0], str(c_rst.rowcount), params)
                 return 'ok', c_msg
-            except psycopg2.Error as e:
+            except sqlite3.Error as e:
+                return 'ko', str(e)
+            
+    def insert(self, query, params=None):
+        with self._create_conn() as conn:
+            c = conn.cursor()
+            try:
+                row = None
+                if params is None:
+                    return 'ko', 'no input data.'
+                else:
+                    if isinstance(params, list):
+                        c_rst = c.executemany(query, params)
+                    else:
+                        c_rst = c.execute(query, params)
+                        row = c.fetchone()
+                conn.commit()
+                # print(row)
+                if row:
+                    columns = [tuple[0] for tuple in c_rst.description]
+                    q_rst = dict(zip(columns, row))
+                    return 'ok', q_rst
+                c_msg = "{} {} data row with {}.".format(str(query).split(' ')[0], str(c_rst.rowcount), params)
+                return 'ok', c_msg
+            except sqlite3.Error as e:
                 return 'ko', str(e)
 
-    def execute_transaction(self, queries, q_params):
+    def steps_modify(self, step_list):
+        with self._create_conn() as conn:
+            c = conn.cursor()
+            if isinstance(step_list, list):
+                try:
+                    c_rst = []
+                    exec_step = 0
+                    for step_row in step_list:
+                        exec_step += 1
+                        if step_row['params'] is None:
+                            rst = c.execute(step_row['query'])
+                            c_msg = "modify {} data row in step {}".format(str(rst.rowcount), str(exec_step))
+                            c_rst.append(c_msg)
+                        else:
+                            rst = c.execute(step_row['query'], step_row['params'])
+                            c_msg = "modify {} data row in step {}".format(str(rst.rowcount), str(exec_step))
+                            c_rst.append(c_msg)
+                    conn.commit()
+                    return 'ok', str(c_rst)
+                except sqlite3.Error as e:
+                    return 'ko', str(e)
+            return 'ko', "input must be a list."
+    
+    def _query_option(self, queries, q_params):
+        with self._create_conn() as conn:
+            c = conn.cursor()
+            try:
+                if isinstance(queries, list):
+                    param_set = []
+                    for k, v in q_params.items():
+                        if v and not k.startswith('last_'):
+                            param_set.append(k)
+                    for query in queries:
+                        for k, q in query.items():
+                            param_in_q = [t.translate({ord(i): None for i in ':)'}) for t in q.split() if t.startswith(':')]
+                            unique_param_in_q = list(set(param_in_q))
+                            # print(param_set, unique_param_in_q)
+                            if sorted(param_set) == sorted(unique_param_in_q):
+                                # print(q, q_params)
+                                res = c.execute(q, q_params)
+                                c_rst = c.fetchall()
+                                if isinstance(c_rst, list):
+                                    columns = [tuple[0] for tuple in res.description]
+                                    # columns = [column[0] for column in c_rst.description]
+                                    r_set = [dict(zip(columns, row)) for row in c_rst]
+                                    return 'ok', r_set
+                                return 'ko', c_rst
+            except sqlite3.Error as e:
+                return 'ko', str(e)
+
+    def _query_queue(self, queries, q_params):
         with self._create_conn() as conn:
             c = conn.cursor()
             if isinstance(queries, list):
@@ -209,7 +190,7 @@ class PostgresqlHandle(object):
                     if c_rsts:
                         return 'ok', c_rsts
                     return 'ok', str(';'.join(c_msgs))
-                except psycopg2.Error as e:
+                except sqlite3.Error as e:
                     conn.execute('ROLLBACK')
                     return 'ko', str(e)
             return 'ko', "input must be a list."
@@ -224,6 +205,7 @@ class PostgresqlHandle(object):
                     if v and isinstance(v, str):
                         q_params[k] = v.strip()
             # print(q_params)
+        
         lookup_fields = []
         if q_keyes:
             for key in q_keyes:
@@ -233,21 +215,67 @@ class PostgresqlHandle(object):
         if q_type == 'insert':
             q_cmd = self.prepare_insert_statement(q_table, changing_fields, lookup_fields)
             # print(q_cmd, q_keyes, lookup_fields)
-            return self.execute_command(q_cmd, q_params)
+            return self.insert(q_cmd, q_params)
+
         if q_type == 'upsert':
             q_cmd = self.prepare_upsert_statement(q_table, changing_fields, lookup_fields)
-            return self.execute_command(q_cmd, q_params)
+            return self.modify(q_cmd, q_params)
+        
         if q_type == 'update':
             q_cmd = self.prepare_update_statement(q_table, changing_fields, lookup_fields)
-            return self.execute_command(q_cmd, q_params)
+            return self.modify(q_cmd, q_params)
+
         if q_type == 'select':
             q_cmd = self.prepare_select_statement(q_table, changing_fields, lookup_fields)
             # print(q_cmd, q_keyes, lookup_fields)
-            return self.execute_query(q_cmd, q_params)
+            return self.read(q_cmd, q_params)
+
         if q_type == 'delete':
             q_cmd = self.prepare_delete_statement(q_table, lookup_fields)
-            return self.execute_command(q_cmd, q_params)
+            return self.read(q_cmd, q_params)
+
         return "ko", "unknown operation type."
+
+    def flex_query(self, mod_type, mod_table, mod_data, mod_lookup):
+        changing_fields = []
+        if mod_data:
+            for k, v in mod_data.items():
+                changing_fields.append(k)
+        
+        lookup_fields = []
+        if mod_lookup:
+            for k, v in mod_lookup.items():
+                lookup_fields.append(k)
+        
+        if mod_type == 'insert':
+            q_cmd = self.prepare_insert_statement(mod_table, changing_fields)
+            q_params = mod_data
+            return self.modify(q_cmd, q_params)
+
+        if mod_type == 'upsert':
+            q_cmd = self.prepare_upsert_statement(mod_table, changing_fields, lookup_fields)
+            q_params = mod_data
+            return self.modify(q_cmd, q_params)
+        
+        if mod_type == 'update':
+            q_cmd = self.prepare_update_statement(mod_table, changing_fields, lookup_fields)
+            q_params = {**mod_data, **mod_lookup}
+            print(q_params)
+            return self.modify(q_cmd, q_params)
+
+        if mod_type == 'select':
+            q_cmd = self.prepare_select_statement(mod_table, changing_fields, lookup_fields)
+            q_params = None
+            if lookup_fields:
+                q_params = {**mod_lookup}
+            return self.read(q_cmd, q_params)
+
+        if mod_type == 'delete':
+            q_cmd = self.prepare_delete_statement(mod_table, lookup_fields)
+            q_params = {**mod_lookup}
+            return self.read(q_cmd, q_params)
+
+        return "unknown operation type."
 
     def prepare_insert_statement(self, insert_table, changing_fields, lookup_fields):
         insert_field_list = []
@@ -271,6 +299,7 @@ class PostgresqlHandle(object):
         if lookup_fields and len(lookup_fields) > 0:
             return_statement = "RETURNING {lookup_field}".format(lookup_field=lookup_fields[0])
             skeleton_statement = ' '.join([skeleton_statement, return_statement])
+
         return skeleton_statement
 
     def prepare_upsert_statement(self, insert_table, changing_fields, lookup_fields):
@@ -304,6 +333,7 @@ class PostgresqlHandle(object):
             lookup_field_string=lookup_field_string,
             set_field_string=set_field_string
         )
+
         return skeleton_statement
 
     def prepare_update_statement(self, update_table, changing_fields, lookup_fields):
@@ -330,6 +360,7 @@ class PostgresqlHandle(object):
             update_field_string=update_field_string, 
             lookup_field_string=lookup_field_string
         )
+
         return skeleton_statement
 
     def prepare_select_statement(self, select_table, select_fields, lookup_fields):
@@ -344,6 +375,7 @@ class PostgresqlHandle(object):
             select_table=select_table, 
             select_field_string=select_field_string, 
         )
+
         if lookup_fields:
             lookup_list = []
             for lookup_field in lookup_fields:
@@ -359,14 +391,17 @@ class PostgresqlHandle(object):
                     skeleton_statement=skeleton_statement,
                     lookup_field_string=lookup_field_string
                 )
+
         return skeleton_statement
 
     def prepare_delete_statement(self, delete_table, lookup_fields):
+
         skeleton_statement = """
             DELETE FROM {delete_table}
         """.format(
             delete_table=delete_table
         )
+
         if lookup_fields:
             lookup_list = []
             for lookup_field in lookup_fields:
@@ -382,10 +417,11 @@ class PostgresqlHandle(object):
                     skeleton_statement=skeleton_statement,
                     lookup_field_string=lookup_field_string
                 )
+
         return skeleton_statement
 
 # import re
-class PostgresqlQueryGenerator(object):
+class SqliteQueryGenerator(object):
     @staticmethod
     def compile_insert_cmd(data, table, output_clause=''):
         sql_params = {}
@@ -490,3 +526,10 @@ class PostgresqlQueryGenerator(object):
         
         # return query, tuple(sql_params)
         return raw_query, data
+    
+    @staticmethod
+    def compile_hybrid_statement(hybrid_query, data, key_fields):
+        # sample key fields {key1:'=', key2:'!='}
+
+        pass
+        # return raw_query, data

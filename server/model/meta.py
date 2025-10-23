@@ -1,16 +1,17 @@
 import jwt
 
+from servicehandle.sqlitehandler import DatabaseHandler
+from servicehandle.postgresqlhandle import PostgresqlHandle
 from appdata import Settings
+
+# db = DatabaseHandler('local/data.sqlite')
 settings = Settings()
+db = PostgresqlHandle(settings)
 
-
-class MetaService(object):
+class MetaModel(object):
     version = 'webapp_0.0a'
     obj_class = 'Auth DB Handler'
     cls_attrs = ('user_id', 'role_id', 'menu_id', 'link_id')
-
-    def __init__(self, db) -> None:
-        self.db = db
 
     def __str__(self):
         return f"""
@@ -20,14 +21,14 @@ class MetaService(object):
         """
     
     def _query(self, q_type, q_table, q_params, q_keyes):
-        return self.db._query(q_type, q_table, q_params, q_keyes)
+        return db._query(q_type, q_table, q_params, q_keyes)
     
     def read(self, query, query_params, headers=None):
         if query_params:
-            return self.db.read(query, query_params)
-        return self.db.read(query)
+            return db.read(query, query_params)
+        return db.read(query)
     
-    def get_auth_set(self, token):
+    def getAuthSet(self, token):
         q_cmd = "SELECT user_id, token_ip, token_time, u.roles, u.default_page FROM user_token ut INNER JOIN users u ON ut.user_id = u.eid WHERE user_id = :user_id AND token = :token"
         token_payload = jwt.decode(token, settings.jwt_key, algorithms=['HS256'])
         if "eid" in token_payload:

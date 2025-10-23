@@ -2,17 +2,18 @@ import datetime
 import jwt
 from passlib.hash import pbkdf2_sha256
 
+# from servicehandle.sqlitehandler import DatabaseHandler
+from servicehandle.postgresqlhandle import PostgresqlHandle
 from appdata import Settings
+
+# db = DatabaseHandler('local/data.sqlite')
 settings = Settings()
+db = PostgresqlHandle(settings)
 
-
-class AdminService(object):
+class AdminModel(object):
     version = 'webapp_0.0a'
     obj_class = 'Auth DB Handler'
     cls_attrs = ('user_id', 'role_id', 'menu_id', 'link_id')
-
-    def __init__(self, db) -> None:
-        self.db = db
 
     def __str__(self):
         return f"""
@@ -28,18 +29,18 @@ class AdminService(object):
         return pbkdf2_sha256.verify(passwd, hash)
     
     def _query(self, q_type, q_table, q_params, q_keyes):
-        return self.db._query(q_type, q_table, q_params, q_keyes)
+        return db._query(q_type, q_table, q_params, q_keyes)
     
     def read(self, query, query_params, headers=None):
         if query_params:
-            return self.db.read(query, query_params)
-        return self.db.read(query)
+            return db.read(query, query_params)
+        return db.read(query)
 
     def modify(self, query, query_params, headers=None):
-        return self.db.modify(query, query_params)
+        return db.modify(query, query_params)
     
     def insert(self, query, query_params, headers=None):
-        return self.db.insert(query, query_params)
+        return db.insert(query, query_params)
     
     def set_password(self, query, query_params, headers=None):
         if 'password' in query_params:
@@ -48,7 +49,7 @@ class AdminService(object):
         return 'ko', 'missing data...'
     
     def get_token(self, query, query_params, headers=None):
-        q_cmd = "SELECT eid, user_name, hash FROM users WHERE user_name = :user_name"
+        q_cmd = "SELECT eid, user_name, hash FROM users WHERE user_name = %(user_name)s"
         q_rst = self.read(q_cmd, query_params)
         if q_rst[0] == 'ok' and len(q_rst[1]) > 0:
             # print(q_rst)
@@ -59,7 +60,7 @@ class AdminService(object):
                 payload = {"eid":q_rst[1][0]['eid'],"user":q_rst[1][0]['user_name'],"expiry":expiry,"token_ip":token_ip}
                 jwt_token = jwt.encode(payload, settings.jwt_key, algorithm='HS256')
                 param = {"user_id":q_rst[1][0]['eid'], "token":str(jwt_token), "token_ip":token_ip}
-                cmd = "INSERT INTO user_token (user_id, token, token_ip) VALUES (:user_id, :token, :token_ip) RETURNING eid"
+                cmd = "INSERT INTO user_token (user_id, token, token_ip) VALUES (%(user_id)s, %(token)s, %(token_ip)s) RETURNING eid"
                 rst = self.insert(cmd, param)
                 if rst[0] == 'ok':
                     data = {"jwt":jwt_token}
@@ -69,7 +70,7 @@ class AdminService(object):
         return 'ko', 'invalid user...'
     
     def auth_check(self, token, permission_set):
-        q_cmd = "SELECT user_id, token_ip, token_time, u.roles, u.user_name FROM user_token ut INNER JOIN users u ON ut.user_id = u.eid WHERE user_id = :user_id AND token = :token"
+        q_cmd = "SELECT user_id, token_ip, token_time, u.roles, u.user_name FROM user_token ut INNER JOIN users u ON ut.user_id = u.eid WHERE user_id = %(user_id)s AND token = %(token)s"
         token_payload = jwt.decode(token, settings.jwt_key, algorithms=['HS256'])
         # print(token_payload)
         if "eid" in token_payload:

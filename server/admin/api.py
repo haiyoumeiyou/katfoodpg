@@ -2,7 +2,7 @@ import json
 import cherrypy
 
 from .model import AdminService
-from hostdata import Settings
+from appdata import Settings
 
 settings = Settings()
 sevices = AdminService(settings)

@@ -1,0 +1,55 @@
+{
+    "::order": {
+        "title": "order Page Meta",
+        "nav_bar": [
+            {"f_id":"title", "f_dname":"Order Name", "f_tag":"input"},
+            {"f_id":"model", "f_dname":"Model", "f_tag":"input"},
+            {"f_id":"vendor", "f_dname":"Vendor", "f_tag":"input"},
+            {"f_id":"begin_date", "f_dname":"Begin Date (yyyy-mm-dd)", "f_tag":"input"},
+            {"f_id":"end_date", "f_dname":"End Date (yyyy-mm-dd)", "f_tag":"input"},
+            {"f_id":"search", "f_event_id":"search_button", "f_dname":"Search", "f_tag":"button", "handler":"json", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work_v2.json::order_search","auth": ["admin","manager"]},
+            {"f_id":"download", "f_event_id":"download_button", "f_dname":"Download Search", "f_tag":"button", "handler":"file", "container":"self", "f_data_endpoint":"/api/util/order_search_download", "auth": ["admin","manager"]}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "header":[
+                {"f_id":"table_data", "f_dname":"order Count", "f_tag":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "f_dname":"Order ID", "f_tag":"thead", "f_sort":"^"},
+                {"f_id":"title", "f_dname":"Production Order", "f_tag":"thead", "f_sort":"^"},
+                {"f_id":"order_type", "f_dname":"Order Type", "f_tag":"thead", "f_sort":"^"},
+                {"f_id":"model_name", "f_dname":"Model", "f_tag":"thead", "f_sort":"^"},
+                {"f_id":"type_code", "f_dname":"Type", "f_tag":"thead", "f_sort":"^"},
+                {"f_id":"scan_count", "f_dname":"Scan Count", "f_tag":"thead", "f_sort":"^"},
+                {"f_id":"quantity", "f_dname":"Order Count", "f_tag":"thead", "f_sort":"^"},
+                {"f_id":"status", "f_dname":"Status", "f_tag":"thead", "f_sort":"^"},
+                {"f_id":"ship_status", "f_dname":"Ship Status", "f_tag":"thead", "f_sort":"^"},
+                {"f_id":"CreationDate", "f_dname":"Create Date", "f_tag":"thead"},
+                {"f_id":"acct_name", "f_dname":"Vendor", "f_tag":"thead"},
+                {"f_id":"remark", "f_dname":"Remark", "f_tag":"thead", "f_sort":"^"}
+            ],
+            "events":[
+                {"f_id":"eid", "f_dname":"View", "f_tag":"button", "f_event_id":"view", "handler": "/js/part/fn_modal_view.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_view"},
+                {"f_id":"eid", "f_dname":"Detail", "f_tag":"button", "f_event_id":"detail", "handler": "/js/part/fn_title_table.js", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_detail"},
+                {"f_id":"eid", "f_dname":"Part List", "f_tag":"button", "f_event_id":"list", "handler": "/js/part/fn_table_dyna.js", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_part_list"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate, m.title as model_name, m.type_code, ac.acct_name, ifnull(scan.scan_count, 0) || '/' || ifnull(asm.quantity, 0) as quantity, scan.scan_count, shp.ship_status FROM orders o LEFT JOIN model m ON o.model_id = m.eid LEFT JOIN accounts ac ON o.vendor_id = ac.eid LEFT JOIN (SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id LEFT JOIN (SELECT count(DISTINCT aps.assm_serial) as scan_count, a.order_id FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number GROUP BY a.order_id) as scan on o.eid = scan.order_id LEFT JOIN (SELECT title, status || '_' || strftime('%Y-%m-%d', datetime(last_update, '-08:00')) ship_status FROM orders WHERE order_type = 'ship') as shp ON o.title = shp.title WHERE o.order_type = 'work' ORDER BY o.eid DESC"
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "work_order_search"
+            }
+        },
+        "auth": []
+    }
+}

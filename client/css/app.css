@@ -1,0 +1,475 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box
+}
+
+html, body {
+  font-family: Arial, Helvetica, sans-serif;
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+}
+
+/* Style the header */
+header {
+  position: relative;
+  width: 100%;
+  height: 8vh;
+  background-color: #007BFF;
+  /* margin: 0; */
+  padding: .6rem;
+  text-align: center;
+  font-size: 1.2rem;
+  color: white;
+}
+header ul {
+  display: flex;
+  margin: 0;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+header ul li {
+  display: block;
+}
+header button {
+  color: azure;
+  font-size: x-large;
+  font-family: cursive;
+  background: none!important;
+  border: none;
+  padding: none!important;
+  text-decoration: underline;
+  cursor: pointer;
+}
+header button:hover {
+  color: bisque;
+  text-decoration: underline;
+  cursor: pointer;
+}
+header .active {
+  color: bisque;
+  text-decoration: underline;
+  cursor: pointer;
+}
+/* Container for flexboxes */
+section {
+  /* position: relative; */
+  display: -webkit-flex;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  height: 87vh;
+}
+
+/* Style the navigation menu */
+nav {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  background: #007BFF;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  /* padding: 2rem; */
+}
+
+/* Style the list inside the menu */
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+nav ul li {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+nav ul li button {
+  display: block;
+  color: azure;
+  background: none;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  font-size: 1.2rem;
+  font-family: cursive;
+  border: none;
+  /* padding: none!important; */
+  /* text-decoration: underline; */
+  cursor: pointer;
+  width: 100%;
+}
+nav ul li button:hover{
+  color: azure;
+  background-color: rgb(82, 147, 201);
+  border-right: thick solid #0d4a83;
+}
+nav .active{
+  color: azure;
+  background-color: rgb(43, 106, 177);
+  border-right: thick solid #0d4a83;
+}
+/* Style the content */
+article {
+  -webkit-flex: 6;
+  -ms-flex: 6;
+  flex: 6;
+  background-color: #F8F9FA;
+  padding: 0 .2rem;
+  margin: 0 .5rem;
+  height: 100%;
+}
+article p label{
+  font-size: 1.1rem;
+  margin: .5rem;
+  padding: .2rem;
+  min-width: 6rem;
+  display: inline-block;
+}
+article p {
+  width: 100%;
+}
+article li {
+  display: flex;
+  align-items: center;
+  margin-bottom: .1rem;
+  border-radius: 4px;
+}
+article button {
+  margin: .05rem;
+  padding: .1rem 1rem;
+  font-size: 1rem;
+  font-family: cursive;
+  border-radius: 2px;
+  cursor: pointer;
+  background-color: #007BFF;
+  color: azure;
+  border: 2px solid #007BFF;
+}
+article button:hover {
+  background-color: rgb(82, 147, 201);
+  border-right: solid #0d4a83;
+}
+article .active {
+  background-color: rgb(43, 106, 177);
+  border-right: thick solid #0d4a83;
+}
+
+/* Style the footer */
+footer {
+  /* position: fixed;
+  left: 0;
+  bottom: 0; */
+  height: 5vh;
+  width: 100%;
+  background-color: #007BFF;
+  padding: 10px;
+  text-align: center;
+  /* color: azure; */
+}
+/* style dialog */
+dialog {
+  border: 5px solid goldenrod;
+  border-radius: .5em;
+  /* position: relative; */
+  /* top: 0;
+  left: 0; */
+  /* height: 100%;
+  width: 100%; */
+  z-index: 3;
+}
+
+/* Responsive layout - makes the menu and the content (inside the section) sit on top of each other instead of next to each other */
+@media (max-width: 600px) {
+  section {
+    -webkit-flex-direction: column;
+    flex-direction: column;
+  }
+}
+
+:modal {
+  outline: transparent;
+  border: 5px solid goldenrod;
+  border-radius: .5em;
+  /* position: relative; */
+  /* top: 0; */
+  /* left: 0; */
+  /* height: 80%;
+  width: 90%; */
+}
+
+textarea {
+  font-size: 1.1rem;
+  padding: .25rem .5rem;
+  border: .1rem solid;
+  border-radius: .2rem;
+  border-color: #007bff;
+  margin: .1rem;
+  width: 100%;
+  height: auto;
+}
+input {
+  font-size: 1.1rem;
+  padding: .25rem .5rem;
+  border: .1rem solid;
+  border-radius: .2rem;
+  border-color: #007bff;
+  margin: .1rem;
+}
+input:focus {
+  outline: transparent;
+  border-color: goldenrod;
+}
+input[readonly] {
+  border-style: dotted;
+  cursor: not-allowed;
+}
+input[disabled] {
+  border-style: dashed;
+  cursor: not-allowed;
+}
+select {
+  font-size: 1.1rem;
+  padding: .25rem .5rem;
+  border: .1rem solid;
+  border-radius: .2rem;
+  border-color: #007BFF;
+  margin: .1rem;
+}
+select:focus {
+  outline: transparent;
+  border-color: goldenrod;
+}
+select[readonly] {
+  border-style: dotted;
+  cursor: not-allowed;
+}
+select[disabled] {
+  border-style: dashed;
+  cursor: not-allowed;
+}
+button[disabled] {
+  background-color: gray;
+  cursor: not-allowed;
+}
+dialog p {
+  display: block;
+  padding: none!important;
+}
+dialog p label {
+  margin: .05rem;
+  padding: .2rem;
+  display: inline-block;
+}
+dialog p input {
+  float: right;
+}
+dialog p select {
+  float: right;
+}
+.horizontal_menu {
+  display: flex;
+  margin: 0;
+}
+
+.horizontal_menu ul {
+  display: flex;
+  margin: .5rem;
+}
+
+.push {
+  margin-left: auto;
+}
+
+.sort:hover {
+  cursor: pointer;
+}
+.scroll_table {
+  overflow: auto;
+  max-height: 55dvh;
+}
+.scroll_table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: #0d4a83;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  /* border: .15rem solid goldenrod; */
+}
+/* thead tr {
+  background-color: #007bff;
+  color: antiquewhite;
+  text-align: center;
+  padding: 1.5rem;
+} */
+table th {
+  padding: .5rem .5rem;
+  /* font-size: large; */
+  /* font-family: cursive; */
+  color: azure;
+  background-color: #0d4a83;
+  text-align: left;
+}
+table td {
+  /* border: #f2f2f3 solid .05rem; */
+  padding: .25rem;
+}
+/* table td[contentEditable] {
+  white-space: nowrap;
+  overflow: hidden;
+  border: solid .15rem blue;
+}
+table td[contentEditable]:focus {
+  background-color: aquamarine;
+}
+table td[contentEditable]:hover {
+  background-color: aquamarine;
+} */
+tbody tr {
+  border-bottom: 1px solid azure;
+  /* font-size: large; */
+  color: azure;
+  background-color: #343A40;
+}
+/* tbody tr:nth-of-type(even) {
+  background-color: beige;
+}
+tbody tr:last-of-type {
+  border-bottom: 2px solid goldenrod;
+} */
+tbody tr:active {
+  background-color: rgb(69, 113, 180);
+}
+tbody tr:hover {
+  background-color: rgb(28, 79, 146);
+}
+.td_nowrap {
+  white-space: nowrap;
+  padding-right: 1rem;
+  /* margin-left: 1rem; */
+}
+
+.messageholder {
+  min-height: 2.5rem;
+}
+.alert {
+  width: 100%;
+  padding: .5rem;
+  border: solid .1rem #007BFF;
+}
+.danger {
+  border: rgb(180, 26, 49);
+  background-color: rgb(180, 26, 49);
+  font-size: x-large;
+  color: white;
+}
+.success {
+  background-color: greenyellow;
+}
+button.right {
+  float: right;
+}
+.left {
+  float: left;
+}
+.right {
+  float: right;
+}
+.flex_container {
+  display: flex;
+}
+
+/* .mdl_width70 {
+  width: 70%;
+} */
+.input_file {
+  min-width: 35rem;
+}
+
+.card {
+  /* Add shadows to create the "card" effect */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  margin: 8px;
+  padding: 2px 16px;
+}
+
+/* On mouse-over, add a deeper shadow */
+.card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+/* Add some padding inside the card container */
+.container {
+  padding: 2px 16px;
+}
+
+.list-fixed-scroll{
+  overflow-y: scroll;
+  height: 70vh;
+}
+
+.list-fixed-header{
+  position: sticky;
+  top: 0;
+  background: #441334;
+  color: white;
+}
+
+.column_in_card {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding:1px 5px;
+  /* grid-template-columns: auto; */
+}
+
+.label_grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(1fr, 1fr));;
+}
+
+.line_display {
+  display: flex;
+  align-items: center;
+}
+
+.dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown-input {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.dropdown-list {
+  position: absolute;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  padding: 10px;
+  cursor: pointer;
+  display: none; /* Initially hidden */
+}
+
+.dropdown-list div {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.dropdown-list option:hover {
+  background-color: #f0f0f0;
+}
+
+

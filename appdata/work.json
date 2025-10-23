@@ -1,0 +1,1060 @@
+{
+    "title": "Production Page Meta",
+    "sect_nav": [
+        {"name":"order", "path":"/work/order", "page_title": "Order Mgmt"},
+        {"name":"orderv2", "path":"/work_v2/order", "page_title": "Order Mgmt V2"},
+        {"name":"assembly", "path":"/work/assm", "page_title": "Assembly Mgmt"},
+        {"name":"model", "path":"/work/model", "page_title": "Model Mgmt"},
+        {"name":"part_sn", "path":"/work/part_scan", "page_title": "Part Scan"},
+        {"name":"part_repair_sn", "path":"/work/part_scan_repair", "page_title": "Repair Scan"},
+        {"name":"sndkp_download", "path":"/work/test_station", "page_title": "Test Station"}
+    ],
+    "::order": {
+        "title": "order Page Meta",
+        "nav_bar": [
+            {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_type":"input", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_search"},
+            {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_search"},
+            {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_type":"button", "handler":"/js/part/fn_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_create","auth": ["admin","manager"]},
+            {"f_id":"eid", "f_event_id":"new_button1", "d_name":"New 1", "f_type":"button", "handler":"/js/part/fn_modal_input_wk.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_create1","auth": ["admin","manager"]}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"order Count", "f_type":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Order ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Production Order", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"order_type", "d_name":"Order Type", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"model_name", "d_name":"Model", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"quantity", "d_name":"SN Count", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"status", "d_name":"Status", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"ship_status", "d_name":"Ship Status", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"CreationDate", "d_name":"Create Date", "f_type":"thead"},
+                {"f_id":"acct_name", "d_name":"Vendor", "f_type":"thead"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_type":"button", "f_event_id":"view", "handler": "/js/part/fn_modal_view.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_view"},
+                {"f_id":"eid", "d_name":"Detail", "f_type":"button", "f_event_id":"detail", "handler": "/js/part/fn_title_table.js", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_detail"},
+                {"f_id":"eid", "d_name":"Part List", "f_type":"button", "f_event_id":"list", "handler": "/js/part/fn_table_dyna.js", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_part_list"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate, m.title as model_name, ac.acct_name, ifnull(scan.scan_count, 0) || '/' || ifnull(asm.quantity, 0) as quantity, scan.scan_count, shp.ship_status FROM orders o LEFT JOIN model m ON o.model_id = m.eid LEFT JOIN accounts ac ON o.vendor_id = ac.eid LEFT JOIN (SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id LEFT JOIN (SELECT count(DISTINCT aps.assm_serial) as scan_count, a.order_id FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number GROUP BY a.order_id) as scan on o.eid = scan.order_id LEFT JOIN (SELECT title, status || '_' || strftime('%Y-%m-%d', datetime(last_update, '-08:00')) ship_status FROM orders WHERE order_type = 'ship') as shp ON o.title = shp.title WHERE o.order_type = 'work' ORDER BY o.eid DESC"
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_view": {
+        "title": "order View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"order_type", "d_name":"Order Type", "f_element":"select", "f_data":"/api/work/order_type", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_attr":"disabled"},
+                {"f_id":"model_id", "d_name":"Model", "f_element":"select", "f_data":"/api/work/order_model", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"status", "d_name":"Status", "f_element":"select", "f_data":"/api/work/order_status", "f_option_text":"option_abbr", "f_option_val":"option_code"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"},
+                {"f_id":"vendor_id", "d_name":"Vendor", "f_element":"select", "f_data":"/api/work/order_vendor", "f_option_text":"acct_name", "f_option_val":"eid"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_update"},
+                {"f_id":"eid", "d_name":"Delete", "f_type":"button", "f_event_id":"delete", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_delete", "css_class":"danger right"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT eid, title, order_type, model_id, vendor_id, status, remark, strftime('%Y-%m-%d', datetime(create_date, '-08:00')) as create_date FROM orders WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_part_list": {
+        "title": "order Page Meta",
+        "nav_bar": [
+            {"f_id":"eid", "f_event_id":"download", "d_name":"Download", "f_type":"button", "f_data_key":"caption_data", "f_data_val":"title", "handler":"file", "container":"self", "meta_endpoint": "/api/meta/route_meta", "css_class":"right", "meta_section": "util.json::part_sn_report_dl"},
+            {"f_id":"eid", "f_event_id":"clear", "d_name":"Clear", "f_type":"button", "handler":"/js/part/fn_modal_confirm.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_clear", "css_class":"danger", "auth": ["admin","manager"]}
+        ],
+        "table_template":{
+            "table_key":{"k_name":"eid", "k_val":"eid"},
+            "caption":[
+                {"f_id":"title", "d_name":"Work Order", "f_type":"label"},
+                {"f_id":"quantity", "d_name":"Quantity", "f_type":"label"},
+                {"f_id":"data_count", "d_name":"Scanned", "f_type":"label"},
+                {"f_id":"model", "d_name":"Model", "f_type":"label"}
+            ],
+            "fields":[],
+            "fields_data":"/api/work/scan_config",
+            "fields_attr":{"f_id":"part_sn","f_row_key":"assm_serial","f_row_name":"Unit Serial","f_data_id":"assm_conf_id","f_data_val":"eid", "d_name":"title"},
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"caption_data":"SELECT o.title, asm.quantity, asm.order_id FROM orders o LEFT OUTER JOIN (SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE o.eid = :eid"},
+                    {"column_data":"SELECT DISTINCT ac.eid, ac.category || ' (' || ac.slot || ') ' || ifnull(i.v_name, '') as title, ac.category FROM orders o INNER JOIN model m on o.model_id = m.eid INNER JOIN assm_config ac on m.assm_id = ac.assm_id LEFT OUTER JOIN (SELECT i.v_name, i.category FROM order_lines ol INNER JOIN items i on ol.item_id = i.eid WHERE ol.order_id = :eid) as i on ac.category = i.category WHERE o.eid = :eid ORDER BY ac.eid ASC"},
+                    {"table_data":"SELECT aps.* FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number WHERE a.order_id = :eid"}
+                ]
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_detail": {
+        "title": "order View Meta",
+        "param":"param",
+        "fn_key":{"order_id":"eid"},
+        "title_template":{"f_id":"title","f_element":"label","f_data":"/api/work/order_label","f_display_fields":{"title":"Order Title","status":"Status","create_date":"Creation Date"}},
+        "action_bar": [
+            {"f_id":"eid", "f_event_id":"undo_order_completed", "d_name":"Undo Complete", "f_type":"button", "f_enable_calc":"controllEnableCalcInScope", "f_enable_indicators":{"quantity":0,"status":"onorder"}, "handler":"self", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_undo_complete", "css_class":"danger", "auth":["admin"]},
+            {"f_id":"eid", "f_event_id":"order_clone", "d_name":"Clone Order", "f_type":"button", "handler":"/js/part/fn_modal_clone.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_clone"},
+            {"f_id":"eid", "f_event_id":"pick_from_list", "d_name":"Manual", "f_type":"button", "f_enable_calc":"controllEnableCalcInScope", "f_enable_indicators":{"status":"fulfilled"},  "handler":"/js/part/fn_modal_table.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_line_manual"},
+            {"f_id":"eid", "f_event_id":"mark_order_completed", "d_name":"Complete Order, Send to Ship", "f_type":"button", "f_enable_calc":"controllEnableCalcInScope", "f_enable_indicators":{"quantity":0,"status":"fulfilled"}, "handler":"self", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_complete", "css_class":"right"},
+            {"f_id":"eid", "f_event_id":"ship_pack", "d_name":"Shipment Packing", "f_type":"button", "f_enable_calc":"controllEnableCalcInScope", "f_enable_indicators":{"quantity":0}, "handler":"/js/part/fn_modal_view.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_shipment", "css_class":"right"},
+            {"f_id":"eid", "f_event_id":"import_serial", "d_name":"Import SN", "f_type":"button", "handler":"/js/part/fn_modal_import.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_serial", "css_class":"right"},
+            {"f_id":"eid", "f_event_id":"print_serial_a4", "d_name":"Print SN A4", "f_type":"button", "handler":"file", "container":"self", "f_data":"/api/file/print_serial_a4", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_print_serial", "css_class":"right"},
+            {"f_id":"eid", "f_event_id":"print_serial_u9", "d_name":"Print SN U9", "f_type":"button", "handler":"file", "container":"self", "f_data":"/api/file/print_serial_u9", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_print_serial", "css_class":"right"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"v_sku", "d_name":"SKU", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"v_description", "d_name":"Description", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"category", "d_name":"Category", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"quantity", "d_name":"Quantity", "f_type":"thead", "f_edit":true, "f_enable_calc":"controllEnableCalcInScope", "f_enable_indicators":{"status":"fulfilled"}, "f_data_id":"eid", "f_data":"/api/work/order_line_quantity"},
+                {"f_id":"item_id", "d_name":"Item ID", "f_type":"thead"},
+                {"f_id":"tran_id", "d_name":"Transaction", "f_type":"thead"},
+                {"f_id":"status", "d_name":"Status", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[
+                {"f_id":"tran_id", "d_name":"Remove", "f_type":"button", "f_event_id":"remove", "f_enable_indicator":"quantity", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_line_remove"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT ol.*, i.v_description, i.category FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :eid ORDER BY ol.eid ASC"
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_create": {
+        "title": "Order Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"order_type", "d_name":"Order Type", "f_element":"select", "f_data":"/api/work/order_type", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_default_val":"work", "f_attr":"disabled"},
+                {"f_id":"model_id", "d_name":"Model", "f_element":"select", "f_data":"/api/work/order_model", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"status", "d_name":"Status", "f_element":"select", "f_data":"/api/work/order_status", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_default_val":"onorder"},
+                {"f_id":"vendor_id", "d_name":"Vendor", "f_element":"select", "f_data":"/api/work/order_vendor", "f_option_text":"acct_name", "f_option_val":"eid"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"orders", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_create1": {
+        "title": "Order Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"order_type", "d_name":"Order Type", "f_element":"select", "f_list":"order_type", "f_data":"/api/work/order_type", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_default_val":"work", "f_attr":"disabled"},
+                {"f_id":"model_id", "d_name":"Model", "f_element":"input", "f_list":"model_id", "f_data":"/api/work/order_model", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"status", "d_name":"Status", "f_element":"select", "f_list":"status", "f_data":"/api/work/order_status", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_default_val":"onorder"},
+                {"f_id":"vendor_id", "d_name":"Vendor", "f_element":"select", "f_list":"vendor_id", "f_data":"/api/work/order_vendor", "f_option_text":"acct_name", "f_option_val":"eid"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"orders", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_clear": {
+        "title": "Order Clear Meta",
+        "modal_template": {
+            "caption":[
+                {"f_id":"title", "d_name":"Work Order", "f_type":"label"},
+                {"f_id":"sn_quantity", "d_name":"Unit Quantity", "f_type":"label"},
+                {"f_id":"part_quantity", "d_name":"Part Quantity", "f_type":"label"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Clear All Part", "f_type":"button", "f_event_id":"clear_part", "handler": "self", "f_data_key":"eid", "f_data_val":"eid", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_clear_part", "css_class":"danger right", "auth": ["admin","manager"]},
+                {"f_id":"eid", "d_name":"Clear All Searial", "f_type":"button", "f_event_id":"clear_sn", "handler": "self", "f_data_key":"eid", "f_data_val":"eid", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_clear_sn", "css_class":"danger right", "auth": ["admin","manager"]}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"caption_data":"SELECT o.eid, o.title, asm.sn_quantity, apc.part_quantity FROM orders o LEFT JOIN(SELECT ifnull(COUNT(*), 0) as sn_quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id LEFT JOIN (SELECT ifnull(count(*), 0) as part_quantity, asn.order_id FROM assm_part_serial aps JOIN assm_serial asn ON aps.assm_serial = asn.serial_number GROUP BY asn.order_id) as apc ON o.eid = apc.order_id WHERE o.eid = :eid"}
+                ]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_clear_part": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"delete_id":"DELETE FROM assm_part_serial WHERE assm_serial in (SELECT serial_number FROM assm_serial WHERE order_id = :eid)"}
+                ],
+                "q_params": {"stop_order_type":"ship"}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_clear_sn": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"exist_part_stop":"SELECT * FROM assm_part_serial WHERE assm_serial in (SELECT serial_number FROM assm_serial WHERE order_id = :eid)"},
+                    {"delete_id":"DELETE FROM assm_serial WHERE order_id = :eid"}
+                ],
+                "q_params": {"stop_order_type":"ship"}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_clone": {
+        "title": "Order Create Meta",
+        "modal_template": {
+            "caption":[
+                {"f_id":"title", "d_name":"Work Order", "f_type":"label"},
+                {"f_id":"quantity", "d_name":"Quantity", "f_type":"label"},
+                {"f_id":"data_count", "d_name":"Scanned", "f_type":"label"},
+                {"f_id":"model", "d_name":"Model", "f_type":"label"}
+            ],
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"clone_save", "handler": "self", "f_data_key":"from_id", "f_data_val":"eid", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_clone_save"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"caption_data":"SELECT o.title, asm.quantity, asm.order_id FROM orders o LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE o.eid = :eid"}
+                ]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_line_manual": {
+        "title": "Order Lines Create Meta",
+        "fn_key":{"order_id":"eid"},
+        "action_bar": [
+            {"f_id":"category", "f_event_id":"category", "d_name":"Category", "f_type":"select", "f_data":"/api/work/item_category", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_action_endpoint":"/api/work/item_by_category"},
+            {"f_id":"search", "f_event_id":"search", "d_name":"", "f_type":"input", "handler":"self", "container":"self", "f_action_endpoint":"/api/work/item_search", "f_clear_onload":true},
+            {"f_id":"quantity", "f_event_id":"quantity", "d_name":"Quantity", "f_type":"input", "handler":"self", "container":"self"}
+        ],
+        "table_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"v_sku", "d_name":"SKU", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"},
+                {"f_id":"v_name", "d_name":"Item Name", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"},
+                {"f_id":"category", "d_name":"Category", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"quantity", "d_name":"Quantity", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"vendor_code", "d_name":"Vendor", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Add to Order", "f_type":"button", "f_event_id":"add", "f_enable_indicator":"item_id", "f_qaram":{"order_id":"eid"}, "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_line_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.quantity, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :eid) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = :eid) v on v.acct_code = i.vendor_code"
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_shipment": {
+        "title": "Order Shipment Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"Ship ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"pallet_count", "d_name":"Pallet Count", "f_type":"text", "f_element":"input"},
+                {"f_id":"unit_per_container", "d_name":"Unit Per Pallet", "f_type":"text", "f_element":"input"},
+                {"f_id":"status", "d_name":"Status", "f_element":"select", "f_data":"/api/work/order_status", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_default_val":"onorder"},
+                {"f_id":"trucker_id", "d_name":"Trucker", "f_element":"select", "f_data":"/api/work/order_trucker", "f_option_text":"acct_name", "f_option_val":"eid"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::order_shipment_update"},
+                {"f_id":"eid", "d_name":"Shipping Label", "f_type":"button", "f_event_id":"ship_label", "handler": "file", "f_data":"/api/file/pallet_label","f_enable_indicator":"pallet_count"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"ship_id":"INSERT OR IGNORE INTO shipments (title, status, work_id) SELECT title, :status, eid FROM orders WHERE eid = :eid"},
+                    {"return_data":"SELECT * FROM shipments WHERE work_id = :eid"}
+                ],
+                "q_params": {"status":"onorder"}
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_serial": {
+        "title": "Order Shipment Meta",
+        "modal_template": {
+            "modal_key": {"k_name":"order_id", "K_val":"eid"},
+            "modal_css": "mdl_width70",
+            "fields":[
+                {"f_id":"text_to_json", "d_name":"Update", "d_label":"List of SN to Upload:", "f_element":"textarea", "f_data_id":"eid", "f_data_key":"order_id", "f_event_id":"text_upload", "f_event_type":"button", "f_data_endpoint":"/api/work/order_serial_bulk", "handler": "data"},
+                {"f_id":"file_import", "d_name":"Upload", "d_label":"SN file to Upload:", "f_type":"file", "f_element":"input", "f_data_id":"eid", "f_data_key":"order_id", "f_event_id":"sn_file_upload", "f_event_type":"button", "f_data_endpoint":"/api/util/order_serial_upload", "handler": "file", "f_css_class":"input_file"},
+                {"f_id":"sndkp_import", "d_name":"Upload", "d_label":"SNDKP file to Upload:", "f_type":"file", "f_element":"input", "f_data_id":"eid", "f_data_key":"order_id", "f_event_id":"sndkp_upload", "f_event_type":"button", "f_data_endpoint":"/api/util/order_sndkp_upload", "handler": "file", "f_css_class":"input_file"},
+                {"f_id":"accs_label", "d_name":"Print Accessory Label", "f_data_id":"eid", "f_data_key":"order_id", "f_event_id":"print_accs_label", "f_event_type":"button", "f_data_endpoint":"/api/file/print_accs_label", "handler": "print", "container":"self"}
+            ],
+            "events":[]
+        },
+        "list_template": {
+            "fields": [
+                {"f_id":"eid", "d_name":"ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"order_id", "d_name":"Order ID", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"},
+                {"f_id":"serial_number", "d_name":"Serial", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"}
+            ],
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM assm_serial WHERE order_id = :eid"
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::part_scan": {
+        "title": "order Page Meta",
+        "nav_bar": [
+            {"f_id":"serial_number", "f_event_id":"search_input", "d_name":"Search by Assembly Serial", "f_type":"input", "handler":"/js/part/fn_modal_scan.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::part_scan_by_sn"},
+            {"f_id":"serial_number", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"/js/part/fn_modal_scan.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::part_scan_by_sn"}
+        ],
+        "table_template":{
+            "table_key":{"k_name":"assm_serial", "k_val":"serial_number"},
+            "caption":[
+                {"f_id":"title", "d_name":"Work Order", "f_type":"label"},
+                {"f_id":"quantity", "d_name":"Quantity", "f_type":"label"},
+                {"f_id":"data_count", "d_name":"Scanned", "f_type":"label"},
+                {"f_id":"model", "d_name":"Model", "f_type":"label"}
+            ],
+            "fields":[],
+            "fields_data":"/api/work/scan_config",
+            "fields_attr":{"f_id":"part_sn","f_row_key":"assm_serial","f_row_name":"Unit Serial","f_data_id":"assm_conf_id","f_data_val":"eid", "d_name":"title"},
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"caption_data":"SELECT a.serial_number, o.title, asm.quantity, asm.order_id FROM assm_serial a INNER JOIN orders o on a.order_id = o.eid LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE a.serial_number = :serial_number"},
+                    {"column_data":"SELECT ac.eid, ac.category || ' (' || ac.slot || ')' as title, ac.category FROM assm_serial a INNER JOIN orders o ON a.order_id = o.eid INNER JOIN model m ON o.model_id = m.eid INNER JOIN assm_config ac ON m.assm_id = ac.assm_id WHERE a.serial_number = :serial_number ORDER BY ac.eid ASC"},
+                    {"table_data":"SELECT aps.* FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number INNER JOIN (SELECT order_id FROM assm_serial WHERE serial_number = :serial_number) as o ON a.order_id = o.order_id"}
+                ]
+            }
+        },
+        "auth": ["admin", "bom","manager"]
+    },
+    "::part_scan_by_sn": {
+        "title": "Order Shipment Meta",
+        "modal_template": {
+            "modal_key": {"k_name":"assm_serial", "k_val":"serial_number"},
+            "caption":[
+                {"f_id":"serial_number", "d_name":"Scan for Assembly", "f_type":"label"}
+            ],
+            "fields":[],
+            "fields_data":"/api/work/serial_scan_config",
+            "fields_attr":{"f_id":"part_sn","f_data_id":"assm_conf_id","f_data_val":"eid", "d_name":"title","f_type":"text","f_element":"input","f_data_endpoint":"/api/work/part_scan_serial", "f_css_class":"left"},
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM assm_part_serial WHERE assm_serial = :assm_serial"
+            }
+        },
+        "auth": ["admin","bom","manager"]
+    },
+    "::part_scan_repair": {
+        "title": "order Page Meta",
+        "nav_bar": [
+            {"f_id":"serial_number", "f_event_id":"search_input", "d_name":"Search by Assembly Serial", "f_type":"input", "handler":"/js/part/fn_modal_scan.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::part_scan_repair_by_sn"},
+            {"f_id":"serial_number", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"/js/part/fn_modal_scan.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::part_scan_repair_by_sn"}
+        ],
+        "table_template":{
+            "table_key":{"k_name":"assm_serial", "k_val":"serial_number"},
+            "caption":[
+                {"f_id":"title", "d_name":"Work Order", "f_type":"label"}
+            ],
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"assm_serial", "d_name":"Unit Serial", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"},
+                {"f_id":"category", "d_name":"Part Category", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"},
+                {"f_id":"swap_in_sn", "d_name":"Old SN", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"},
+                {"f_id":"swap_out_sn", "d_name":"New SN", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"},
+                {"f_id":"change_reason", "d_name":"Reason", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"},
+                {"f_id":"change_date", "d_name":"Change Date", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"}
+            ],
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"caption_data":"SELECT a.serial_number, o.title, asm.quantity, asm.order_id FROM assm_serial a INNER JOIN orders o on a.order_id = o.eid LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE a.serial_number = :serial_number"},
+                    {"table_data":"SELECT ac.category, apcl.* FROM assm_part_change_log apcl INNER JOIN assm_serial a ON apcl.assm_serial = a.serial_number INNER JOIN assm_config ac ON apcl.assm_conf_id = ac.eid INNER JOIN (SELECT order_id FROM assm_serial WHERE serial_number = :serial_number) as o ON a.order_id = o.order_id"}
+                ]
+            }
+        },
+        "auth": ["admin","test","manager"]
+    },
+    "::part_scan_repair_by_sn": {
+        "title": "Order Shipment Meta",
+        "modal_template": {
+            "modal_key": {"k_name":"assm_serial", "k_val":"serial_number"},
+            "caption":[
+                {"f_id":"serial_number", "d_name":"Scan for Repair", "f_type":"label"}
+            ],
+            "fields":[],
+            "fields_data":"/api/work/serial_scan_config",
+            "fields_attr":{"f_id":"part_sn","f_data_id":"assm_conf_id","f_data_val":"eid", "d_name":"title","f_type":"text","f_element":"input","f_data_endpoint":"/api/work/part_scan_repair_serial", "f_css_class":"left"},
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM assm_part_serial WHERE assm_serial = :assm_serial"
+            }
+        },
+        "auth": ["admin","test","manager"]
+    },
+    "::test_station": {
+        "title": "order Page Meta",
+        "nav_bar": [
+            {"f_id":"serial_number", "f_event_id":"search_input", "d_name":"Search by Assembly Serial", "f_type":"input", "handler":"/js/part/fn_modal_download.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::test_station_dowload"},
+            {"f_id":"serial_number", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"/js/part/fn_modal_download.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::test_station_dowload"}
+        ],
+        "table_template":{
+            "table_key":{"k_name":"assm_serial", "k_val":"serial_number"},
+            "caption":[
+                {"f_id":"title", "d_name":"Work Order", "f_type":"label"},
+                {"f_id":"quantity", "d_name":"Quantity", "f_type":"label"},
+                {"f_id":"data_count", "d_name":"Scanned", "f_type":"label"},
+                {"f_id":"model", "d_name":"Model", "f_type":"label"}
+            ],
+            "fields":[],
+            "fields_data":"/api/work/scan_config",
+            "fields_attr":{"f_id":"part_sn","f_row_key":"assm_serial","f_row_name":"Unit Serial","f_data_id":"assm_conf_id","f_data_val":"eid", "d_name":"title"},
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"caption_data":"SELECT a.serial_number, o.title, asm.quantity, asm.order_id FROM assm_serial a INNER JOIN orders o on a.order_id = o.eid LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE a.serial_number = :serial_number"},
+                    {"column_data":"SELECT ac.eid, ac.category || ' (' || ac.slot || ')' as title, ac.category FROM assm_serial a INNER JOIN orders o ON a.order_id = o.eid INNER JOIN model m ON o.model_id = m.eid INNER JOIN assm_config ac ON m.assm_id = ac.assm_id WHERE a.serial_number = :serial_number"},
+                    {"table_data":"SELECT aps.* FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number INNER JOIN (SELECT order_id FROM assm_serial WHERE serial_number = :serial_number) as o ON a.order_id = o.order_id"}
+                ]
+            }
+        },
+        "auth": ["admin","test","manager"]
+    },
+    "::test_station_dowload": {
+        "title": "Order Shipment Meta",
+        "modal_template": {
+            "modal_key": {"k_name":"assm_serial", "k_val":"serial_number"},
+            "caption":[
+                {"f_id":"title", "d_name":"Work Order", "f_type":"label"},
+                {"f_id":"quantity", "d_name":"Quantity", "f_type":"label"},
+                {"f_id":"data_count", "d_name":"Scanned", "f_type":"label"},
+                {"f_id":"model", "d_name":"Model", "f_type":"label"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Download SNDKP", "f_type":"button", "f_event_id":"download_sndkp", "handler": "file", "f_data":"/api/util/order_sndkp_download"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"caption_data":"SELECT o.eid, a.serial_number, o.title, asm.quantity, asm.order_id FROM assm_serial a INNER JOIN orders o on a.order_id = o.eid LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE a.serial_number = :serial_number"}
+                ]
+            }
+        },
+        "auth": ["admin","test","manager"]
+    },
+    "::serial_scan_config": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT DISTINCT ac.eid, ac.category || ' (' || ac.slot || ') ' || ifnull(i.v_name, '') as title, ac.category FROM assm_serial a INNER JOIN orders o ON a.order_id = o.eid INNER JOIN model m ON o.model_id = m.eid INNER JOIN assm_config ac ON m.assm_id = ac.assm_id LEFT OUTER JOIN (SELECT i.v_name, i.category FROM items i INNER JOIN order_lines ol ON ol.item_id = i.eid INNER JOIN assm_serial a ON ol.order_id = a.order_id WHERE a.serial_number = :serial_number) as i on ac.category = i.category WHERE a.serial_number = :serial_number ORDER BY ac.eid ASC"
+            }
+        },
+        "auth": []
+    },
+    "::part_scan_serial": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"duplicated_stop":"SELECT * FROM assm_part_serial aps INNER JOIN assm_config ac ON aps.assm_conf_id = ac.eid WHERE aps.part_sn = :part_sn AND aps.category = :category AND ac.is_unique = 1"},
+                    {"aps_id":"INSERT INTO assm_part_serial (assm_serial, assm_conf_id, part_sn, category, last_update, last_user) VALUES (:assm_serial, :assm_conf_id, :part_sn, :category, :last_update, :last_user) ON CONFLICT (assm_serial, assm_conf_id) DO UPDATE SET part_sn = excluded.part_sn, last_update = excluded.last_update, last_user = excluded.last_user WHERE assm_serial = excluded.assm_serial AND assm_conf_id = excluded.assm_conf_id"},
+                    {"return_data":"SELECT * FROM assm_part_serial WHERE assm_serial = :assm_serial"}
+                ]            }
+        },
+        "auth": []
+    },
+    "::part_scan_repair_serial": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"duplicated_stop":"SELECT * FROM assm_part_serial aps INNER JOIN assm_config ac ON aps.assm_conf_id = ac.eid WHERE aps.part_sn = :part_sn AND aps.category = :category AND ac.is_unique = 1"},
+                    {"aph_id":"INSERT INTO assm_part_change_log (assm_serial, assm_conf_id, swap_in_sn, swap_out_sn, change_reason, last_update, last_user) SELECT assm_serial, assm_conf_id, :part_sn, part_sn, 'testing failed', :last_update, :last_user FROM assm_part_serial WHERE assm_serial = :assm_serial AND assm_conf_id = :assm_conf_id"},
+                    {"aps_id":"UPDATE assm_part_serial SET part_sn = :part_sn, last_update = :last_update, last_user = :last_user WHERE assm_serial = :assm_serial AND assm_conf_id = :assm_conf_id"},
+                    {"return_data":"SELECT * FROM assm_part_serial WHERE assm_serial = :assm_serial"}
+                ]            
+            }
+        },
+        "auth": []
+    },
+    "::scan_config": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT DISTINCT ac.eid, ac.category || ' (' || ac.slot || ') ' || ifnull(i.v_name, '') as title, ac.category FROM assm_serial a INNER JOIN orders o ON a.order_id = o.eid INNER JOIN model m ON o.model_id = m.eid INNER JOIN assm_config ac ON m.assm_id = ac.assm_id LEFT OUTER JOIN (SELECT i.v_name, i.category FROM items i INNER JOIN order_lines ol ON ol.item_id = i.eid INNER JOIN assm_serial a ON ol.order_id = a.order_id WHERE a.serial_number = :serial_number) as i on ac.category = i.category WHERE a.serial_number = :serial_number ORDER BY ac.eid ASC"
+            }
+        },
+        "auth": []
+    },
+    "::assm_sn_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT ac.eid, ac.category || ' (' || ac.slot || ') ' || ifnull(i.v_name, '') as title, ac.category FROM orders o INNER JOIN model m on o.model_id = m.eid INNER JOIN assm_config ac on m.assm_id = ac.assm_id LEFT OUTER JOIN (SELECT i.v_name, i.category FROM order_lines ol INNER JOIN items i on ol.item_id = i.eid WHERE ol.order_id = :order_id) as i on ac.category = i.category WHERE o.eid = :order_id"
+            }
+        },
+        "auth": []
+    },
+    "::order_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate, m.title as model_name, ac.acct_name, ifnull(scan.scan_count, 0) || '/' || ifnull(asm.quantity, 0) as quantity, scan.scan_count, shp.ship_status FROM orders o LEFT JOIN model m ON o.model_id = m.eid LEFT JOIN accounts ac ON o.vendor_id = ac.eid LEFT JOIN (SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id LEFT JOIN (SELECT count(DISTINCT aps.assm_serial) as scan_count, a.order_id FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number GROUP BY a.order_id) as scan on o.eid = scan.order_id LEFT JOIN (SELECT title, status || '_' || strftime('%Y-%m-%d', datetime(last_update)) ship_status FROM orders WHERE order_type = 'ship') as shp ON o.title = shp.title WHERE (o.eid LIKE :search OR o.title LIKE :search OR o.status LIKE :search OR o.remark LIKE :search) and o.order_type = 'work' ORDER BY o.eid DESC"
+            }
+        },
+        "auth": []
+    },
+    "::order_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"orders", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_delete": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"exist_stop":"SELECT ol.item_id, ol.quantity FROM order_lines ol WHERE ol.order_id = :eid"},
+                    {"delete_id":"DELETE FROM orders WHERE eid = :eid and order_type = :order_type"}
+                ],
+                "q_params": {"order_type":"work"}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_complete": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"line_id":"UPDATE order_lines SET status = :status, last_user = :last_user, last_update = :last_update WHERE order_id = :eid"},
+                    {"tran_id":"UPDATE transactions SET status = :status, last_user = :last_user, last_update = :last_update WHERE order_id = :eid"},
+                    {"order_id":"UPDATE orders SET status = :status, last_user = :last_user, last_update = :last_update WHERE eid = :eid"},
+                    {"item_id":"UPDATE items SET last_user = :last_user, last_update = :last_update, quantity = (SELECT sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) FROM transactions as t WHERE items.eid =  t.item_id) WHERE eid in (SELECT item_id FROM transactions WHERE order_id = :eid)"},
+                    {"new_order_id":"INSERT into orders (title, order_type, status, link_order, vendor_id, create_date, create_user) SELECT title, :order_type, :ship_status, eid, vendor_id, :last_update, :last_user FROM orders WHERE eid = :eid"},
+                    {"new_tran":"INSERT INTO transactions (order_id, item_id, direction, status, quantity, create_date, create_user) select :new_order_id, item_id, :direction, :ship_status, quantity, :last_update, :last_user FROM transactions WHERE order_id = :eid"},
+                    {"new_line":"INSERT INTO order_lines (order_id, v_sku, item_id, tran_id, quantity, status, create_date, create_user) select t.order_id, i.v_sku, t.item_id, t.eid, t.quantity, t.status, :last_update, :last_user from transactions t inner join items i on t.item_id = i.eid where t.order_id = :new_order_id"},
+                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :eid"}
+                ],
+                "q_params": {"status":"fulfilled", "order_type":"ship", "ship_status":"onorder", "direction":"outbound"}
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_undo_complete": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"fulfilled_stop":"select * from orders where order_type = :order_type and link_order = :eid and status = :ship_status"},
+                    {"ship_notfoundstop":"select * from orders where order_type = :order_type and link_order = :eid"},
+                    {"del_line_id":"delete from order_lines where order_id = (select eid from orders where link_order = :eid)"},
+                    {"del_tran_id":"delete from transactions where order_id = (select eid from orders where orders.link_order = :eid)"},
+                    {"del_order_id":"delete from orders where link_order = :eid"},
+                    {"line_id":"UPDATE order_lines SET status = :status, last_user = :last_user, last_update = :last_update WHERE order_id = :eid"},
+                    {"tran_id":"UPDATE transactions SET status = :status, last_user = :last_user, last_update = :last_update WHERE order_id = :eid"},
+                    {"order_id":"UPDATE orders SET status = :status, last_user = :last_user, last_update = :last_update WHERE eid = :eid"},
+                    {"item_id":"UPDATE items SET last_user = :last_user, last_update = :last_update, quantity = (SELECT sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) FROM transactions as t WHERE items.eid =  t.item_id) WHERE eid in (SELECT item_id FROM transactions WHERE order_id = :eid)"},
+                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :eid"}
+                ],
+                "q_params": {"status":"onorder", "order_type":"ship", "ship_status":"fulfilled", "direction":"outbound"}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_clone_save": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"order_id":"INSERT INTO orders (title, order_type, status, model_id, vendor_id, create_date, create_user) SELECT :title, order_type, :order_status, model_id, vendor_id, :last_update, :last_user FROM orders WHERE eid = :from_id RETURNING eid"},
+                    {"tran_id":"INSERT INTO transactions (order_id, item_id, direction, quantity, status, create_date, create_user) SELECT :order_id, item_id, direction, quantity, :tran_status, :last_update, :last_user FROM transactions WHERE order_id = :from_id"},
+                    {"line_id":"INSERT INTO order_lines (order_id, v_sku, item_id, tran_id, quantity, status, create_date, create_user) select t.order_id, i.v_sku, t.item_id, t.eid, t.quantity, :tran_status, :last_update, :last_user from transactions t inner join items i on t.item_id = i.eid where t.order_id = :order_id"},
+                    {"return_data":"SELECT * FROM orders WHERE eid = :order_id"}
+                ],
+                "q_params": {"order_status":"onorder", "tran_status":"inproduction"}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_line_create": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"tran_id":"INSERT INTO transactions (order_id, item_id, quantity, direction, status) VALUES (:order_id, :eid, :quantity, :direction, :status) RETURNING eid"},
+                    {"line_id":"INSERT INTO order_lines (order_id, v_sku, item_id, tran_id, quantity, status) select t.order_id, i.v_sku, t.item_id, t.eid, t.quantity, :status from transactions t inner join items i on t.item_id = i.eid where t.eid = :tran_id"},
+                    {"return_data":"SELECT i.eid, i.v_sku, i.v_name, i.category, i.quantity, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id"}
+                ],
+                "q_params": {"direction":"internal", "status":"inproduction"}
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_line_remove": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"tran_id":"DELETE FROM order_lines WHERE order_id = :order_id AND tran_id = :tran_id"},
+                    {"line_id":"DELETE FROM transactions WHERE eid = :tran_id"},
+                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :order_id"}
+                ]
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_line_quantity": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"line_id":"UPDATE order_lines SET quantity = :quantity, last_user = :last_user, last_update = :last_update WHERE eid = :eid"},
+                    {"tran_id":"UPDATE transactions SET quantity = :quantity, last_user = :last_user, last_update = :last_update WHERE eid = (SELECT tran_id FROM order_lines WHERE eid = :eid)"},
+                    {"return_data":"SELECT ol.*, i.v_description, i.category FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :order_id ORDER BY ol.eid ASC"}
+                ],
+                "q_params": {"direction":"internal", "status":"inproduction"}
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_shipment_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"shipments", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_serial_bulk": {
+        "data_endpoint": {
+            "data": {
+                "handler": "insert", 
+                "query": "INSERT INTO assm_serial (order_id, serial_number, last_user, last_update) VALUES (:order_id, :serial_number, :last_user, :last_update)"
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_label": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM orders WHERE eid = :eid"
+            }
+        },
+        "auth": []
+    },
+    "::order_vendor": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"accounts", "q_fields":["eid", "acct_name"], "q_keyes":["acct_type", "is_active"], "q_params":{"acct_type":"vendor", "is_active":1}
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_trucker": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"accounts", "q_fields":["eid", "acct_name"], "q_keyes":["acct_type", "is_active"], "q_params":{"acct_type":"truck", "is_active":1}
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_type": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"orders", "refer_column":"order_type"}
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_model": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT eid, title FROM model WHERE is_active = :is_active ORDER BY eid DESC",
+                "q_params":{"is_active":1}
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::order_status": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"orders", "refer_column":"status"}
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::item_category": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"items", "refer_column":"category"}
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::item_by_category": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.quantity, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = :order_id) v on v.acct_code = i.vendor_code WHERE i.category = :category"
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::item_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.quantity, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = :order_id) v on v.acct_code = i.vendor_code WHERE i.v_sku like :search or i.v_name like :search or i.category like :search"
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::assm": {
+        "title": "order Page Meta",
+        "nav_bar": [
+            {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_type":"input", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::assm_search"},
+            {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::assm_search"},
+            {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_type":"button", "handler":"/js/part/fn_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::assm_create"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"order Count", "f_type":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Assembly", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"thead"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_type":"button", "f_event_id":"view", "handler": "/js/part/fn_modal_view.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::assm_view"},
+                {"f_id":"eid", "d_name":"Config", "f_type":"button", "f_event_id":"config", "handler": "/js/part/fn_modal_into_list.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::assm_config"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM assembly ORDER BY eid DESC"
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::assm_view": {
+        "title": "order View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"is_active", "d_name":"Status", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::assm_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM assembly WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::assm_config": {
+        "title": "order View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"category", "d_name":"Category", "f_element":"select", "f_data":"/api/invt/item_category", "f_option_text":"option_abbr", "f_option_val":"option_code"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Add", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::assm_config_save"}
+            ]
+        },
+        "list_template": {
+            "fields": [
+                {"f_id":"category", "d_name":"Category", "f_element":"select", "f_data":"/api/invt/item_category", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_attr":"disabled"},
+                {"f_id":"slot", "d_name":"Slot", "f_element":"input", "f_type":"text", "f_data_id":"eid", "f_data":"/api/work/assm_config_update", "f_attr":"disabled"},
+                {"f_id":"is_scan", "d_name":"Scan", "f_element":"input", "f_type":"checkbox", "f_checked_val":"1", "f_data_id":"eid", "f_data":"/api/work/assm_config_update"},
+                {"f_id":"is_unique", "d_name":"Unique", "f_element":"input", "f_type":"checkbox", "f_checked_val":"1", "f_data_id":"eid", "f_data":"/api/work/assm_config_update"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Remove", "f_type":"button", "f_event_id":"remove", "f_data_val":"eid", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::assm_config_remove"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT ac.*, a.title FROM assm_config ac inner join assembly a ON ac.assm_id = a.eid WHERE a.eid = :eid ORDER BY ac.eid DESC"
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::assm_create": {
+        "title": "Order Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::assm_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"assembly", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin"]
+    },
+    "::assm_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM assembly WHERE (eid like :search or title like :search or status like :search or remark like :search)"
+            }
+        },
+        "auth": []
+    },
+    "::assm_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"assembly", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::assm_config_save": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"assm_config_id":"INSERT INTO assm_config (assm_id, category, slot) SELECT :eid, :category, IFNULL(count(*), 0) + 1 FROM assm_config WHERE assm_id = :eid AND category = :category"},
+                    {"return_data":"SELECT ac.*, a.title FROM assm_config ac inner join assembly a ON ac.assm_id = a.eid WHERE a.eid = :eid ORDER BY ac.eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::assm_config_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"assm_config", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::assm_config_remove": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"assm_id":"SELECT assm_id FROM assm_config WHERE eid = :eid"},
+                    {"assm_config_id":"DELETE FROM assm_config WHERE eid = :eid"},
+                    {"return_data":"SELECT ac.*, a.title FROM assm_config ac inner join assembly a ON ac.assm_id = a.eid WHERE a.eid = :assm_id ORDER BY ac.eid DESC"}
+                ]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::model": {
+        "title": "order Page Meta",
+        "nav_bar": [
+            {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_type":"input", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::model_search"},
+            {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::model_search"},
+            {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_type":"button", "handler":"/js/part/fn_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::model_create"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"order Count", "f_type":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Model", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"type_code", "d_name":"Type", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"is_active", "d_name":"Status", "f_type":"thead"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"unit_per_container", "d_name":"Unit Per Pallet", "f_type":"thead"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_type":"button", "f_event_id":"view", "handler": "/js/part/fn_modal_view.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::model_view"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM model ORDER BY eid DESC"
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::model_view": {
+        "title": "order View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"assm_id", "d_name":"Assembly", "f_element":"select", "f_data":"/api/work/model_assm", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"vendor_id", "d_name":"Vendor", "f_element":"select", "f_data":"/api/work/order_vendor", "f_option_text":"acct_name", "f_option_val":"eid"},
+                {"f_id":"type_code", "d_name":"Type", "f_element":"select", "f_data":"/api/work/model_type", "f_option_text":"option_abbr", "f_option_val":"option_code"},
+                {"f_id":"unit_per_container", "d_name":"Unit Per Pallet", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::model_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM model WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::model_create": {
+        "title": "Order Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"assm_id", "d_name":"Assembly", "f_element":"select", "f_data":"/api/work/model_assm", "f_option_text":"title", "f_option_val":"eid"},
+                {"f_id":"vendor_id", "d_name":"Vendor", "f_element":"select", "f_data":"/api/work/order_vendor", "f_option_text":"acct_name", "f_option_val":"eid"},
+                {"f_id":"type_code", "d_name":"Type", "f_element":"select", "f_data":"/api/work/model_type", "f_option_text":"option_abbr", "f_option_val":"option_code"},
+                {"f_id":"unit_per_container", "d_name":"Unit Per Pallet", "f_type":"text", "f_element":"input"},
+                {"f_id":"is_active", "d_name":"Status", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::model_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"model", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::model_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM model WHERE (eid like :search or title like :search or remark like :search)"
+            }
+        },
+        "auth": []
+    },
+    "::model_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"model", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::model_assm": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT eid, title FROM assembly WHERE is_active = :is_active ORDER BY eid DESC",
+                "q_params":{"is_active":1}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::model_type": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT option_code, option_abbr FROM data_codes WHERE is_active = :is_active AND refer_entity = :refer_entity AND refer_column = :refer_column ORDER BY option_code DESC",
+                "q_params":{"is_active":1, "refer_entity":"model", "refer_column":"type_code"}
+            }
+        },
+        "auth": ["admin","manager"]
+    }
+}

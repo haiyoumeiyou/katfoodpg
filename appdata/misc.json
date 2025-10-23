@@ -1,0 +1,221 @@
+{
+    "title": "Misc Page Meta",
+    "sect_nav": [
+        {"name":"order", "path":"/misc/order", "page_title": "Order Mgmt"},
+        {"name":"order", "path":"/misc/misc_scan", "page_title": "Misc Scan"}
+    ],
+    "::order": {
+        "title": "order Page Meta",
+        "nav_bar": [
+            {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_type":"input", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "misc.json::order_search"},
+            {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "misc.json::order_search"},
+            {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_type":"button", "handler":"/js/part/fn_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "misc.json::order_create"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"order Count", "f_type":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Order ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Misc Order", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"status", "d_name":"Status", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"CreationDate", "d_name":"Create Date", "f_type":"thead"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_type":"button", "f_event_id":"view", "handler": "/js/part/fn_modal_view.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "misc.json::order_view"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT *, strftime('%Y-%m-%d', datetime(create_date, '-08:00')) as CreationDate FROM misc_orders ORDER BY eid DESC"
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_view": {
+        "title": "order View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"status", "d_name":"Status", "f_element":"select", "f_data":"/api/rma/order_status", "f_option_text":"option_abbr", "f_option_val":"option_code"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "misc.json::order_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT eid, title, status, remark, strftime('%Y-%m-%d', datetime(create_date, '-08:00')) as create_date FROM misc_orders WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_create": {
+        "title": "Order Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"status", "d_name":"Status", "f_element":"select", "f_data":"/api/misc/order_status", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_default_val":"onorder"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "misc.json::order_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"misc_orders", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT *, datetime(create_date, '-08:00')) as CreationDate FROM misc_orders WHERE (eid like :search or title like :search or status like :search or remark like :search)"
+            }
+        },
+        "auth": []
+    },
+    "::order_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"misc_orders", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_complete": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"order_id":"UPDATE misc_orders SET status = :status, last_user = :last_user, last_update = :last_update WHERE eid = :eid"}
+                ],
+                "q_params": {"status":"fulfilled"}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_label": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM misc_orders WHERE eid = :eid"
+            }
+        },
+        "auth": []
+    },
+    "::order_status": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"orders", "refer_column":"status"}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::misc_scan": {
+        "title": "order Page Meta",
+        "nav_bar": [
+            {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_type":"input", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "misc.json::misc_scan_search"},
+            {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "misc.json::misc_scan_search"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"order Count", "f_type":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Order ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Receive Order", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"status", "d_name":"Status", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"CreationDate", "d_name":"Create Date", "f_type":"thead"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Scan", "f_type":"button", "f_event_id":"scan", "handler": "/js/part/fn_v2_scan_recv.js", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "misc.json::misc_scan_input"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate FROM misc_orders o WHERE o.status = 'onorder' ORDER BY o.eid DESC"
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::misc_scan_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate FROM misc_orders o WHERE (o.eid LIKE :search OR o.title LIKE :search OR o.status LIKE :search OR o.remark LIKE :search) ORDER BY o.eid DESC"
+            }
+        },
+        "auth": []
+    },
+    "::misc_scan_input": {
+        "title": "order View Meta",
+        "title_template":{
+            "data_source":"order_notfoundstop",
+            "fields":[
+                {"f_id":"eid", "d_name":"Order ID", "f_element":"h3"},
+                {"f_id":"title", "d_name":"Order Title", "f_element":"h3"},
+                {"f_id":"local_error_msg", "d_name":"Error", "f_element":"h2"}
+            ]
+        },
+        "action_template": {
+            "fields":[
+                {"f_id":"serial_number", "f_event_id":"scan_input", "d_name":"Scan Serial Number", "f_element":"input", "f_type":"text", "handler":"self", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "misc.json::misc_scan_serial"},
+                {"f_id":"serial_number", "f_event_id":"scan_button", "f_event_data":"serial_number", "d_name":"Scan Serial Number", "f_element":"button", "handler":"self", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "misc.json::misc_scan_serial"}
+            ]
+        },
+        "table_template":{
+            "data_source":"table_data",
+            "template_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"Set Count", "f_element":"label"}
+            ],
+            "caption":"Misc Station Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Order ID", "f_element":"thead", "f_sort":"^"},
+                {"f_id":"serial_number", "d_name":"Unit SN", "f_element":"thead", "f_sort":"^"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"order_notfoundstop":"SELECT eid, title, status, remark, strftime('%Y-%m-%d', datetime(create_date, '-08:00')) as create_date FROM misc_orders WHERE eid = :eid"},
+                    {"table_data":"SELECT rs.*, o.title FROM misc_serial rs INNER JOIN misc_orders o ON rs.order_id = o.eid WHERE rs.order_id = :eid"}
+                ]
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    },
+    "::misc_scan_serial": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue",
+                "query": [
+                    {"duplicate_stop":"SELECT * FROM misc_serial WHERE serial_number = :serial_number and order_id = :eid"},
+                    {"order_notfoundstop":"SELECT * FROM misc_orders o WHERE o.eid = :eid"},
+                    {"recv_serial_id":"INSERT INTO misc_serial (order_id, serial_number, create_user) SELECT o.eid, :serial_number, :last_user FROM orders o WHERE o.eid = :eid"},
+                    {"table_data":"SELECT rs.*, o.title FROM misc_serial rs INNER JOIN misc_orders o ON rs.order_id = o.eid WHERE rs.order_id = :eid"}
+                ]
+            }
+        },
+        "auth": ["admin","manager","prsentry"]
+    }
+}

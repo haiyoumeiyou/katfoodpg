@@ -1,0 +1,141 @@
+{
+    "title": "Inventory Page Meta",
+    "sect_nav": [
+        {"name":"Inventory", "path":"/vendor/item", "page_title": "Item Mgmt"}
+    ],
+    "::item": {
+        "title": "Item Page Meta",
+        "nav_bar": [
+            {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_type":"input", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "vendor.json::item_search"},
+            {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "vendor.json::item_search"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"Item Count", "f_type":"label"}
+            ],
+            "caption":"Item Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"v_sku", "d_name":"SKU", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"},
+                {"f_id":"v_name", "d_name":"Item Name", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"},
+                {"f_id":"category", "d_name":"Category", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"v_description", "d_name":"Description", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"quantity", "d_name":"On Hand", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"vendor_code", "d_name":"Vendor", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_type":"button", "f_event_id":"view", "handler": "/js/part/fn_modal_view.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "vendor.json::item_view"},
+                {"f_id":"eid", "d_name":"Detail", "f_type":"button", "f_event_id":"detail", "handler": "/js/part/fn_modal_sum_table.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "vendor.json::item_detail"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM items i WHERE i.vendor_code in (SELECT acct_code FROM accounts JOIN users ON accounts.eid = users.vendor_of WHERE users.user_name = :last_user)"
+            }
+        },
+        "auth": ["admin","manager","vendor"]
+    },
+    "::item_view": {
+        "title": "Item View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"Item ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"v_sku", "d_name":"SKU", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"v_name", "d_name":"Item Name", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"category", "d_name":"Category", "f_element":"select", "f_data":"/api/vendor/item_category", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_attr":"disabled"},
+                {"f_id":"v_description", "d_name":"Description", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"vendor_code", "d_name":"Vendor", "f_element":"select", "f_data":"/api/vendor/item_vendor", "f_option_text":"acct_name", "f_option_val":"acct_code", "f_attr":"disabled"},
+                {"f_id":"comment", "d_name":"Comment", "f_type":"text", "f_element":"input", "f_attr":"disabled"}
+            ],
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM items WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin","manager","vendor"]
+    },
+    "::item_detail": {
+        "title": "Item Detail Meta",
+        "param":"param",
+        "fn_key":{"item_id":"eid"},
+        "title_template":{"f_id":"title","f_element":"label","f_data":"/api/vendor/item_label","f_display_fields":{"v_sku":"SKU","v_description":"Description"}},
+        "action_bar":[],
+        "summ_template": {
+            "fields": [
+                {"f_id":"inwh", "d_name":"In WH", "f_type":"thead"},
+                {"f_id":"inproduction", "d_name":"In Production", "f_type":"thead"},
+                {"f_id":"inrma", "d_name":"In RMA", "f_type":"thead"},
+                {"f_id":"onhand", "d_name":"On Hand", "f_type":"thead"}
+            ],
+            "template_data":"/api/vendor/item_summ"
+        },
+        "table_template":{
+            "table_key":"eid",
+            "fields":[
+                {"f_id":"create_date", "d_name":"Date", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"Source", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"in", "d_name":"In", "f_type":"thead"},
+                {"f_id":"out", "d_name":"Out", "f_type":"thead"},
+                {"f_id":"ao", "d_name":"Adjust", "f_type":"thead"},
+                {"f_id":"inhouse", "d_name":"In Process", "f_type":"thead"},
+                {"f_id":"total", "d_name":"Total", "f_type":"thead", "f_formula":"calcTotal", "f_formula_fields":{"in":"+", "ao":"+", "out":"-"}},
+                {"f_id":"status", "d_name":"Status", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "select item_id, CASE WHEN direction in ('inbound') THEN t.quantity END as 'in', CASE direction WHEN 'outbound' THEN t.quantity END as 'out', CASE WHEN direction in ('adjustment') THEN t.quantity END as 'ao',  CASE WHEN direction in ('internal') AND t.status in ('inrma', 'inproduction', 'fulfilled') THEN quantity END as inhouse, t.create_date, t.status, o.title from transactions t inner join orders o on t.order_id = o.eid where item_id = :eid"
+            }
+        },
+        "auth": ["admin","manager","vendor"]
+    },
+    "::item_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM items WHERE (eid like :search or v_sku like :search or v_name like :search or category like :search or equivalent like :search or v_description like :search) AND vendor_code in (SELECT acct_code FROM accounts JOIN users ON accounts.eid = users.vendor_of WHERE users.user_name = :last_user)"
+            }
+        },
+        "auth": ["admin","manager","vendor"]
+    },
+    "::item_label": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"items", "q_fields":["v_sku", "v_description"], "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin","manager","vendor"]
+    },
+    "::item_summ": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query":"SELECT item_id, sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('internal') AND status in ('inrma', 'inproduction') THEN quantity ELSE 0 END) as inwh, sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) as onhand, sum(CASE WHEN direction in ('internal') AND status in ('inrma') THEN quantity ELSE 0 END) as inrma, sum(CASE WHEN direction in ('internal') AND status in ('inproduction') THEN quantity ELSE 0 END) as inproduction FROM transactions WHERE item_id = :eid"
+            }
+        },
+        "auth": ["admin","manager","vendor"]
+    },
+    "::item_vendor": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"accounts", "q_fields":["acct_code", "acct_name"], "q_keyes":[]
+            }
+        },
+        "auth": ["admin","manager","vendor"]
+    },
+    "::item_category": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"items", "refer_column":"category"}
+            }
+        },
+        "auth": ["admin","manager","vendor"]
+    }
+}

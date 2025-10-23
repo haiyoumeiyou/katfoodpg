@@ -1,0 +1,23 @@
+{
+    "title": "Sample Page Meta",
+    "table_key":"eid",
+    "table_template":{
+        "header":[
+            {"f_id":"table_data", "d_name":"User Count", "f_type":"label"}
+        ],
+        "body":[
+            {"f_id":"eid", "d_name":"User ID", "f_type":"thead"},
+            {"f_id":"user_name", "d_name":"User Name", "f_type":"thead"},
+            {"f_id":"first_name", "d_name":"First Name", "f_type":"thead"},
+            {"f_id":"last_name", "d_name":"Last Name", "f_type":"thead"},
+            {"f_id":"title", "d_name":"Title", "f_type":"thead"},
+            {"f_id":"report_to", "d_name":"Supervisor", "f_type":"thead"},
+            {"f_id":"event", "d_name":"Action", "f_type":"thead"}
+        ],
+        "event":[
+            {"f_id":"eid", "f_id_key":"data-btn_id", "d_name":"Edit", "f_type":"button", "f_event_id":"entry_edit", "f_class":"btn btn-sm btn-outline-primary"},
+            {"f_id":"eid", "f_id_key":"data-btn_id", "d_name":"Roles", "f_type":"button", "f_event_id":"role_member_edit", "f_class":"btn btn-sm btn-outline-primary", "auth":[]}
+        ],
+        "data_src":"table_data"
+    }
+}

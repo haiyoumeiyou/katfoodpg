@@ -1,0 +1,13 @@
+{
+    "title": "Home Page Meta",
+    "sect_nav": [
+        {"name":"dashboard", "path":"/home/dashboard", "page_title": "Dashboard"},
+        {"name":"viewboard", "path":"/home/viewboard", "page_title": "Viewboard"}
+    ],
+    "dashboard": {
+        "title": "Dashboard Page Meta"
+    },
+    "viewboard": {
+        "title": "Viewboard Page Meta"
+    }
+}

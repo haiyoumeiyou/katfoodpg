@@ -1,0 +1,178 @@
+{
+    "version": "1.2",
+    "endpoints": {
+        "order_management": {
+            "title": "Production Order Management",
+            "type": "crud_interface",
+            "auth": {
+                "required": true,
+                "roles": ["admin", "manager", "prsentry"],
+                "permissions": ["order.read", "order.export"]
+            },
+            "components": {
+                "search_form": {
+                    "fields": [
+                        {
+                            "id": "title",
+                            "label": "Order Name",
+                            "type": "text",
+                            "max_length": 100
+                        },
+                        {
+                            "id": "model",
+                            "label": "Model",
+                            "type": "text",
+                            "pattern": "^[A-Z0-9-]{5,20}$"
+                        },
+                        {
+                            "id": "vendor",
+                            "label": "Vendor",
+                            "type": "text",
+                            "suggest_endpoint": "/api/vendors/suggest"
+                        },
+                        {
+                            "id": "begin_date",
+                            "label": "Start Date",
+                            "type": "date",
+                            "format": "YYYY-MM-DD"
+                        },
+                        {
+                            "id": "end_date",
+                            "label": "End Date",
+                            "type": "date",
+                            "format": "YYYY-MM-DD",
+                            "validation": {
+                                "after_field": "begin_date"
+                            }
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "id": "search",
+                            "label": "Search",
+                            "type": "button",
+                            "handler": {
+                                "type": "api_request",
+                                "endpoint": "/api/orders/search",
+                                "method": "POST"
+                            }
+                        },
+                        {
+                            "id": "download",
+                            "label": "Export Results",
+                            "type": "button",
+                            "handler": {
+                                "type": "file_download",
+                                "endpoint": "/api/orders/export",
+                                "format": "CSV"
+                            },
+                            "permissions": ["order.export"]
+                        }
+                    ]
+                },
+                "data_table": {
+                    "schema": {
+                        "columns": [
+                            {
+                                "id": "eid",
+                                "label": "Order ID",
+                                "type": "number",
+                                "sortable": true,
+                                "filterable": true
+                            },
+                            {
+                                "id": "title",
+                                "label": "Production Order",
+                                "type": "string",
+                                "truncate": 50
+                            },
+                            {
+                                "id": "order_type",
+                                "label": "Type",
+                                "type": "enum",
+                                "values": ["work", "ship", "maintenance"]
+                            },
+                            {
+                                "id": "model_name",
+                                "label": "Model",
+                                "type": "string"
+                            },
+                            {
+                                "id": "progress",
+                                "label": "Progress",
+                                "type": "composite",
+                                "components": ["scan_count", "quantity"]
+                            },
+                            {
+                                "id": "status",
+                                "label": "Status",
+                                "type": "badge",
+                                "styles": {
+                                    "completed": "success",
+                                    "pending": "warning",
+                                    "canceled": "danger"
+                                }
+                            }
+                        ],
+                        "row_actions": [
+                            {
+                                "id": "view",
+                                "label": "View Details",
+                                "icon": "eye",
+                                "endpoint": "/api/orders/{eid}"
+                            },
+                            {
+                                "id": "parts",
+                                "label": "Part List",
+                                "icon": "list",
+                                "endpoint": "/api/orders/{eid}/parts"
+                            }
+                        ],
+                        "pagination": {
+                            "default_page_size": 25,
+                            "max_records": 1000
+                        }
+                    }
+                }
+            },
+            "data_sources": {
+                "primary": {
+                    "endpoint": "/api/orders",
+                    "query": {
+                        "base": "order_base_query",
+                        "filters": [
+                            "date_range",
+                            "status_filter",
+                            "vendor_filter"
+                        ]
+                    }
+                }
+            },
+            "security": {
+                "input_validation": {
+                    "date_range": {
+                        "max_range_days": 365
+                    },
+                    "text_fields": {
+                        "sanitize_pattern": "[^A-Za-z0-9- _]"
+                    }
+                },
+                "export": {
+                    "rate_limit": "5/minute",
+                    "max_records": 10000
+                }
+            }
+        }
+    },
+    "sql_templates": {
+        "order_base_query": {
+            "sql": "SELECT o.*, DATE(o.create_date, '-8 hours') AS creation_date, m.title AS model_name, a.quantity AS order_quantity, ps.scan_count, s.status AS ship_status FROM orders o LEFT JOIN model m USING (model_id) LEFT JOIN (SELECT order_id, COUNT(*) AS quantity FROM assm_serial GROUP BY order_id) a USING (order_id) LEFT JOIN (SELECT order_id, COUNT(DISTINCT assm_serial) AS scan_count FROM assm_part_serial GROUP BY order_id) ps USING (order_id) LEFT JOIN shipping_status s USING (order_id) WHERE o.order_type = :order_type",
+            "parameters": ["order_type"]
+        }
+    },
+    "validation": {
+        "order_types": ["work", "ship", "maintenance"],
+        "status_values": ["pending", "in_progress", "completed", "canceled"],
+        "date_formats": ["YYYY-MM-DD", "ISO8601"]
+    }
+}

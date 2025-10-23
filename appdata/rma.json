@@ -1,0 +1,313 @@
+{
+    "title": "RMA Page Meta",
+    "sect_nav": [
+        {"name":"order", "path":"/rma/order", "page_title": "Order Mgmt"},
+        {"name":"Part Changed List", "path":"/rma/partlist", "page_title":"Part Changed List"}
+    ],
+    "::order": {
+        "title": "order Page Meta",
+        "nav_bar": [
+            {"f_id":"search", "f_event_id":"search_input", "d_name":"", "f_type":"input", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rma.json::order_search"},
+            {"f_id":"search", "f_event_id":"search_button", "d_name":"Search", "f_type":"button", "handler":"self", "container":"table", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rma.json::order_search"},
+            {"f_id":"eid", "f_event_id":"new_button", "d_name":"New", "f_type":"button", "handler":"/js/part/fn_modal_input.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rma.json::order_create"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"order Count", "f_type":"label"}
+            ],
+            "caption":"order Information",
+            "fields":[
+                {"f_id":"eid", "d_name":"Order ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"title", "d_name":"RMA Order", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"order_type", "d_name":"Order Type", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"status", "d_name":"Status", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"CreationDate", "d_name":"Create Date", "f_type":"thead"},
+                {"f_id":"vendor_id", "d_name":"Vendor", "f_type":"thead"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"View", "f_type":"button", "f_event_id":"view", "handler": "/js/part/fn_modal_view.js", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rma.json::order_view"},
+                {"f_id":"eid", "d_name":"Detail", "f_type":"button", "f_event_id":"detail", "handler": "/js/part/fn_title_table.js", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rma.json::order_detail"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT *, strftime('%Y-%m-%d', datetime(create_date, '-08:00')) as CreationDate FROM orders WHERE order_type = 'rma' ORDER BY eid DESC"
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_view": {
+        "title": "order View Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"order_type", "d_name":"Order Type", "f_element":"select", "f_data":"/api/rma/order_type", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_attr":"disabled"},
+                {"f_id":"status", "d_name":"Status", "f_element":"select", "f_data":"/api/rma/order_status", "f_option_text":"option_abbr", "f_option_val":"option_code"},
+                {"f_id":"create_date", "d_name":"Create Date", "f_type":"text", "f_element":"input"},
+                {"f_id":"vendor_id", "d_name":"Vendor", "f_element":"select", "f_data":"/api/rma/order_vendor", "f_option_text":"acct_name", "f_option_val":"eid"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Update", "f_type":"button", "f_event_id":"update", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rma.json::order_update"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT eid, title, order_type, model_id, vendor_id, status, remark, strftime('%Y-%m-%d', datetime(create_date, '-08:00')) as create_date FROM orders WHERE eid = :eid"
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_detail": {
+        "title": "order View Meta",
+        "param":"param",
+        "fn_key":{"order_id":"eid"},
+        "title_template":{"f_id":"title","f_element":"label","f_data":"/api/rma/order_label","f_display_fields":{"title":"Order Title","status":"Status","create_date":"Creation Date"}},
+        "action_bar": [
+            {"f_id":"eid", "f_event_id":"pick_from_list", "d_name":"Manual", "f_type":"button", "f_enable_calc":"controllEnableCalcInScope", "f_enable_indicators":{"status":"fulfilled"}, "handler":"/js/part/fn_modal_table.js", "container":"dialog", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rma.json::order_line_manual"},
+            {"f_id":"eid", "f_event_id":"mark_order_completed", "d_name":"Complete and Ship", "f_type":"button", "f_enable_calc":"controllEnableCalcInScope", "f_enable_indicators":{"quantity":0,"status":"fulfilled"}, "handler":"self", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rma.json::order_complete", "css_class":"right"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"v_sku", "d_name":"SKU", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"v_description", "d_name":"Description", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"quantity", "d_name":"Quantity", "f_type":"thead", "f_edit":true, "f_enable_calc":"controllEnableCalcInScope", "f_enable_indicators":{"status":"fulfilled"}, "f_data_id":"eid", "f_data":"/api/rma/order_line_quantity"},
+                {"f_id":"item_id", "d_name":"Item ID", "f_type":"thead"},
+                {"f_id":"tran_id", "d_name":"Transaction", "f_type":"thead"},
+                {"f_id":"status", "d_name":"Status", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[
+                {"f_id":"tran_id", "d_name":"Remove", "f_type":"button", "f_event_id":"remove", "f_enable_indicator":"quantity", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rma.json::order_line_remove"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :eid ORDER BY ol.eid ASC"
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_create": {
+        "title": "Order Create Meta",
+        "modal_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"text", "f_element":"input", "f_attr":"disabled"},
+                {"f_id":"title", "d_name":"Title", "f_type":"text", "f_element":"input"},
+                {"f_id":"order_type", "d_name":"Order Type", "f_element":"select", "f_data":"/api/rma/order_type", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_default_val":"rma", "f_attr":"disabled"},
+                {"f_id":"status", "d_name":"Status", "f_element":"select", "f_data":"/api/rma/order_status", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_default_val":"onorder"},
+                {"f_id":"vendor_id", "d_name":"Vendor", "f_element":"select", "f_data":"/api/rma/order_vendor", "f_option_text":"acct_name", "f_option_val":"eid"},
+                {"f_id":"remark", "d_name":"Remark", "f_type":"text", "f_element":"input"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Save", "f_type":"button", "f_event_id":"save", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rma.json::order_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"insert", "q_table":"orders", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_line_manual": {
+        "title": "Order Lines Create Meta",
+        "fn_key":{"order_id":"eid"},
+        "action_bar": [
+            {"f_id":"category", "f_event_id":"category", "d_name":"Category", "f_type":"select", "f_data":"/api/rma/item_category", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_action_endpoint":"/api/rma/item_by_category"},
+            {"f_id":"search", "f_event_id":"search", "d_name":"", "f_type":"input", "handler":"self", "container":"self", "f_action_endpoint":"/api/rma/item_search", "f_clear_onload":true},
+            {"f_id":"quantity", "f_event_id":"quantity", "d_name":"Quantity", "f_type":"input", "handler":"self", "container":"self"}
+        ],
+        "table_template": {
+            "fields":[
+                {"f_id":"eid", "d_name":"ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"v_sku", "d_name":"SKU", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"},
+                {"f_id":"v_name", "d_name":"Item Name", "f_type":"thead", "f_sort":"^", "f_css_class": "td_nowrap"},
+                {"f_id":"category", "d_name":"Category", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"vendor_code", "d_name":"Vendor", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[
+                {"f_id":"eid", "d_name":"Add to Order", "f_type":"button", "f_event_id":"add", "f_enable_indicator":"item_id", "f_qaram":{"order_id":"eid"}, "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "rma.json::order_line_create"}
+            ]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :eid) ol on i.eid = ol.item_id"
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT *, datetime(create_date, '-08:00')) as CreationDate FROM orders WHERE (eid like :search or title like :search or order_type like :search or status like :search or remark like :search) AND order_type = 'rma'"
+            }
+        },
+        "auth": []
+    },
+    "::order_update": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"update", "q_table":"orders", "q_keyes":["eid"]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_complete": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"line_id":"UPDATE order_lines SET status = :status, last_user = :last_user, last_update = :last_update WHERE order_id = :eid"},
+                    {"tran_id":"UPDATE transactions SET status = :status, last_user = :last_user, last_update = :last_update WHERE order_id = :eid"},
+                    {"tran_id":"UPDATE orders SET status = :status WHERE eid = :eid"},
+                    {"tran_id":"UPDATE items SET last_user = :last_user, last_update = :last_update, quantity = (SELECT sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) FROM transactions as t WHERE items.eid =  t.item_id) WHERE eid in (SELECT item_id FROM transactions WHERE order_id = :eid)"},
+                    {"new_order_id":"INSERT into orders (title, order_type, status, link_order, vendor_id) SELECT title, :order_type, :ship_status, eid, vendor_id FROM orders WHERE eid = :eid"},
+                    {"new_tran":"INSERT INTO transactions (order_id, item_id, direction, status, quantity) select :new_order_id, item_id, :direction, :ship_status, quantity FROM transactions WHERE order_id = :eid"},
+                    {"new_line":"INSERT INTO order_lines (order_id, v_sku, item_id, tran_id, quantity, status) select t.order_id, i.v_sku, t.item_id, t.eid, t.quantity, t.status from transactions t inner join items i on t.item_id = i.eid where t.order_id = :new_order_id"},
+                    {"tran_id":"UPDATE items SET last_user = :last_user, last_update = :last_update, quantity = (SELECT sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) FROM transactions as t WHERE items.eid =  t.item_id) WHERE eid in (SELECT item_id FROM transactions WHERE order_id = :new_order_id)"},
+                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :eid"}
+                ],
+                "q_params": {"status":"fulfilled", "order_type":"ship", "ship_status":"fulfilled", "direction":"outbound"}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_line_create": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"tran_id":"INSERT INTO transactions (order_id, item_id, quantity, direction, status) VALUES (:order_id, :eid, :quantity, :direction, :status) RETURNING eid"},
+                    {"line_id":"INSERT INTO order_lines (order_id, v_sku, item_id, tran_id, quantity, status) select t.order_id, i.v_sku, t.item_id, t.eid, t.quantity, :status from transactions t inner join items i on t.item_id = i.eid where t.eid = :tran_id"},
+                    {"return_data":"SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id"}
+                ],
+                "q_params": {"direction":"internal", "status":"inrma"}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_line_remove": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"tran_id":"DELETE FROM order_lines WHERE order_id = :order_id AND tran_id = :tran_id"},
+                    {"line_id":"DELETE FROM transactions WHERE eid = :tran_id"},
+                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :order_id"}
+                ]
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_line_quantity": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"line_id":"UPDATE order_lines SET quantity = :quantity, last_user = :last_user, last_update = :last_update WHERE eid = :eid"},
+                    {"tran_id":"UPDATE transactions SET quantity = :quantity, last_user = :last_user, last_update = :last_update WHERE eid = (SELECT tran_id FROM order_lines WHERE eid = :eid)"},
+                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :order_id ORDER BY ol.eid ASC"}
+                ],
+                "q_params": {"direction":"internal", "status":"inrma"}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_label": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT * FROM orders WHERE eid = :eid"
+            }
+        },
+        "auth": []
+    },
+    "::order_vendor": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"accounts", "q_fields":["eid", "acct_name"], "q_keyes":["acct_type", "is_active"], "q_params":{"acct_type":"vendor", "is_active":1}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_type": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"orders", "refer_column":"order_type"}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::order_status": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"orders", "refer_column":"status"}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::item_category": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"items", "refer_column":"category"}
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::item_by_category": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id WHERE i.category = :category"
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::item_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id WHERE i.v_sku like :search or i.v_name like :search or i.category like :search"
+            }
+        },
+        "auth": ["admin","manager"]
+    },
+    "::partlist": {
+        "title": "Changed Part List Page Meta",
+        "nav_bar": [],
+        "table_template":{
+            "table_key":"eid",
+            "header":[],
+            "caption":"Part Changed List",
+            "fields":[
+                {"f_id":"eid", "d_name":"Change ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"order_id", "d_name":"Order ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"category", "d_name":"Part Category", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"v_name", "d_name":"Part Name", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"assm_serial", "d_name":"Assm SN", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"swap_in_sn", "d_name":"Swap In", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"swap_out_sn", "d_name":"Swap Out", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"change_reason", "d_name":"Reason", "f_type":"thead"},
+                {"f_id":"change_date", "d_name":"Changed Date", "f_type":"thead"}
+            ],
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "read",
+                "query": "SELECT apc.*, poc.* FROM assm_part_change_log apc INNER JOIN assm_part_serial aps on apc.swap_in_sn = aps.part_sn AND apc.assm_serial = aps.assm_serial INNER JOIN assm_serial asn on apc.assm_serial = asn.serial_number LEFT OUTER JOIN (SELECT i.v_name, i.category, ol.order_id FROM order_lines ol INNER JOIN items i on ol.item_id = i.eid) as poc ON poc.category = aps.category and poc.order_id = asn.order_id ORDER BY eid DESC"
+            }
+        },
+        "auth": ["admin","manager"]
+    }
+}

@@ -1,0 +1,104 @@
+{
+    "title": "Report Page Meta",
+    "sect_nav": [
+        {"name":"Pallet By Order", "path":"/report/pltbyorder", "page_title": "Order Mgmt"},
+        {"name":"Accs By Order", "path":"/report/accbyorder", "page_title": "Order Mgmt"}
+    ],
+    "::pltbyorder": {
+        "title": "order View Meta",
+        "param":"param",
+        "fn_key":{"order_id":"eid"},
+        "title_template":{"f_id":"title","f_element":"label","f_display_fields":{"title":"Order Title","status":"Status","create_date":"Creation Date"}},
+        "action_bar": [
+            {"f_id":"vendor_id", "f_event_id":"vendor_id", "d_name":"Vendor", "f_element":"select", "f_data_key":"vendor_option", "f_option_text":"acct_name", "f_option_val":"acct_id"},
+            {"f_id":"search", "f_event_id":"search", "d_name":"", "f_element":"input", "handler":"self", "container":"self", "f_action_endpoint":"/api/report/pltreport_search"},
+            {"f_id":"search_button", "f_event_id":"search_button", "d_name":"Search", "f_element":"button", "handler":"self", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "report.json::pltbyorder_search"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"Item Count", "f_type":"label"}
+            ],
+            "caption":"Order Information",
+            "fields":[
+                {"f_id":"acct_name", "d_name":"Vendor", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"order_id", "d_name":"Order ID", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"container_code", "d_name":"Pallet", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"quantity", "d_name":"Quantity", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"table_data":"SELECT a.acct_name, wpu.order_id, wpu.container_code, count(wpu.unit_serial) as quantity FROM wf_pack_unit wpu JOIN orders o on wpu.order_id = o.eid JOIN accounts a on o.vendor_id = a.eid GROUP BY a.acct_name, wpu.order_id, wpu.container_code ORDER BY wpu.order_id DESC"},
+                    {"vendor_option":"SELECT eid as acct_id, acct_name FROM accounts WHERE acct_type = 'vendor'"}
+                ]
+            }
+        },
+        "auth": ["metaadmin","admin","manager"]
+    },
+    "::pltbyorder_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_option",
+                "query":[
+                    {"option_3":"SELECT a.acct_name, wpu.order_id, wpu.container_code, count(wpu.unit_serial) as quantity FROM wf_pack_unit wpu JOIN orders o on wpu.order_id = o.eid JOIN accounts a on o.vendor_id = a.eid WHERE wpu.order_id in (SELECT order_id FROM orders WHERE vendor_id = :vendor_id) AND wpu.order_id in (SELECT order_id FROM wf_pack_unit WHERE unit_serial LIKE :search) GROUP BY a.acct_name, wpu.order_id, wpu.container_code ORDER BY wpu.order_id DESC"},
+                    {"option_2":"SELECT a.acct_name, wpu.order_id, wpu.container_code, count(wpu.unit_serial) as quantity FROM wf_pack_unit wpu JOIN orders o on wpu.order_id = o.eid JOIN accounts a on o.vendor_id = a.eid WHERE wpu.order_id in (SELECT order_id FROM orders WHERE vendor_id = :vendor_id) GROUP BY a.acct_name, wpu.order_id, wpu.container_code ORDER BY wpu.order_id DESC"},
+                    {"option_1":"SELECT a.acct_name, wpu.order_id, wpu.container_code, count(wpu.unit_serial) as quantity FROM wf_pack_unit wpu JOIN orders o on wpu.order_id = o.eid JOIN accounts a on o.vendor_id = a.eid WHERE wpu.order_id in (SELECT order_id FROM wf_pack_unit WHERE unit_serial LIKE :search) GROUP BY a.acct_name, wpu.order_id, wpu.container_code ORDER BY wpu.order_id DESC"}
+                ] 
+            }
+        },
+        "auth": ["metaadmin","admin","manager"]
+    },
+    "::accbyorder": {
+        "title": "order View Meta",
+        "param":"param",
+        "fn_key":{"order_id":"eid"},
+        "title_template":{"f_id":"title","f_element":"label","f_display_fields":{"title":"Order Title","status":"Status","create_date":"Creation Date"}},
+        "action_bar": [
+            {"f_id":"order_id", "f_event_id":"order_id", "d_name":"Order", "f_element":"select", "f_data_key":"order_option", "f_option_text":"title", "f_option_val":"order_id"},
+            {"f_id":"search", "f_event_id":"search", "d_name":"", "f_element":"input", "handler":"self", "container":"self", "f_action_endpoint":"/api/report/accreport_search"},
+            {"f_id":"search_button", "f_event_id":"search_button", "d_name":"Search", "f_element":"button", "handler":"self", "container":"self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "report.json::accbyorder_search"}
+        ],
+        "table_template":{
+            "table_key":"eid",
+            "header":[
+                {"f_id":"table_data", "d_name":"Item Count", "f_type":"label"}
+            ],
+            "caption":"Order Information",
+            "fields":[
+                {"f_id":"title", "d_name":"Order", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"unit_serial", "d_name":"Serial Number", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"kb_code", "d_name":"Keyboard", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"mouse_code", "d_name":"Mouse", "f_type":"thead", "f_sort":"^"},
+                {"f_id":"accs_code", "d_name":"Accessory", "f_type":"thead", "f_sort":"^"}
+            ],
+            "events":[]
+        },
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_queue", 
+                "query":[
+                    {"table_data":"SELECT wau.*, o.title FROM wf_accs_unit wau JOIN orders o ON wau.order_id = o.eid"},
+                    {"order_option":"SELECT eid as order_id, title FROM orders WHERE order_type = 'work' ORDER BY title DESC"}
+                ]
+            }
+        },
+        "auth": ["metaadmin","admin","manager"]
+    },
+    "::accbyorder_search": {
+        "data_endpoint": {
+            "data": {
+                "handler": "_query_option",
+                "query":[
+                    {"option_3":"SELECT wau.*, o.title FROM wf_accs_unit wau JOIN orders o ON wau.order_id = o.eid WHERE (wau.unit_serial LIKE :search OR wau.kb_code LIKE :search OR wau.mouse_code LIKE :search or wau.accs_code LIKE :search) AND o.eid = :order_id"},
+                    {"option_2":"SELECT wau.*, o.title FROM wf_accs_unit wau JOIN orders o ON wau.order_id = o.eid WHERE wau.unit_serial LIKE :search OR wau.kb_code LIKE :search OR wau.mouse_code LIKE :search or wau.accs_code LIKE :search"},
+                    {"option_1":"SELECT wau.*, o.title FROM wf_accs_unit wau JOIN orders o ON wau.order_id = o.eid WHERE o.eid = :order_id"}
+                ] 
+            }
+        },
+        "auth": ["metaadmin","admin","manager"]
+    }
+}
