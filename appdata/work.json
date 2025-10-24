@@ -44,10 +44,10 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate, m.title as model_name, ac.acct_name, ifnull(scan.scan_count, 0) || '/' || ifnull(asm.quantity, 0) as quantity, scan.scan_count, shp.ship_status FROM orders o LEFT JOIN model m ON o.model_id = m.eid LEFT JOIN accounts ac ON o.vendor_id = ac.eid LEFT JOIN (SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id LEFT JOIN (SELECT count(DISTINCT aps.assm_serial) as scan_count, a.order_id FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number GROUP BY a.order_id) as scan on o.eid = scan.order_id LEFT JOIN (SELECT title, status || '_' || strftime('%Y-%m-%d', datetime(last_update, '-08:00')) ship_status FROM orders WHERE order_type = 'ship') as shp ON o.title = shp.title WHERE o.order_type = 'work' ORDER BY o.eid DESC"
+                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') AS CreationDate, m.title AS model_name, ac.acct_name, COALESCE(scan.scan_count, 0)::text || '/' || COALESCE(asm.quantity, 0)::text AS quantity, scan.scan_count, shp.ship_status FROM orders o LEFT JOIN model m ON o.model_id = m.eid LEFT JOIN accounts ac ON o.vendor_id = ac.eid LEFT JOIN (SELECT order_id, COUNT(*) AS quantity FROM assm_serial GROUP BY order_id) asm ON o.eid = asm.order_id LEFT JOIN (SELECT a.order_id, COUNT(DISTINCT aps.assm_serial) AS scan_count FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number GROUP BY a.order_id) scan ON o.eid = scan.order_id LEFT JOIN (SELECT title, status || '_' || TO_CHAR(last_update, 'YYYY-MM-DD') AS ship_status FROM orders WHERE order_type = 'ship') shp ON o.title = shp.title WHERE o.order_type = 'work' ORDER BY o.eid DESC;"
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_view": {
         "title": "order View Meta",
@@ -70,10 +70,10 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT eid, title, order_type, model_id, vendor_id, status, remark, strftime('%Y-%m-%d', datetime(create_date, '-08:00')) as create_date FROM orders WHERE eid = :eid"
+                "query": "SELECT eid, title, order_type, model_id, vendor_id, status, remark, TO_CHAR(create_date, 'YYYY-MM-DD') AS create_date FROM orders WHERE eid = $(eid)s;"
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_part_list": {
         "title": "order Page Meta",
@@ -98,13 +98,13 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"caption_data":"SELECT o.title, asm.quantity, asm.order_id FROM orders o LEFT OUTER JOIN (SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE o.eid = :eid"},
-                    {"column_data":"SELECT DISTINCT ac.eid, ac.category || ' (' || ac.slot || ') ' || ifnull(i.v_name, '') as title, ac.category FROM orders o INNER JOIN model m on o.model_id = m.eid INNER JOIN assm_config ac on m.assm_id = ac.assm_id LEFT OUTER JOIN (SELECT i.v_name, i.category FROM order_lines ol INNER JOIN items i on ol.item_id = i.eid WHERE ol.order_id = :eid) as i on ac.category = i.category WHERE o.eid = :eid ORDER BY ac.eid ASC"},
-                    {"table_data":"SELECT aps.* FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number WHERE a.order_id = :eid"}
+                    {"caption_data":"SELECT o.title, asm.quantity, asm.order_id FROM orders o LEFT OUTER JOIN (SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE o.eid = $(eid)s"},
+                    {"column_data":"SELECT DISTINCT ac.eid, ac.category || ' (' || ac.slot || ') ' || ifnull(i.v_name, '') as title, ac.category FROM orders o INNER JOIN model m on o.model_id = m.eid INNER JOIN assm_config ac on m.assm_id = ac.assm_id LEFT OUTER JOIN (SELECT i.v_name, i.category FROM order_lines ol INNER JOIN items i on ol.item_id = i.eid WHERE ol.order_id = $(eid)s) as i on ac.category = i.category WHERE o.eid = $(eid)s ORDER BY ac.eid ASC"},
+                    {"table_data":"SELECT aps.* FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number WHERE a.order_id = $(eid)s"}
                 ]
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_detail": {
         "title": "order View Meta",
@@ -140,10 +140,10 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT ol.*, i.v_description, i.category FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :eid ORDER BY ol.eid ASC"
+                "query": "SELECT ol.*, i.v_description, i.category FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = $(eid)s ORDER BY ol.eid ASC"
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_create": {
         "title": "Order Create Meta",
@@ -166,7 +166,7 @@
                 "handler": "_query", "q_type":"insert", "q_table":"orders", "q_keyes":["eid"]
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::order_create1": {
         "title": "Order Create Meta",
@@ -189,7 +189,7 @@
                 "handler": "_query", "q_type":"insert", "q_table":"orders", "q_keyes":["eid"]
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::order_clear": {
         "title": "Order Clear Meta",
@@ -208,36 +208,36 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"caption_data":"SELECT o.eid, o.title, asm.sn_quantity, apc.part_quantity FROM orders o LEFT JOIN(SELECT ifnull(COUNT(*), 0) as sn_quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id LEFT JOIN (SELECT ifnull(count(*), 0) as part_quantity, asn.order_id FROM assm_part_serial aps JOIN assm_serial asn ON aps.assm_serial = asn.serial_number GROUP BY asn.order_id) as apc ON o.eid = apc.order_id WHERE o.eid = :eid"}
+                    {"caption_data":"SELECT o.eid, o.title, asm.sn_quantity, apc.part_quantity FROM orders o LEFT JOIN(SELECT ifnull(COUNT(*), 0) as sn_quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id LEFT JOIN (SELECT ifnull(count(*), 0) as part_quantity, asn.order_id FROM assm_part_serial aps JOIN assm_serial asn ON aps.assm_serial = asn.serial_number GROUP BY asn.order_id) as apc ON o.eid = apc.order_id WHERE o.eid = $(eid)s"}
                 ]
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::order_clear_part": {
         "data_endpoint": {
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"delete_id":"DELETE FROM assm_part_serial WHERE assm_serial in (SELECT serial_number FROM assm_serial WHERE order_id = :eid)"}
+                    {"delete_id":"DELETE FROM assm_part_serial WHERE assm_serial in (SELECT serial_number FROM assm_serial WHERE order_id = $(eid)s)"}
                 ],
                 "q_params": {"stop_order_type":"ship"}
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::order_clear_sn": {
         "data_endpoint": {
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"exist_part_stop":"SELECT * FROM assm_part_serial WHERE assm_serial in (SELECT serial_number FROM assm_serial WHERE order_id = :eid)"},
-                    {"delete_id":"DELETE FROM assm_serial WHERE order_id = :eid"}
+                    {"exist_part_stop":"SELECT * FROM assm_part_serial WHERE assm_serial in (SELECT serial_number FROM assm_serial WHERE order_id = $(eid)s)"},
+                    {"delete_id":"DELETE FROM assm_serial WHERE order_id = $(eid)s"}
                 ],
                 "q_params": {"stop_order_type":"ship"}
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::order_clone": {
         "title": "Order Create Meta",
@@ -261,11 +261,11 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"caption_data":"SELECT o.title, asm.quantity, asm.order_id FROM orders o LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE o.eid = :eid"}
+                    {"caption_data":"SELECT o.title, asm.quantity, asm.order_id FROM orders o LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE o.eid = $(eid)s"}
                 ]
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::order_line_manual": {
         "title": "Order Lines Create Meta",
@@ -291,10 +291,10 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.quantity, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :eid) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = :eid) v on v.acct_code = i.vendor_code"
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.quantity, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = $(eid)s) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = $(eid)s) v on v.acct_code = i.vendor_code"
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_shipment": {
         "title": "Order Shipment Meta",
@@ -317,13 +317,13 @@
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"ship_id":"INSERT OR IGNORE INTO shipments (title, status, work_id) SELECT title, :status, eid FROM orders WHERE eid = :eid"},
-                    {"return_data":"SELECT * FROM shipments WHERE work_id = :eid"}
+                    {"ship_id":"INSERT INTO shipments (title, status, work_id) SELECT title, %(status)s, eid FROM orders WHERE eid = %(eid)s ON CONFLICT DO NOTHING;"},
+                    {"return_data":"SELECT * FROM shipments WHERE work_id = $(eid)s;"}
                 ],
                 "q_params": {"status":"onorder"}
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_serial": {
         "title": "Order Shipment Meta",
@@ -349,10 +349,10 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM assm_serial WHERE order_id = :eid"
+                "query": "SELECT * FROM assm_serial WHERE order_id = $(eid)s"
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::part_scan": {
         "title": "order Page Meta",
@@ -377,13 +377,13 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"caption_data":"SELECT a.serial_number, o.title, asm.quantity, asm.order_id FROM assm_serial a INNER JOIN orders o on a.order_id = o.eid LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE a.serial_number = :serial_number"},
-                    {"column_data":"SELECT ac.eid, ac.category || ' (' || ac.slot || ')' as title, ac.category FROM assm_serial a INNER JOIN orders o ON a.order_id = o.eid INNER JOIN model m ON o.model_id = m.eid INNER JOIN assm_config ac ON m.assm_id = ac.assm_id WHERE a.serial_number = :serial_number ORDER BY ac.eid ASC"},
-                    {"table_data":"SELECT aps.* FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number INNER JOIN (SELECT order_id FROM assm_serial WHERE serial_number = :serial_number) as o ON a.order_id = o.order_id"}
+                    {"caption_data":"SELECT a.serial_number, o.title, asm.quantity, asm.order_id FROM assm_serial a INNER JOIN orders o on a.order_id = o.eid LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE a.serial_number = %(serial_number)s;"},
+                    {"column_data":"SELECT ac.eid, ac.category || ' (' || ac.slot || ')' as title, ac.category FROM assm_serial a INNER JOIN orders o ON a.order_id = o.eid INNER JOIN model m ON o.model_id = m.eid INNER JOIN assm_config ac ON m.assm_id = ac.assm_id WHERE a.serial_number = %(serial_number)s ORDER BY ac.eid ASC"},
+                    {"table_data":"SELECT aps.* FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number INNER JOIN (SELECT order_id FROM assm_serial WHERE serial_number = %(serial_number)s) as o ON a.order_id = o.order_id"}
                 ]
             }
         },
-        "auth": ["admin", "bom","manager"]
+        "auth": ["metaadmin","admin", "bom","manager"]
     },
     "::part_scan_by_sn": {
         "title": "Order Shipment Meta",
@@ -400,10 +400,10 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM assm_part_serial WHERE assm_serial = :assm_serial"
+                "query": "SELECT * FROM assm_part_serial WHERE assm_serial = %(assm_serial)s;"
             }
         },
-        "auth": ["admin","bom","manager"]
+        "auth": ["metaadmin","admin","bom","manager"]
     },
     "::part_scan_repair": {
         "title": "order Page Meta",
@@ -431,12 +431,12 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"caption_data":"SELECT a.serial_number, o.title, asm.quantity, asm.order_id FROM assm_serial a INNER JOIN orders o on a.order_id = o.eid LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE a.serial_number = :serial_number"},
-                    {"table_data":"SELECT ac.category, apcl.* FROM assm_part_change_log apcl INNER JOIN assm_serial a ON apcl.assm_serial = a.serial_number INNER JOIN assm_config ac ON apcl.assm_conf_id = ac.eid INNER JOIN (SELECT order_id FROM assm_serial WHERE serial_number = :serial_number) as o ON a.order_id = o.order_id"}
+                    {"caption_data":"SELECT a.serial_number, o.title, asm.quantity, asm.order_id FROM assm_serial a INNER JOIN orders o on a.order_id = o.eid LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE a.serial_number = %(serial_number)s;"},
+                    {"table_data":"SELECT ac.category, apcl.* FROM assm_part_change_log apcl INNER JOIN assm_serial a ON apcl.assm_serial = a.serial_number INNER JOIN assm_config ac ON apcl.assm_conf_id = ac.eid INNER JOIN (SELECT order_id FROM assm_serial WHERE serial_number = %(serial_number)s) as o ON a.order_id = o.order_id"}
                 ]
             }
         },
-        "auth": ["admin","test","manager"]
+        "auth": ["metaadmin","admin","test","manager"]
     },
     "::part_scan_repair_by_sn": {
         "title": "Order Shipment Meta",
@@ -453,10 +453,10 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM assm_part_serial WHERE assm_serial = :assm_serial"
+                "query": "SELECT * FROM assm_part_serial WHERE assm_serial = %(assm_serial)s;"
             }
         },
-        "auth": ["admin","test","manager"]
+        "auth": ["metaadmin","admin","test","manager"]
     },
     "::test_station": {
         "title": "order Page Meta",
@@ -481,13 +481,13 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"caption_data":"SELECT a.serial_number, o.title, asm.quantity, asm.order_id FROM assm_serial a INNER JOIN orders o on a.order_id = o.eid LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE a.serial_number = :serial_number"},
-                    {"column_data":"SELECT ac.eid, ac.category || ' (' || ac.slot || ')' as title, ac.category FROM assm_serial a INNER JOIN orders o ON a.order_id = o.eid INNER JOIN model m ON o.model_id = m.eid INNER JOIN assm_config ac ON m.assm_id = ac.assm_id WHERE a.serial_number = :serial_number"},
-                    {"table_data":"SELECT aps.* FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number INNER JOIN (SELECT order_id FROM assm_serial WHERE serial_number = :serial_number) as o ON a.order_id = o.order_id"}
+                    {"caption_data":"SELECT a.serial_number, o.title, asm.quantity, asm.order_id FROM assm_serial a INNER JOIN orders o on a.order_id = o.eid LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE a.serial_number = %(serial_number)s;"},
+                    {"column_data":"SELECT ac.eid, ac.category || ' (' || ac.slot || ')' as title, ac.category FROM assm_serial a INNER JOIN orders o ON a.order_id = o.eid INNER JOIN model m ON o.model_id = m.eid INNER JOIN assm_config ac ON m.assm_id = ac.assm_id WHERE a.serial_number = %(serial_number)s;"},
+                    {"table_data":"SELECT aps.* FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number INNER JOIN (SELECT order_id FROM assm_serial WHERE serial_number = %(serial_number)s) as o ON a.order_id = o.order_id"}
                 ]
             }
         },
-        "auth": ["admin","test","manager"]
+        "auth": ["metaadmin","admin","test","manager"]
     },
     "::test_station_dowload": {
         "title": "Order Shipment Meta",
@@ -507,17 +507,17 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"caption_data":"SELECT o.eid, a.serial_number, o.title, asm.quantity, asm.order_id FROM assm_serial a INNER JOIN orders o on a.order_id = o.eid LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE a.serial_number = :serial_number"}
+                    {"caption_data":"SELECT o.eid, a.serial_number, o.title, asm.quantity, asm.order_id FROM assm_serial a INNER JOIN orders o on a.order_id = o.eid LEFT OUTER JOIN(SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id WHERE a.serial_number = %(serial_number)s;"}
                 ]
             }
         },
-        "auth": ["admin","test","manager"]
+        "auth": ["metaadmin","admin","test","manager"]
     },
     "::serial_scan_config": {
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT DISTINCT ac.eid, ac.category || ' (' || ac.slot || ') ' || ifnull(i.v_name, '') as title, ac.category FROM assm_serial a INNER JOIN orders o ON a.order_id = o.eid INNER JOIN model m ON o.model_id = m.eid INNER JOIN assm_config ac ON m.assm_id = ac.assm_id LEFT OUTER JOIN (SELECT i.v_name, i.category FROM items i INNER JOIN order_lines ol ON ol.item_id = i.eid INNER JOIN assm_serial a ON ol.order_id = a.order_id WHERE a.serial_number = :serial_number) as i on ac.category = i.category WHERE a.serial_number = :serial_number ORDER BY ac.eid ASC"
+                "query": "SELECT DISTINCT ac.eid, ac.category || ' (' || ac.slot || ') ' || ifnull(i.v_name, '') as title, ac.category FROM assm_serial a INNER JOIN orders o ON a.order_id = o.eid INNER JOIN model m ON o.model_id = m.eid INNER JOIN assm_config ac ON m.assm_id = ac.assm_id LEFT OUTER JOIN (SELECT i.v_name, i.category FROM items i INNER JOIN order_lines ol ON ol.item_id = i.eid INNER JOIN assm_serial a ON ol.order_id = a.order_id WHERE a.serial_number = %(serial_number)s) as i on ac.category = i.category WHERE a.serial_number = %(serial_number)s ORDER BY ac.eid ASC"
             }
         },
         "auth": []
@@ -527,9 +527,9 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"duplicated_stop":"SELECT * FROM assm_part_serial aps INNER JOIN assm_config ac ON aps.assm_conf_id = ac.eid WHERE aps.part_sn = :part_sn AND aps.category = :category AND ac.is_unique = 1"},
-                    {"aps_id":"INSERT INTO assm_part_serial (assm_serial, assm_conf_id, part_sn, category, last_update, last_user) VALUES (:assm_serial, :assm_conf_id, :part_sn, :category, :last_update, :last_user) ON CONFLICT (assm_serial, assm_conf_id) DO UPDATE SET part_sn = excluded.part_sn, last_update = excluded.last_update, last_user = excluded.last_user WHERE assm_serial = excluded.assm_serial AND assm_conf_id = excluded.assm_conf_id"},
-                    {"return_data":"SELECT * FROM assm_part_serial WHERE assm_serial = :assm_serial"}
+                    {"duplicated_stop":"SELECT * FROM assm_part_serial aps INNER JOIN assm_config ac ON aps.assm_conf_id = ac.eid WHERE aps.part_sn = %(part_sn)s AND aps.category = %(category)s AND ac.is_unique = 1"},
+                    {"aps_id":"INSERT INTO assm_part_serial (assm_serial, assm_conf_id, part_sn, category, last_update, last_user) VALUES (%(assm_serial)s, %(assm_conf_id)s, %(part_sn)s, %(category)s, %(last_update)s, %(last_user)s) ON CONFLICT (assm_serial, assm_conf_id) DO UPDATE SET part_sn = EXCLUDED.part_sn, last_update = EXCLUDED.last_update, last_user = EXCLUDED.last_user WHERE assm_part_serial.assm_serial = EXCLUDED.assm_serial AND assm_part_serial.assm_conf_id = EXCLUDED.assm_conf_id;"},
+                    {"return_data":"SELECT * FROM assm_part_serial WHERE assm_serial = %(assm_serial)s;"}
                 ]            }
         },
         "auth": []
@@ -539,10 +539,10 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"duplicated_stop":"SELECT * FROM assm_part_serial aps INNER JOIN assm_config ac ON aps.assm_conf_id = ac.eid WHERE aps.part_sn = :part_sn AND aps.category = :category AND ac.is_unique = 1"},
-                    {"aph_id":"INSERT INTO assm_part_change_log (assm_serial, assm_conf_id, swap_in_sn, swap_out_sn, change_reason, last_update, last_user) SELECT assm_serial, assm_conf_id, :part_sn, part_sn, 'testing failed', :last_update, :last_user FROM assm_part_serial WHERE assm_serial = :assm_serial AND assm_conf_id = :assm_conf_id"},
-                    {"aps_id":"UPDATE assm_part_serial SET part_sn = :part_sn, last_update = :last_update, last_user = :last_user WHERE assm_serial = :assm_serial AND assm_conf_id = :assm_conf_id"},
-                    {"return_data":"SELECT * FROM assm_part_serial WHERE assm_serial = :assm_serial"}
+                    {"duplicated_stop":"SELECT * FROM assm_part_serial aps INNER JOIN assm_config ac ON aps.assm_conf_id = ac.eid WHERE aps.part_sn = %(part_sn)s AND aps.category = %(category)s AND ac.is_unique = 1"},
+                    {"aph_id":"INSERT INTO assm_part_change_log (assm_serial, assm_conf_id, swap_in_sn, swap_out_sn, change_reason, last_update, last_user) SELECT assm_serial, assm_conf_id, $(part_sn)s, part_sn, 'testing failed', %(last_update)s, %(last_user)s FROM assm_part_serial WHERE assm_serial = %(assm_serial)s AND assm_conf_id = %(assm_conf_id)s;"},
+                    {"aps_id":"UPDATE assm_part_serial SET part_sn = %(part_sn)s, last_update = %(last_update)s, last_user = %(last_user)s WHERE assm_serial = %(assm_serial)s AND assm_conf_id = %(assm_conf_id)s;"},
+                    {"return_data":"SELECT * FROM assm_part_serial WHERE assm_serial = %(assm_serial)s;"}
                 ]            
             }
         },
@@ -552,7 +552,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT DISTINCT ac.eid, ac.category || ' (' || ac.slot || ') ' || ifnull(i.v_name, '') as title, ac.category FROM assm_serial a INNER JOIN orders o ON a.order_id = o.eid INNER JOIN model m ON o.model_id = m.eid INNER JOIN assm_config ac ON m.assm_id = ac.assm_id LEFT OUTER JOIN (SELECT i.v_name, i.category FROM items i INNER JOIN order_lines ol ON ol.item_id = i.eid INNER JOIN assm_serial a ON ol.order_id = a.order_id WHERE a.serial_number = :serial_number) as i on ac.category = i.category WHERE a.serial_number = :serial_number ORDER BY ac.eid ASC"
+                "query": "SELECT DISTINCT ac.eid, ac.category || ' (' || ac.slot || ') ' || ifnull(i.v_name, '') as title, ac.category FROM assm_serial a INNER JOIN orders o ON a.order_id = o.eid INNER JOIN model m ON o.model_id = m.eid INNER JOIN assm_config ac ON m.assm_id = ac.assm_id LEFT OUTER JOIN (SELECT i.v_name, i.category FROM items i INNER JOIN order_lines ol ON ol.item_id = i.eid INNER JOIN assm_serial a ON ol.order_id = a.order_id WHERE a.serial_number = %(serial_number)s) as i on ac.category = i.category WHERE a.serial_number = %(serial_number)s ORDER BY ac.eid ASC"
             }
         },
         "auth": []
@@ -561,7 +561,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT ac.eid, ac.category || ' (' || ac.slot || ') ' || ifnull(i.v_name, '') as title, ac.category FROM orders o INNER JOIN model m on o.model_id = m.eid INNER JOIN assm_config ac on m.assm_id = ac.assm_id LEFT OUTER JOIN (SELECT i.v_name, i.category FROM order_lines ol INNER JOIN items i on ol.item_id = i.eid WHERE ol.order_id = :order_id) as i on ac.category = i.category WHERE o.eid = :order_id"
+                "query": "SELECT ac.eid, ac.category || ' (' || ac.slot || ') ' || ifnull(i.v_name, '') as title, ac.category FROM orders o INNER JOIN model m on o.model_id = m.eid INNER JOIN assm_config ac on m.assm_id = ac.assm_id LEFT OUTER JOIN (SELECT i.v_name, i.category FROM order_lines ol INNER JOIN items i on ol.item_id = i.eid WHERE ol.order_id = %(order_id)s) as i on ac.category = i.category WHERE o.eid = %(order_id)s;"
             }
         },
         "auth": []
@@ -581,7 +581,7 @@
                 "handler": "_query", "q_type":"update", "q_table":"orders", "q_keyes":["eid"]
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_delete": {
         "data_endpoint": {
@@ -594,7 +594,7 @@
                 "q_params": {"order_type":"work"}
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::order_complete": {
         "data_endpoint": {
@@ -613,7 +613,7 @@
                 "q_params": {"status":"fulfilled", "order_type":"ship", "ship_status":"onorder", "direction":"outbound"}
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_undo_complete": {
         "data_endpoint": {
@@ -634,7 +634,7 @@
                 "q_params": {"status":"onorder", "order_type":"ship", "ship_status":"fulfilled", "direction":"outbound"}
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::order_clone_save": {
         "data_endpoint": {
@@ -649,7 +649,7 @@
                 "q_params": {"order_status":"onorder", "tran_status":"inproduction"}
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::order_line_create": {
         "data_endpoint": {
@@ -663,7 +663,7 @@
                 "q_params": {"direction":"internal", "status":"inproduction"}
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_line_remove": {
         "data_endpoint": {
@@ -676,7 +676,7 @@
                 ]
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_line_quantity": {
         "data_endpoint": {
@@ -690,7 +690,7 @@
                 "q_params": {"direction":"internal", "status":"inproduction"}
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_shipment_update": {
         "data_endpoint": {
@@ -698,7 +698,7 @@
                 "handler": "_query", "q_type":"update", "q_table":"shipments", "q_keyes":["eid"]
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_serial_bulk": {
         "data_endpoint": {
@@ -707,7 +707,7 @@
                 "query": "INSERT INTO assm_serial (order_id, serial_number, last_user, last_update) VALUES (:order_id, :serial_number, :last_user, :last_update)"
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_label": {
         "data_endpoint": {
@@ -724,7 +724,7 @@
                 "handler": "_query", "q_type":"select", "q_table":"accounts", "q_fields":["eid", "acct_name"], "q_keyes":["acct_type", "is_active"], "q_params":{"acct_type":"vendor", "is_active":1}
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_trucker": {
         "data_endpoint": {
@@ -732,7 +732,7 @@
                 "handler": "_query", "q_type":"select", "q_table":"accounts", "q_fields":["eid", "acct_name"], "q_keyes":["acct_type", "is_active"], "q_params":{"acct_type":"truck", "is_active":1}
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_type": {
         "data_endpoint": {
@@ -740,7 +740,7 @@
                 "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"orders", "refer_column":"order_type"}
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_model": {
         "data_endpoint": {
@@ -750,7 +750,7 @@
                 "q_params":{"is_active":1}
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::order_status": {
         "data_endpoint": {
@@ -758,7 +758,7 @@
                 "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"orders", "refer_column":"status"}
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::item_category": {
         "data_endpoint": {
@@ -766,7 +766,7 @@
                 "handler": "_query", "q_type":"select", "q_table":"data_codes", "q_fields":["option_code", "option_abbr"], "q_keyes":["refer_entity", "refer_column"], "q_params":{"refer_entity":"items", "refer_column":"category"}
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::item_by_category": {
         "data_endpoint": {
@@ -775,7 +775,7 @@
                 "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.quantity, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = :order_id) v on v.acct_code = i.vendor_code WHERE i.category = :category"
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::item_search": {
         "data_endpoint": {
@@ -784,7 +784,7 @@
                 "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.quantity, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = :order_id) v on v.acct_code = i.vendor_code WHERE i.v_sku like :search or i.v_name like :search or i.category like :search"
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::assm": {
         "title": "order Page Meta",
@@ -816,7 +816,7 @@
                 "query": "SELECT * FROM assembly ORDER BY eid DESC"
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::assm_view": {
         "title": "order View Meta",
@@ -837,7 +837,7 @@
                 "query": "SELECT * FROM assembly WHERE eid = :eid"
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::assm_config": {
         "title": "order View Meta",
@@ -866,7 +866,7 @@
                 "query": "SELECT ac.*, a.title FROM assm_config ac inner join assembly a ON ac.assm_id = a.eid WHERE a.eid = :eid ORDER BY ac.eid DESC"
             }
         },
-        "auth": ["admin","manager","prsentry"]
+        "auth": ["metaadmin","admin","manager","prsentry"]
     },
     "::assm_create": {
         "title": "Order Create Meta",
@@ -886,7 +886,7 @@
                 "handler": "_query", "q_type":"insert", "q_table":"assembly", "q_keyes":["eid"]
             }
         },
-        "auth": ["admin"]
+        "auth": ["metaadmin","admin"]
     },
     "::assm_search": {
         "data_endpoint": {
@@ -903,7 +903,7 @@
                 "handler": "_query", "q_type":"update", "q_table":"assembly", "q_keyes":["eid"]
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::assm_config_save": {
         "data_endpoint": {
@@ -915,7 +915,7 @@
                 ]
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::assm_config_update": {
         "data_endpoint": {
@@ -923,7 +923,7 @@
                 "handler": "_query", "q_type":"update", "q_table":"assm_config", "q_keyes":["eid"]
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::assm_config_remove": {
         "data_endpoint": {
@@ -936,7 +936,7 @@
                 ]
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::model": {
         "title": "order Page Meta",
@@ -969,7 +969,7 @@
                 "query": "SELECT * FROM model ORDER BY eid DESC"
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::model_view": {
         "title": "order View Meta",
@@ -994,7 +994,7 @@
                 "query": "SELECT * FROM model WHERE eid = :eid"
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::model_create": {
         "title": "Order Create Meta",
@@ -1018,7 +1018,7 @@
                 "handler": "_query", "q_type":"insert", "q_table":"model", "q_keyes":["eid"]
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::model_search": {
         "data_endpoint": {
@@ -1035,7 +1035,7 @@
                 "handler": "_query", "q_type":"update", "q_table":"model", "q_keyes":["eid"]
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::model_assm": {
         "data_endpoint": {
@@ -1045,7 +1045,7 @@
                 "q_params":{"is_active":1}
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     },
     "::model_type": {
         "data_endpoint": {
@@ -1055,6 +1055,6 @@
                 "q_params":{"is_active":1, "refer_entity":"model", "refer_column":"type_code"}
             }
         },
-        "auth": ["admin","manager"]
+        "auth": ["metaadmin","admin","manager"]
     }
 }

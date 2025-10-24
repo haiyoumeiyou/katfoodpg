@@ -17,6 +17,7 @@ def add_endpoint(cls, endpoint):
     def endpointFunc(self):
         # check_pass = cherrypy.request.json['check_pass'] if 'check_pass' in cherrypy.request.json else None
         check_pass = cherrypy.request.ep_data['check_pass'] if 'check_pass' in cherrypy.request.ep_data else None
+        print(check_pass)
         if not check_pass:
             data = ('ia', 'invalid access')
             return json.dumps({'endpoint':str(endpoint['endpoint']), 'data':data})

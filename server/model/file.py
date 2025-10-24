@@ -1,10 +1,12 @@
-from servicehandle.sqlitehandler import DatabaseHandler
+# from servicehandle.sqlitehandler import DatabaseHandler
+from servicehandle.postgresqlhandle import PostgresqlHandle
 from servicehandle.pdfhandler import PdfHandler
 from appdata import Settings
 
-db = DatabaseHandler('local/data.sqlite')
+# db = DatabaseHandler('local/data.sqlite')
 pdf = PdfHandler()
 settings = Settings()
+db = PostgresqlHandle(settings)
 
 class FileModel(object):
     version = 'webapp_0.0a'

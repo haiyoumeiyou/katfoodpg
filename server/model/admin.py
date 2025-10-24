@@ -51,9 +51,10 @@ class AdminModel(object):
     def get_token(self, query, query_params, headers=None):
         q_cmd = "SELECT eid, user_name, hash FROM users WHERE user_name = %(user_name)s"
         q_rst = self.read(q_cmd, query_params)
+        # print(q_rst, q_cmd, query_params)
         if q_rst[0] == 'ok' and len(q_rst[1]) > 0:
-            # print(q_rst)
             verified = self._verify_password(q_rst[1][0]['hash'], query_params['password'])
+            # print(q_rst, q_rst[1][0]['hash'], verified)
             if verified:
                 expiry = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
                 token_ip = headers['Remote-Addr'] if headers['Remote-Addr'] else None
@@ -62,6 +63,7 @@ class AdminModel(object):
                 param = {"user_id":q_rst[1][0]['eid'], "token":str(jwt_token), "token_ip":token_ip}
                 cmd = "INSERT INTO user_token (user_id, token, token_ip) VALUES (%(user_id)s, %(token)s, %(token_ip)s) RETURNING eid"
                 rst = self.insert(cmd, param)
+                # print(rst, param)
                 if rst[0] == 'ok':
                     data = {"jwt":jwt_token}
                     return 'ok', data

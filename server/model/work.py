@@ -1,8 +1,8 @@
-from servicehandle.sqlitehandler import DatabaseHandler
+from servicehandle.postgresqlhandle import PostgresqlHandle
 from appdata import Settings
 
-db = DatabaseHandler('local/data.sqlite')
 settings = Settings()
+db = PostgresqlHandle(settings)
 
 class WorkModel(object):
     version = 'webapp_0.0a'

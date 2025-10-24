@@ -29,7 +29,7 @@ class MetaModel(object):
         return db.read(query)
     
     def getAuthSet(self, token):
-        q_cmd = "SELECT user_id, token_ip, token_time, u.roles, u.default_page FROM user_token ut INNER JOIN users u ON ut.user_id = u.eid WHERE user_id = :user_id AND token = :token"
+        q_cmd = "SELECT user_id, token_ip, token_time, u.roles, u.default_page FROM user_token ut INNER JOIN users u ON ut.user_id = u.eid WHERE user_id = %(user_id)s AND token = %(token)s"
         token_payload = jwt.decode(token, settings.jwt_key, algorithms=['HS256'])
         if "eid" in token_payload:
             param = {"user_id": token_payload["eid"], "token":str(token)}
