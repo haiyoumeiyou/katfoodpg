@@ -27,6 +27,29 @@ class PostgresqlHandle(object):
         cur.close()
         conn.close()
         return db_version
+
+    def _read(self, query, params=None):
+        try:
+            conn = psycopg2.connect(
+                dbname=self.settings.pg_dbname, 
+                user=self.settings.pg_user, 
+                password=self.settings.pg_password, 
+                host=self.settings.pg_host, 
+                port=self.settings.pg_port
+            )
+            conn.autocommit = True
+            with conn.cursor(cursor_factory=RealDictCursor) as c:
+                if params:
+                    c.execute(query, params)
+                else:
+                    c.execute(query)
+                result = c.fetchall()
+                return 'ok', result
+        except psycopg2.Error as e:
+            return 'ko', str(e)  
+        finally:
+            if conn:
+                conn.close()
             
     def read(self, query, params=None):
         try:
@@ -37,6 +60,7 @@ class PostgresqlHandle(object):
                     else:
                         c.execute(query)
                     result = c.fetchall()
+                    print(result, query, params)
                     return 'ok', result
         except psycopg2.Error as e:
             return 'ko', str(e)
@@ -88,10 +112,10 @@ class PostgresqlHandle(object):
                     c_msg = "{} {} data row with {}.".format(
                         query.split()[0], c.rowcount, params
                     )
-                    print(c_msg)
+                    # print(c_msg)
                     return 'ok', c_msg
         except psycopg2.Error as e:
-            print(str(e))
+            # print(str(e))
             return 'ko', str(e)
 
     def _build_where_clause(and_conditions=None, or_conditions=None):
