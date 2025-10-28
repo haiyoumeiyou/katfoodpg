@@ -35,7 +35,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a on o.vendor_id = a.eid WHERE o.order_type = 'recv' ORDER BY o.eid DESC"
+                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a on o.vendor_id = a.eid WHERE o.order_type = 'recv' ORDER BY o.eid DESC;"
             }
         },
         "auth": ["admin","manager","prsentry"]
@@ -59,7 +59,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT eid, title, order_type, model_id, vendor_id, status, remark, strftime('%Y-%m-%d', datetime(create_date, '-08:00')) as create_date FROM orders WHERE eid = :eid"
+                "query": "SELECT eid, title, order_type, model_id, vendor_id, status, remark, TO_CHAR(create_date, 'YYYY-MM-DD') as create_date FROM orders WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin","manager","prsentry"]
@@ -93,7 +93,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :eid ORDER BY ol.eid ASC"
+                "query": "SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(eid)s ORDER BY ol.eid ASC;"
             }
         },
         "auth": ["admin","manager","prsentry"]
@@ -144,7 +144,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :eid) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = :eid) v on v.acct_code = i.vendor_code"
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(eid)s) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = %(eid)s) v on v.acct_code = i.vendor_code;"
             }
         },
         "auth": ["admin","manager","prsentry"]
@@ -153,7 +153,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a ON o.vendor_id = a.eid WHERE (o.eid LIKE :search OR o.title LIKE :search OR o.order_type LIKE :search OR o.status LIKE :search OR o.remark LIKE :search) AND o.order_type = 'recv' ORDER BY o.eid DESC"
+                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a ON o.vendor_id = a.eid WHERE (o.eid LIKE %(search)s OR o.title LIKE %(search)s OR o.order_type LIKE %(search)s OR o.status LIKE %(search)s OR o.remark LIKE %(search)s) AND o.order_type = 'recv' ORDER BY o.eid DESC;"
             }
         },
         "auth": []
@@ -171,8 +171,8 @@
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"exist_orderline_stop":"SELECT * FROM order_lines WHERE order_id = :eid"},
-                    {"deleted_id":"DELETE FROM orders WHERE eid = :eid"}
+                    {"exist_orderline_stop":"SELECT * FROM order_lines WHERE order_id = %(eid)s;"},
+                    {"deleted_id":"DELETE FROM orders WHERE eid = %(eid)s;"}
                 ]
             }
         },
@@ -183,11 +183,11 @@
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"line_id":"UPDATE order_lines SET status = :status, last_user = :last_user, last_update = :last_update WHERE order_id = :eid"},
-                    {"tran_id":"UPDATE transactions SET status = :status, last_user = :last_user, last_update = :last_update WHERE order_id = :eid"},
-                    {"tran_id":"UPDATE orders SET status = :status, last_user = :last_user, last_update = :last_update WHERE eid = :eid"},
-                    {"tran_id":"UPDATE items SET last_user = :last_user, last_update = :last_update, quantity = (SELECT sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) FROM transactions as t WHERE items.eid =  t.item_id) WHERE eid in (SELECT item_id FROM transactions WHERE order_id = :eid)"},
-                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :eid"}
+                    {"line_id":"UPDATE order_lines SET status = %(status)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE order_id = %(eid)s;"},
+                    {"tran_id":"UPDATE transactions SET status = %(status)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE order_id = %(eid)s;"},
+                    {"tran_id":"UPDATE orders SET status = %(status)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = %(eid)s;"},
+                    {"tran_id":"UPDATE items SET last_user = %(last_user)s, last_update = %(last_update)s, quantity = (SELECT sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) FROM transactions as t WHERE items.eid =  t.item_id) WHERE eid in (SELECT item_id FROM transactions WHERE order_id = %(eid)s);"},
+                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(eid)s;"}
                 ],
                 "q_params": {"status":"fulfilled"}
             }
@@ -199,9 +199,9 @@
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"tran_id":"INSERT INTO transactions (order_id, item_id, quantity, direction, status) VALUES (:order_id, :eid, :quantity, :direction, :status) RETURNING eid"},
-                    {"line_id":"INSERT INTO order_lines (order_id, v_sku, item_id, tran_id, quantity, status) select t.order_id, i.v_sku, t.item_id, t.eid, t.quantity, :status from transactions t inner join items i on t.item_id = i.eid where t.eid = :tran_id"},
-                    {"return_data":"SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id"}
+                    {"tran_id":"INSERT INTO transactions (order_id, item_id, quantity, direction, status) VALUES (%(order_id)s, %(eid)s, %(quantity)s, %(direction)s, %(status)s) RETURNING eid;"},
+                    {"line_id":"INSERT INTO order_lines (order_id, v_sku, item_id, tran_id, quantity, status) select t.order_id, i.v_sku, t.item_id, t.eid, t.quantity, %(status)s from transactions t inner join items i on t.item_id = i.eid where t.eid = %(tran_id)s;"},
+                    {"return_data":"SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(order_id)s) ol on i.eid = ol.item_id;"}
                 ],
                 "q_params": {"direction":"inbound", "status":"onorder"}
             }
@@ -213,9 +213,9 @@
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"tran_id":"DELETE FROM order_lines WHERE order_id = :order_id AND tran_id = :tran_id"},
-                    {"line_id":"DELETE FROM transactions WHERE eid = :tran_id"},
-                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :order_id"}
+                    {"tran_id":"DELETE FROM order_lines WHERE order_id = %(order_id)s AND tran_id = %(tran_id)s;"},
+                    {"line_id":"DELETE FROM transactions WHERE eid = %(tran_id)s;"},
+                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(order_id)s;"}
                 ]
             }
         },
@@ -226,9 +226,9 @@
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"line_id":"UPDATE order_lines SET quantity = :quantity, last_user = :last_user, last_update = :last_update WHERE eid = :eid"},
-                    {"tran_id":"UPDATE transactions SET quantity = :quantity, last_user = :last_user, last_update = :last_update WHERE eid = (SELECT tran_id FROM order_lines WHERE eid = :eid)"},
-                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :order_id ORDER BY ol.eid ASC"}
+                    {"line_id":"UPDATE order_lines SET quantity = %(quantity)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = %(eid)s;"},
+                    {"tran_id":"UPDATE transactions SET quantity = %(quantity)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = (SELECT tran_id FROM order_lines WHERE eid = %(eid)s);"},
+                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(order_id)s ORDER BY ol.eid ASC;"}
                 ],
                 "q_params": {"direction":"inbound", "status":"onorder"}
             }
@@ -239,7 +239,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM orders WHERE eid = :eid"
+                "query": "SELECT * FROM orders WHERE eid = %(eid)s;"
             }
         },
         "auth": []
@@ -280,7 +280,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = :order_id) v on v.acct_code = i.vendor_code WHERE i.category = :category"
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(order_id)s) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = %(order_id)s) v on v.acct_code = i.vendor_code WHERE i.category = %(category)s;"
             }
         },
         "auth": ["admin","manager","prsentry"]
@@ -289,7 +289,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = :order_id) v on v.acct_code = i.vendor_code WHERE i.v_sku like :search or i.v_name like :search or i.category like :search"
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(order_id)s) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = %(order_id)s) v on v.acct_code = i.vendor_code WHERE i.v_sku like %(search)s or i.v_name like %(search)s or i.category like %(search)s;"
             }
         },
         "auth": ["admin","manager","prsentry"]
@@ -322,7 +322,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a on o.vendor_id = a.eid WHERE o.order_type = 'recv' AND o.status = 'onorder' ORDER BY o.eid DESC"
+                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a on o.vendor_id = a.eid WHERE o.order_type = 'recv' AND o.status = 'onorder' ORDER BY o.eid DESC;"
             }
         },
         "auth": ["admin","manager","prsentry"]
@@ -331,7 +331,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a ON o.vendor_id = a.eid WHERE (o.eid LIKE :search OR o.title LIKE :search OR o.order_type LIKE :search OR o.status LIKE :search OR o.remark LIKE :search) AND o.order_type = 'recv' ORDER BY o.eid DESC"
+                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a ON o.vendor_id = a.eid WHERE (o.eid LIKE %(search)s OR o.title LIKE %(search)s OR o.order_type LIKE %(search)s OR o.status LIKE %(search)s OR o.remark LIKE %(search)s) AND o.order_type = 'recv' ORDER BY o.eid DESC;"
             }
         },
         "auth": []
@@ -369,8 +369,8 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"order_notfoundstop":"SELECT eid, title, order_type, model_id, vendor_id, status, remark, strftime('%Y-%m-%d', datetime(create_date, '-08:00')) as create_date FROM orders WHERE eid = :eid"},
-                    {"table_data":"SELECT rs.*, o.title FROM recv_serial rs INNER JOIN orders o ON rs.order_id = o.eid WHERE rs.order_id = :eid"}
+                    {"order_notfoundstop":"SELECT eid, title, order_type, model_id, vendor_id, status, remark, TO_CHAR(create_date, 'YYYY-MM-DD') as create_date FROM orders WHERE eid = %(eid)s;"},
+                    {"table_data":"SELECT rs.*, o.title FROM recv_serial rs INNER JOIN orders o ON rs.order_id = o.eid WHERE rs.order_id = %(eid)s;"}
                 ]
             }
         },
@@ -381,10 +381,10 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"duplicate_stop":"SELECT * FROM recv_serial WHERE serial_number = :serial_number"},
-                    {"order_notfoundstop":"SELECT * FROM orders o WHERE o.eid = :eid"},
-                    {"recv_serial_id":"INSERT INTO recv_serial (order_id, serial_number, vendor_id, create_user) SELECT o.eid, :serial_number, o.vendor_id, :last_user FROM orders o WHERE o.eid = :eid"},
-                    {"table_data":"SELECT rs.*, o.title FROM recv_serial rs INNER JOIN orders o ON rs.order_id = o.eid WHERE rs.order_id = :eid"}
+                    {"duplicate_stop":"SELECT * FROM recv_serial WHERE serial_number = %(serial_number)s;"},
+                    {"order_notfoundstop":"SELECT * FROM orders o WHERE o.eid = %(eid)s;"},
+                    {"recv_serial_id":"INSERT INTO recv_serial (order_id, serial_number, vendor_id, create_user) SELECT o.eid, %(serial_number)s, o.vendor_id, %(last_user)s FROM orders o WHERE o.eid = %(eid)s;"},
+                    {"table_data":"SELECT rs.*, o.title FROM recv_serial rs INNER JOIN orders o ON rs.order_id = o.eid WHERE rs.order_id = %(eid)s;"}
                 ]
             }
         },

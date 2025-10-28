@@ -15,7 +15,7 @@ class MetaDataREST(object):
     def routes(self):
         with open('./appdata/routes.json', "r") as f:
             data = json.load(f)
-            return json.dumps({'endpoint':'meta/routes', 'data':data})
+            return json.dumps({'endpoint':'meta/routes', 'data':data}, default=str)
         
     @cherrypy.expose
     @cherrypy.tools.json_in()
@@ -32,7 +32,7 @@ class MetaDataREST(object):
         if default_page:
             data['default_page'] = default_page
         # print(data)
-        return json.dumps({'endpoint':'meta/site_meta', 'data':data})
+        return json.dumps({'endpoint':'meta/site_meta', 'data':data}, default=str)
         
     @cherrypy.expose
     @cherrypy.tools.json_in()
@@ -51,4 +51,4 @@ class MetaDataREST(object):
         if default_page:
             data['default_page'] = default_page
         # print(data)
-        return json.dumps({'endpoint':'meta/route_meta', 'data':data})
+        return json.dumps({'endpoint':'meta/route_meta', 'data':data}, default=str)

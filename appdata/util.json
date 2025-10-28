@@ -3,7 +3,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "serial_upload",
-                "query": "SELECT * FROM shipments WHERE eid = :eid",
+                "query": "SELECT * FROM shipments WHERE eid = %(eid)s;",
                 "file_handle": "palletLabelHalfA4",
                 "content_type": "application/pdf",
                 "file_name": "ship_label.pdf"
@@ -16,7 +16,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "sndfk_upload",
-                "query": "SELECT * FROM shipments WHERE eid = :eid",
+                "query": "SELECT * FROM shipments WHERE eid = %(eid)s;",
                 "file_handle": "palletLabelHalfA4",
                 "content_type": "application/pdf",
                 "file_name": "ship_label.pdf"

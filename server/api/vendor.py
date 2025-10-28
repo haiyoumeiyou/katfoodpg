@@ -60,7 +60,7 @@ def add_endpoint(cls, endpoint):
                 q_params = {**q_params, **data_meta['q_params']}
             data = getattr(db, data_meta['handler'])(data_meta['query'], q_params, req_header)
             # print(data)
-        return json.dumps({'endpoint':str(endpoint['endpoint']), 'data':data})
+        return json.dumps({'endpoint':str(endpoint['endpoint']), 'data':data}, default=str)
     endpointFunc.__name__ = str(endpoint['endpoint'])
     setattr(cls, endpointFunc.__name__, classmethod(endpointFunc))
 

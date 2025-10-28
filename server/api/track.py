@@ -19,7 +19,7 @@ def add_endpoint(cls, endpoint):
         check_pass = cherrypy.request.ep_data['check_pass'] if 'check_pass' in cherrypy.request.ep_data else None
         if not check_pass:
             data = ('ia', 'invalid access')
-            return json.dumps({'endpoint':str(endpoint['endpoint']), 'data':data})
+            return json.dumps({'endpoint':str(endpoint['endpoint']), 'data':data}, default=str)
         
         req_params = cherrypy.request.json or {}
         ep_data = cherrypy.request.ep_data or {}
@@ -53,12 +53,12 @@ def add_endpoint(cls, endpoint):
                 if 'q_params' in data_meta:
                     q_params = {**q_params, **data_meta['q_params']}
                 data = getattr(db, data_meta['handler'])(data_meta['q_type'], data_meta['q_table'], q_params, data_meta['q_keyes'])
-                return json.dumps({'endpoint':str(endpoint['endpoint']), 'data':data})
+                return json.dumps({'endpoint':str(endpoint['endpoint']), 'data':data}, default=str)
             
             if 'q_params' in data_meta:
                 q_params = {**q_params, **data_meta['q_params']}
             data = getattr(db, data_meta['handler'])(data_meta['query'], q_params, req_header)
-        return json.dumps({'endpoint':str(endpoint['endpoint']), 'data':data})
+        return json.dumps({'endpoint':str(endpoint['endpoint']), 'data':data}, default=str)
     endpointFunc.__name__ = str(endpoint['endpoint'])
     setattr(cls, endpointFunc.__name__, classmethod(endpointFunc))
 

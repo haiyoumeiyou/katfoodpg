@@ -23,7 +23,7 @@ def add_json_endpoint(cls, endpoint):
         check_pass = cherrypy.request.ep_data['check_pass'] if 'check_pass' in cherrypy.request.ep_data else None
         if not check_pass:
             data = ('ia', 'invalid access')
-            return json.dumps({'endpoint':str(endpoint['endpoint']), 'data':data})
+            return json.dumps({'endpoint':str(endpoint['endpoint']), 'data':data}, default=str)
         
         req_params = cherrypy.request.json or {}
         ep_data = cherrypy.request.ep_data or {}
@@ -69,7 +69,7 @@ def add_file_endpoint(cls, endpoint):
         check_pass = cherrypy.request.ep_data['check_pass'] if 'check_pass' in cherrypy.request.ep_data else None
         if not check_pass:
             data = ('ia', 'invalid access')
-            return json.dumps({'endpoint':str(endpoint['endpoint']), 'data':data})
+            return json.dumps({'endpoint':str(endpoint['endpoint']), 'data':data}, default=str)
         
         upload_path = data_path
         uploaded_filename, upload_fileext = os.path.splitext(uploaded_file.filename)

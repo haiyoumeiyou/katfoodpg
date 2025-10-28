@@ -99,7 +99,7 @@ class UtilREST:
                 return json.dumps(('ok', data))
             
             data += "<br> File reading error, no data list processed."
-            return json.dumps(('ko', data))
+            return json.dumps(('ko', data), default=str)
         except Exception as e:
             data += "<br>" + str(e)
         
@@ -111,7 +111,7 @@ class UtilREST:
         check_pass = cherrypy.request.ep_data['check_pass'] if 'check_pass' in cherrypy.request.ep_data else None
         if not check_pass:
             data = ('ia', 'invalid access')
-            return json.dumps({'endpoint':"order_serial_upload", 'data':data})
+            return json.dumps({'endpoint':"order_serial_upload", 'data':data}, default=str)
         ep_data = cherrypy.request.ep_data
 
         upload_path = data_path
@@ -156,10 +156,10 @@ class UtilREST:
             h_rst = db.insert(fdir_cmd, fdir_params)
             # h_rst = ""
             if not h_rst[0] == 'ok':
-                return json.dumps(h_rst)
+                return json.dumps(h_rst, default=str)
             data = "Util Rest API Report Upload File: {}, {}, {} for {}, recorded {}. Processing file...".format(uploaded_file.filename, uploaded_file.content_type, size, work_order, h_rst)
             # print(data, upload_fileext)
-        return json.dumps(h_rst)
+        return json.dumps(h_rst, default=str)
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
@@ -167,7 +167,7 @@ class UtilREST:
         check_pass = cherrypy.request.ep_data['check_pass'] if 'check_pass' in cherrypy.request.ep_data else None
         if not check_pass:
             data = ('ia', 'invalid access')
-            return json.dumps({'endpoint':"order_serial_upload", 'data':data})
+            return json.dumps({'endpoint':"order_serial_upload", 'data':data}, default=str)
         ep_data = cherrypy.request.ep_data
 
         q_params = cherrypy.request.json
@@ -216,7 +216,7 @@ class UtilREST:
         check_pass = cherrypy.request.ep_data['check_pass'] if 'check_pass' in cherrypy.request.ep_data else None
         if not check_pass:
             data = ('ia', 'invalid access')
-            return json.dumps({'endpoint':"part_sn_report_dl", 'data':data})
+            return json.dumps({'endpoint':"part_sn_report_dl", 'data':data}, default=str)
         ep_data = cherrypy.request.ep_data
 
         q_params = cherrypy.request.json
@@ -281,7 +281,7 @@ class UtilREST:
         check_pass = cherrypy.request.ep_data['check_pass'] if 'check_pass' in cherrypy.request.ep_data else None
         if not check_pass:
             data = ('ia', 'invalid access')
-            return json.dumps({'endpoint':"part_sn_report_dl", 'data':data})
+            return json.dumps({'endpoint':"part_sn_report_dl", 'data':data}, default=str)
         ep_data = cherrypy.request.ep_data
 
         q_params = cherrypy.request.json
@@ -325,7 +325,7 @@ class UtilREST:
         check_pass = cherrypy.request.ep_data['check_pass'] if 'check_pass' in cherrypy.request.ep_data else None
         if not check_pass:
             data = ('ia', 'invalid access')
-            return json.dumps({'endpoint':"part_sn_report_dl", 'data':data})
+            return json.dumps({'endpoint':"part_sn_report_dl", 'data':data}, default=str)
         ep_data = cherrypy.request.ep_data
 
         q_params = cherrypy.request.json

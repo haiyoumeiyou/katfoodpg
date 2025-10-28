@@ -62,7 +62,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM items WHERE eid = :eid"
+                "query": "SELECT * FROM items WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin","manager"]
@@ -101,7 +101,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "select item_id, CASE WHEN direction in ('inbound') THEN t.quantity END as 'in', CASE direction WHEN 'outbound' THEN t.quantity END as 'out', CASE WHEN direction in ('adjustment') THEN t.quantity END as 'ao',  CASE WHEN direction in ('internal') AND t.status in ('inrma', 'inproduction', 'fulfilled') THEN quantity END as inhouse, t.create_date, t.status, o.title from transactions t inner join orders o on t.order_id = o.eid where item_id = :eid"
+                "query": "select item_id, CASE WHEN direction in ('inbound') THEN t.quantity END as 'in', CASE direction WHEN 'outbound' THEN t.quantity END as 'out', CASE WHEN direction in ('adjustment') THEN t.quantity END as 'ao',  CASE WHEN direction in ('internal') AND t.status in ('inrma', 'inproduction', 'fulfilled') THEN quantity END as inhouse, t.create_date, t.status, o.title from transactions t inner join orders o on t.order_id = o.eid where item_id = %(eid)s;"
             }
         },
         "auth": ["admin","manager","bom"]
@@ -152,12 +152,12 @@
             "data": {
                 "handler": "_query_option",
                 "query":[
-                    {"option_6":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND category = :category and vendor_code = :vendor_code and (eid like :search or v_sku like :search or v_name like :search or v_description like :search)"},
-                    {"option_5":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND vendor_code = :vendor_code and (eid like :search or v_sku like :search or v_name like :search or v_description like :search)"},
-                    {"option_4":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND (eid like :search or v_sku like :search or v_name like :search or v_description like :search)"},
-                    {"option_3":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND vendor_code = :vendor_code and category = :category"},
-                    {"option_2":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND vendor_code = :vendor_code"},
-                    {"option_1":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND category = :category"}
+                    {"option_6":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND category = %(category)s and vendor_code = %(vendor_code)s and (eid like %(search)s or v_sku like %(search)s or v_name like %(search)s or v_description like %(search)s);"},
+                    {"option_5":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND vendor_code = %(vendor_code)s and (eid like %(search)s or v_sku like %(search)s or v_name like %(search)s or v_description like %(search)s);"},
+                    {"option_4":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND (eid like %(search)s or v_sku like %(search)s or v_name like %(search)s or v_description like %(search)s);"},
+                    {"option_3":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND vendor_code = %(vendor_code)s and category = %(category)s;"},
+                    {"option_2":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND vendor_code = %(vendor_code)s;"},
+                    {"option_1":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND category = %(category)s;"}
                 ] 
             }
         },
@@ -168,10 +168,10 @@
             "data": {
                 "handler": "_query_option",
                 "query":[
-                    {"option_4":"SELECT * FROM items WHERE category = :category and vendor_code = :vendor_code and (eid like :search or v_sku like :search or v_name like :search or v_description like :search)"},
-                    {"option_3":"SELECT * FROM items WHERE vendor_code = :vendor_code and (eid like :search or v_sku like :search or v_name like :search or v_description like :search)"},
-                    {"option_2":"SELECT * FROM items WHERE vendor_code = :vendor_code and category = :category"},
-                    {"option_1":"SELECT * FROM items WHERE vendor_code = :vendor_code"}
+                    {"option_4":"SELECT * FROM items WHERE category = %(category)s and vendor_code = %(vendor_code)s and (eid like %(search)s or v_sku like %(search)s or v_name like %(search)s or v_description like %(search)s);"},
+                    {"option_3":"SELECT * FROM items WHERE vendor_code = %(vendor_code)s and (eid like %(search)s or v_sku like %(search)s or v_name like %(search)s or v_description like %(search)s);"},
+                    {"option_2":"SELECT * FROM items WHERE vendor_code = %(vendor_code)s and category = %(category)s;"},
+                    {"option_1":"SELECT * FROM items WHERE vendor_code = %(vendor_code)s;"}
                 ] 
             }
         },
@@ -205,7 +205,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM items WHERE eid like :search or v_sku like :search or v_name like :search or category like :search or equivalent like :search or v_description like :search"
+                "query": "SELECT * FROM items WHERE eid like %(search)s or v_sku like %(search)s or v_name like %(search)s or category like %(search)s or equivalent like %(search)s or v_description like %(search)s;"
             }
         },
         "auth": []
@@ -222,7 +222,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query":"SELECT item_id, sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('internal') AND status in ('inrma', 'inproduction') THEN quantity ELSE 0 END) as inwh, sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) as onhand, sum(CASE WHEN direction in ('internal') AND status in ('inrma') THEN quantity ELSE 0 END) as inrma, sum(CASE WHEN direction in ('internal') AND status in ('inproduction') THEN quantity ELSE 0 END) as inproduction FROM transactions WHERE item_id = :eid"
+                "query":"SELECT item_id, sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('internal') AND status in ('inrma', 'inproduction') THEN quantity ELSE 0 END) as inwh, sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) as onhand, sum(CASE WHEN direction in ('internal') AND status in ('inrma') THEN quantity ELSE 0 END) as inrma, sum(CASE WHEN direction in ('internal') AND status in ('inproduction') THEN quantity ELSE 0 END) as inproduction FROM transactions WHERE item_id = %(eid)s;"
             }
         },
         "auth": ["admin","manager","bom"]
@@ -232,8 +232,8 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"item_id":"UPDATE items SET last_user = :last_user, last_update = :last_update, quantity = (SELECT sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) FROM transactions as t WHERE items.eid =  t.item_id) WHERE eid = :item_id"},
-                    {"return_data":"SELECT item_id, sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('internal') AND status in ('inrma', 'inproduction') THEN quantity ELSE 0 END) as inwh, sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) as onhand, sum(CASE WHEN direction in ('internal') AND status in ('inrma') THEN quantity ELSE 0 END) as inrma, sum(CASE WHEN direction in ('internal') AND status in ('inproduction') THEN quantity ELSE 0 END) as inproduction FROM transactions WHERE item_id = :item_id"}
+                    {"item_id":"UPDATE items SET last_user = %(last_user)s, last_update = %(last_update)s, quantity = (SELECT sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) FROM transactions as t WHERE items.eid =  t.item_id) WHERE eid = %(item_id)s;"},
+                    {"return_data":"SELECT item_id, sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('internal') AND status in ('inrma', 'inproduction') THEN quantity ELSE 0 END) as inwh, sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN quantity ELSE 0 END) as onhand, sum(CASE WHEN direction in ('internal') AND status in ('inrma') THEN quantity ELSE 0 END) as inrma, sum(CASE WHEN direction in ('internal') AND status in ('inproduction') THEN quantity ELSE 0 END) as inproduction FROM transactions WHERE item_id = %(item_id)s;"}
                 ]
             }
         },
@@ -252,8 +252,8 @@
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"exist_order_stop":"SELECT ol.item_id, ol.quantity FROM items i INNER JOIN order_lines ol ON i.eid = ol.item_id WHERE i.eid = :eid"},
-                    {"deleted_id":"DELETE FROM items WHERE eid = :eid"}
+                    {"exist_order_stop":"SELECT ol.item_id, ol.quantity FROM items i INNER JOIN order_lines ol ON i.eid = ol.item_id WHERE i.eid = %(eid)s;"},
+                    {"deleted_id":"DELETE FROM items WHERE eid = %(eid)s;"}
                 ]
             }
         },
@@ -364,7 +364,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM data_codes WHERE (eid like :search or option_code like :search or option_abbr like :search or option_description like :search) and refer_entity = 'items' and refer_column = 'category'"
+                "query": "SELECT * FROM data_codes WHERE (eid like %(search)s or option_code like %(search)s or option_abbr like %(search)s or option_description like %(search)s) and refer_entity = 'items' and refer_column = 'category';"
             }
         },
         "auth": []
@@ -431,7 +431,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM orders WHERE eid = :eid"
+                "query": "SELECT * FROM orders WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -463,7 +463,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :eid ORDER BY ol.eid ASC"
+                "query": "SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(eid)s ORDER BY ol.eid ASC;"
             }
         },
         "auth": ["admin"]
@@ -514,7 +514,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.quantity, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :eid) ol on i.eid = ol.item_id"
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.quantity, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(eid)s) ol on i.eid = ol.item_id;"
             }
         },
         "auth": ["admin"]
@@ -523,7 +523,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM orders WHERE (eid like :search or title like :search or order_type like :search or status like :search or remark like :search) AND order_type = 'adjt'"
+                "query": "SELECT * FROM orders WHERE (eid like %(search)s or title like %(search)s or order_type like %(search)s or status like %(search)s or remark like %(search)s) AND order_type = 'adjt';"
             }
         },
         "auth": []
@@ -541,11 +541,11 @@
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"line_id":"UPDATE order_lines SET status = :status, last_user = :last_user, last_update = :last_update WHERE order_id = :eid"},
-                    {"tran_id":"UPDATE transactions SET status = :status, last_user = :last_user, last_update = :last_update WHERE order_id = :eid"},
-                    {"tran_id":"UPDATE orders SET status = :status, last_user = :last_user, last_update = :last_update WHERE eid = :eid"},
-                    {"tran_id":"UPDATE items SET last_user = :last_user, last_update = :last_update, quantity = (SELECT sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) FROM transactions as t WHERE items.eid =  t.item_id) WHERE eid in (SELECT item_id FROM transactions WHERE order_id = :eid)"},
-                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :eid"}
+                    {"line_id":"UPDATE order_lines SET status = %(status)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE order_id = %(eid)s;"},
+                    {"tran_id":"UPDATE transactions SET status = %(status)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE order_id = %(eid)s;"},
+                    {"tran_id":"UPDATE orders SET status = %(status)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = %(eid)s;"},
+                    {"tran_id":"UPDATE items SET last_user = %(last_user)s, last_update = %(last_update)s, quantity = (SELECT sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) FROM transactions as t WHERE items.eid =  t.item_id) WHERE eid in (SELECT item_id FROM transactions WHERE order_id = %(eid)s);"},
+                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(eid)s;"}
                 ],
                 "q_params": {"status":"fulfilled"}
             }
@@ -557,9 +557,9 @@
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"tran_id":"INSERT INTO transactions (order_id, item_id, quantity, direction, status) VALUES (:order_id, :eid, :quantity, :direction, :status) RETURNING eid"},
-                    {"line_id":"INSERT INTO order_lines (order_id, v_sku, item_id, tran_id, quantity, status) select t.order_id, i.v_sku, t.item_id, t.eid, t.quantity, :status from transactions t inner join items i on t.item_id = i.eid where t.eid = :tran_id"},
-                    {"return_data":"SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id"}
+                    {"tran_id":"INSERT INTO transactions (order_id, item_id, quantity, direction, status) VALUES (%(order_id)s, %(eid)s, %(quantity)s, %(direction)s, %(status)s) RETURNING eid;"},
+                    {"line_id":"INSERT INTO order_lines (order_id, v_sku, item_id, tran_id, quantity, status) select t.order_id, i.v_sku, t.item_id, t.eid, t.quantity, %(status)s from transactions t inner join items i on t.item_id = i.eid where t.eid = %(tran_id)s;"},
+                    {"return_data":"SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(order_id)s) ol on i.eid = ol.item_id;"}
                 ],
                 "q_params": {"direction":"adjustment", "status":"onorder"}
             }
@@ -571,9 +571,9 @@
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"tran_id":"DELETE FROM order_lines WHERE order_id = :order_id AND tran_id = :tran_id"},
-                    {"line_id":"DELETE FROM transactions WHERE eid = :tran_id"},
-                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :order_id"}
+                    {"tran_id":"DELETE FROM order_lines WHERE order_id = %(order_id)s AND tran_id = %(tran_id)s;"},
+                    {"line_id":"DELETE FROM transactions WHERE eid = %(tran_id)s;"},
+                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(order_id)s;"}
                 ]
             }
         },
@@ -584,9 +584,9 @@
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"line_id":"UPDATE order_lines SET quantity = :quantity, last_user = :last_user, last_update = :last_update WHERE eid = :eid"},
-                    {"tran_id":"UPDATE transactions SET quantity = :quantity, last_user = :last_user, last_update = :last_update WHERE eid = (SELECT tran_id FROM order_lines WHERE eid = :eid)"},
-                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = :order_id ORDER BY ol.eid ASC"}
+                    {"line_id":"UPDATE order_lines SET quantity = %(quantity)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = %(eid)s;"},
+                    {"tran_id":"UPDATE transactions SET quantity = %(quantity)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = (SELECT tran_id FROM order_lines WHERE eid = %(eid)s);"},
+                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(order_id)s ORDER BY ol.eid ASC;"}
                 ],
                 "q_params": {"direction":"adjustment", "status":"onorder"}
             }
@@ -597,7 +597,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM orders WHERE eid = :eid"
+                "query": "SELECT * FROM orders WHERE eid = %(eid)s;"
             }
         },
         "auth": []
@@ -638,7 +638,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id WHERE i.category = :category"
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(order_id)s) ol on i.eid = ol.item_id WHERE i.category = %(category);"
             }
         },
         "auth": ["admin"]
@@ -647,7 +647,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = :order_id) ol on i.eid = ol.item_id WHERE i.v_sku like :search or i.v_name like :search or i.category like :search"
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(order_id)s) ol on i.eid = ol.item_id WHERE i.v_sku like %(search)s or i.v_name like %(search)s or i.category like %(search)s;"
             }
         },
         "auth": ["admin"]

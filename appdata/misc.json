@@ -31,7 +31,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT *, strftime('%Y-%m-%d', datetime(create_date, '-08:00')) as CreationDate FROM misc_orders ORDER BY eid DESC"
+                "query": "SELECT *, TO_CHAR(create_date, 'YYYY-MM-DD') as CreationDate FROM misc_orders ORDER BY eid DESC;"
             }
         },
         "auth": ["admin","manager"]
@@ -53,7 +53,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT eid, title, status, remark, strftime('%Y-%m-%d', datetime(create_date, '-08:00')) as create_date FROM misc_orders WHERE eid = :eid"
+                "query": "SELECT eid, title, status, remark, TO_CHAR(create_date, 'YYYY-MM-DD') as create_date FROM misc_orders WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin","manager"]
@@ -82,7 +82,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT *, datetime(create_date, '-08:00')) as CreationDate FROM misc_orders WHERE (eid like :search or title like :search or status like :search or remark like :search)"
+                "query": "SELECT *, TO_CHAR(create_date, 'YYYY-MM-DD') as CreationDate FROM misc_orders WHERE (eid like %(search)s or title like %(search)s or status like %(search)s or remark like %(search)s);"
             }
         },
         "auth": []
@@ -100,7 +100,7 @@
             "data": {
                 "handler": "_query_queue", 
                 "query":[
-                    {"order_id":"UPDATE misc_orders SET status = :status, last_user = :last_user, last_update = :last_update WHERE eid = :eid"}
+                    {"order_id":"UPDATE misc_orders SET status = %(status)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = %(eid)s;"}
                 ],
                 "q_params": {"status":"fulfilled"}
             }
@@ -111,7 +111,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM misc_orders WHERE eid = :eid"
+                "query": "SELECT * FROM misc_orders WHERE eid = %(eid)s;"
             }
         },
         "auth": []
@@ -150,7 +150,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate FROM misc_orders o WHERE o.status = 'onorder' ORDER BY o.eid DESC"
+                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate FROM misc_orders o WHERE o.status = 'onorder' ORDER BY o.eid DESC;"
             }
         },
         "auth": ["admin","manager","prsentry"]
@@ -159,7 +159,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate FROM misc_orders o WHERE (o.eid LIKE :search OR o.title LIKE :search OR o.status LIKE :search OR o.remark LIKE :search) ORDER BY o.eid DESC"
+                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate FROM misc_orders o WHERE (o.eid LIKE %(search)s OR o.title LIKE %(search)s OR o.status LIKE %(search)s OR o.remark LIKE %(search)s) ORDER BY o.eid DESC;"
             }
         },
         "auth": []
@@ -197,8 +197,8 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"order_notfoundstop":"SELECT eid, title, status, remark, strftime('%Y-%m-%d', datetime(create_date, '-08:00')) as create_date FROM misc_orders WHERE eid = :eid"},
-                    {"table_data":"SELECT rs.*, o.title FROM misc_serial rs INNER JOIN misc_orders o ON rs.order_id = o.eid WHERE rs.order_id = :eid"}
+                    {"order_notfoundstop":"SELECT eid, title, status, remark, TO_CHAR(create_date, 'YYYY-MM-DD') as create_date FROM misc_orders WHERE eid = %(eid)s;"},
+                    {"table_data":"SELECT rs.*, o.title FROM misc_serial rs INNER JOIN misc_orders o ON rs.order_id = o.eid WHERE rs.order_id = %(eid)s;"}
                 ]
             }
         },
@@ -209,10 +209,10 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"duplicate_stop":"SELECT * FROM misc_serial WHERE serial_number = :serial_number and order_id = :eid"},
-                    {"order_notfoundstop":"SELECT * FROM misc_orders o WHERE o.eid = :eid"},
-                    {"recv_serial_id":"INSERT INTO misc_serial (order_id, serial_number, create_user) SELECT o.eid, :serial_number, :last_user FROM orders o WHERE o.eid = :eid"},
-                    {"table_data":"SELECT rs.*, o.title FROM misc_serial rs INNER JOIN misc_orders o ON rs.order_id = o.eid WHERE rs.order_id = :eid"}
+                    {"duplicate_stop":"SELECT * FROM misc_serial WHERE serial_number = %(serial_number)s and order_id = %(eid)s;"},
+                    {"order_notfoundstop":"SELECT * FROM misc_orders o WHERE o.eid = %(eid)s;"},
+                    {"recv_serial_id":"INSERT INTO misc_serial (order_id, serial_number, create_user) SELECT o.eid, %(serial_number)s, %(last_user)s FROM orders o WHERE o.eid = %(eid)s;"},
+                    {"table_data":"SELECT rs.*, o.title FROM misc_serial rs INNER JOIN misc_orders o ON rs.order_id = o.eid WHERE rs.order_id = %(eid)s;"}
                 ]
             }
         },

@@ -61,7 +61,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"table_data":"SELECT * FROM wf_action WHERE (eid like :search or title like :search or remark like :search) ORDER BY eid DESC"}
+                    {"table_data":"SELECT * FROM wf_action WHERE (eid like %(search)s or title like %(search)s or remark like %(search)s) ORDER BY eid DESC"}
                 ]
             }
         },
@@ -109,7 +109,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM wf_action WHERE eid = :eid"
+                "query": "SELECT * FROM wf_action WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -170,7 +170,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"table_data":"SELECT * FROM wf_set WHERE (eid like :search or title like :search or remark like :search) ORDER BY eid DESC"}
+                    {"table_data":"SELECT * FROM wf_set WHERE (eid like %(search)s or title like %(search)s or remark like %(search)s) ORDER BY eid DESC;"}
                 ]
             }
         },
@@ -214,7 +214,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM wf_set WHERE eid = :eid"
+                "query": "SELECT * FROM wf_set WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -278,7 +278,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"table_data":"SELECT * FROM wf_set_step WHERE (eid like :search or title like :search or remark like :search) ORDER BY eid DESC"}
+                    {"table_data":"SELECT * FROM wf_set_step WHERE (eid like %(search)s or title like %(search)s or remark like %(search)s) ORDER BY eid DESC;"}
                 ]
             }
         },
@@ -328,7 +328,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM wf_set_step WHERE eid = :eid"
+                "query": "SELECT * FROM wf_set_step WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -406,7 +406,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"table_data":"SELECT wl.*, ws.title as default_set_title FROM wf_line wl LEFT JOIN wf_set ws ON wl.default_set = ws.eid WHERE (wl.eid like :search or wl.title like :search or wl.remark like :search) ORDER BY wl.eid DESC"}
+                    {"table_data":"SELECT wl.*, ws.title as default_set_title FROM wf_line wl LEFT JOIN wf_set ws ON wl.default_set = ws.eid WHERE (wl.eid like %(search)s or wl.title like %(search)s or wl.remark like %(search)s) ORDER BY wl.eid DESC"}
                 ]
             }
         },
@@ -452,7 +452,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM wf_line WHERE eid = :eid"
+                "query": "SELECT * FROM wf_line WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -523,7 +523,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"table_data":"SELECT wlo.*, wl.title as line_title, ws.title as set_title, o.title as order_title FROM wf_line_order wlo INNER JOIN wf_line wl ON wlo.line_id = wl.eid INNER JOIN wf_set ws ON wlo.set_id = ws.eid INNER JOIN orders o ON wlo.order_id = o.eid WHERE (wlo.eid like :search or wlo.title like :search or wlo.remark like :search) ORDER BY wlo.eid DESC"}
+                    {"table_data":"SELECT wlo.*, wl.title as line_title, ws.title as set_title, o.title as order_title FROM wf_line_order wlo INNER JOIN wf_line wl ON wlo.line_id = wl.eid INNER JOIN wf_set ws ON wlo.set_id = ws.eid INNER JOIN orders o ON wlo.order_id = o.eid WHERE (wlo.eid like %(search)s or wlo.title like %(search)s or wlo.remark like %(search)s) ORDER BY wlo.eid DESC"}
                 ]
             }
         },
@@ -571,7 +571,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM wf_line_order WHERE eid = :eid"
+                "query": "SELECT * FROM wf_line_order WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -649,7 +649,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"list_data":"SELECT wl.eid || '-' || ws.eid || '-' || wss.eid as eid, wl.eid as line_id, wl.title as line_title, ws.eid as set_id, wss.eid as set_step_id, wss.title as set_step_title, wss.step_sq as step_sq, wls.device_reg FROM wf_line wl INNER JOIN wf_set ws ON wl.default_set = ws.eid AND ws.is_active = 1 INNER JOIN wf_set_step wss ON wss.set_id = ws.eid AND wss.is_active = 1 LEFT JOIN (SELECT line_id || '-' || set_id || '-' || set_step_id as station_id, * FROM wf_line_station) as wls ON wls.line_id = wl.eid AND wls.set_id = ws.eid and wls.set_step_id = wss.eid WHERE wl.is_active = 1 ORDER BY line_id, set_id, step_sq"}
+                    {"list_data":"SELECT wl.eid || '-' || ws.eid || '-' || wss.eid as eid, wl.eid as line_id, wl.title as line_title, ws.eid as set_id, wss.eid as set_step_id, wss.title as set_step_title, wss.step_sq as step_sq, wls.device_reg FROM wf_line wl INNER JOIN wf_set ws ON wl.default_set = ws.eid AND ws.is_active = true INNER JOIN wf_set_step wss ON wss.set_id = ws.eid AND wss.is_active = true LEFT JOIN (SELECT line_id || '-' || set_id || '-' || set_step_id as station_id, * FROM wf_line_station) as wls ON wls.line_id = wl.eid AND wls.set_id = ws.eid and wls.set_step_id = wss.eid WHERE wl.is_active = true ORDER BY line_id, set_id, step_sq"}
                 ]
             }
         },
@@ -678,9 +678,9 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"old_register_inact":"UPDATE wf_line_station SET is_active = FALSE WHERE EXISTS (SELECT * FROM wf_line_station subq WHERE subq.device_footprint = :device_footprint)"},
-                    {"station_id":"INSERT INTO wf_line_station (line_id, set_id, set_step_id, step_sq, device_footprint, device_reg, is_active) VALUES (:line_id, :set_id, :set_step_id, :step_sq, :device_footprint, :line_id || '-' || :set_id || '-' || :set_step_id || '-' || :step_sq || '-' || :device_footprint, TRUE) ON CONFLICT (line_id, set_id, set_step_id) DO UPDATE SET step_sq=excluded.step_sq, device_footprint=excluded.device_footprint, device_reg=excluded.device_reg, is_active=excluded.is_active WHERE line_id=excluded.line_id AND set_id=excluded.set_id AND set_step_id=excluded.set_step_id"},
-                    {"return_data":"SELECT * FROM wf_line_station WHERE line_id = :line_id AND set_id = :set_id AND set_step_id = :set_step_id"}
+                    {"old_register_inact":"UPDATE wf_line_station SET is_active = FALSE WHERE EXISTS (SELECT * FROM wf_line_station subq WHERE subq.device_footprint = %(device_footprint)s);"},
+                    {"station_id":"INSERT INTO wf_line_station (line_id, set_id, set_step_id, step_sq, device_footprint, device_reg, is_active) VALUES (%(line_id)s, %(set_id)s, %(set_step_id)s, %(step_sq)s, %(device_footprint)s, %(line_id)s || '-' || %(set_id)s || '-' || %(set_step_id)s || '-' || %(step_sq)s || '-' || %(device_footprint)s, TRUE) ON CONFLICT (line_id, set_id, set_step_id) DO UPDATE SET step_sq=excluded.step_sq, device_footprint=excluded.device_footprint, device_reg=excluded.device_reg, is_active=excluded.is_active WHERE line_id=excluded.line_id AND set_id=excluded.set_id AND set_step_id=excluded.set_step_id"},
+                    {"return_data":"SELECT * FROM wf_line_station WHERE line_id = %(line_id)s AND set_id = %(set_id)s AND set_step_id = %(set_step_id)s;"}
                 ]
             }
         },
@@ -706,7 +706,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"dispatch_data":"SELECT wac.* FROM wf_line_station wls JOIN wf_set_step wss ON wls.set_step_id = wss.eid JOIN wf_action wac ON wss.action_id = wac.eid WHERE wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"}
+                    {"dispatch_data":"SELECT wac.* FROM wf_line_station wls JOIN wf_set_step wss ON wls.set_step_id = wss.eid JOIN wf_action wac ON wss.action_id = wac.eid WHERE wls.device_reg = %(device_reg)s AND wls.device_footprint = %(device_footprint)s;"}
                 ]
             }
         },
@@ -740,7 +740,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg AND wls.is_active = 1"}
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = %(device_footprint)s AND wls.device_reg = %(device_reg)s AND wls.is_active = true;"}
                 ]
             }
         },
@@ -751,13 +751,13 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg"},
-                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = :serial_number AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
-                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = :serial_number"},
-                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
-                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
-                    {"line_track_id":"INSERT INTO wf_line_track (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
-                    {"list_data":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number ORDER BY wlt.step_sq DESC"}
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = %(device_footprint)s AND wls.device_reg = %(device_reg)s;"},
+                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = %(serial_number)s AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = %(device_reg)s);"},
+                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = %(serial_number)s;"},
+                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = %(serial_number)s AND wls.device_reg = %(device_reg)s AND wls.device_footprint = %(device_footprint)s;"},
+                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = %(serial_number)s AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_station wls WHERE wls.device_reg = %(device_reg)s);"},
+                    {"line_track_id":"INSERT INTO wf_line_track (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, asl.serial_number, %(last_user)s FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = %(serial_number)s AND wls.device_reg = %(device_reg)s AND wls.device_footprint = %(device_footprint)s;"},
+                    {"list_data":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = %(serial_number)s ORDER BY wlt.step_sq DESC"}
                 ]
             }
         },
@@ -795,7 +795,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg AND wls.is_active = 1"}
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = %(device_footprint)s AND wls.device_reg = %(device_reg)s AND wls.is_active = true;"}
                 ]
             }
         },
@@ -806,11 +806,11 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg"},
-                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = :serial_number AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
-                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = :serial_number"},
-                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
-                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"}
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = %(device_footprint)s AND wls.device_reg = %(device_reg)s;"},
+                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = %(serial_number)s AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = %(device_reg)s);"},
+                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = %(serial_number)s;"},
+                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = %(serial_number)s AND wls.device_reg = %(device_reg)s AND wls.device_footprint = %(device_footprint)s;"},
+                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = %(serial_number)s AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_station wls WHERE wls.device_reg = %(device_reg)s);"}
                 ]
             }
         },
@@ -821,14 +821,14 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg"},
-                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = :serial_number AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
-                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = :serial_number"},
-                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
-                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
-                    {"line_track_id":"INSERT INTO wf_line_track (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
-                    {"accs_unit_id":"INSERT INTO wf_accs_unit (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, accs_code, kb_code, mouse_code, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, :accs_code, :kb_code, :mouse_code, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
-                    {"list_data":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number ORDER BY wlt.step_sq DESC"}
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = %(device_footprint)s AND wls.device_reg = %(device_reg)s;"},
+                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = %(serial_number)s AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = %(device_reg)s);"},
+                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = %(serial_number)s;"},
+                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = %(serial_number)s AND wls.device_reg = %(device_reg)s AND wls.device_footprint = %(device_footprint)s;"},
+                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = %(serial_number)s AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_station wls WHERE wls.device_reg = %(device_reg)s);"},
+                    {"line_track_id":"INSERT INTO wf_line_track (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, asl.serial_number, %(last_user)s FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = %(serial_number)s AND wls.device_reg = %(device_reg)s AND wls.device_footprint = %(device_footprint)s;"},
+                    {"accs_unit_id":"INSERT INTO wf_accs_unit (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, accs_code, kb_code, mouse_code, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, %(accs_code)s, %(kb_code)s, %(mouse_code)s, asl.serial_number, %(last_user)s FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = %(serial_number)s AND wls.device_reg = %(device_reg)s AND wls.device_footprint = %(device_footprint)s;"},
+                    {"list_data":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = %(serial_number)s ORDER BY wlt.step_sq DESC"}
                 ]
             }
         },
@@ -883,7 +883,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg AND wls.is_active = 1"}
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = %(device_footprint)s AND wls.device_reg = %(device_reg)s AND wls.is_active = true;"}
                 ]
             }
         },
@@ -894,14 +894,14 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg"},
-                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = :serial_number AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
-                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = :serial_number"},
-                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
-                    {"line_track_id":"INSERT INTO wf_line_track (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
-                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_track wlt WHERE wlt.eid = :line_track_id)"},
-                    {"accs_unit_id":"INSERT INTO wf_accs_unit (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, kb_code, mouse_code, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, :kb_code, :mouse_code, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
-                    {"list_data":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number ORDER BY wlt.step_sq DESC"}
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = %(device_footprint)s AND wls.device_reg = %(device_reg)s;"},
+                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = %(serial_number)s AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = %(device_reg)s);"},
+                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = %(serial_number)s;"},
+                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = %(serial_number)s AND wls.device_reg = %(device_reg)s AND wls.device_footprint = %(device_footprint)s;"},
+                    {"line_track_id":"INSERT INTO wf_line_track (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, asl.serial_number, %(last_user)s FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = %(serial_number)s AND wls.device_reg = %(device_reg)s AND wls.device_footprint = %(device_footprint)s;"},
+                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = %(serial_number)s AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_track wlt WHERE wlt.eid = %(line_track_id)s);"},
+                    {"accs_unit_id":"INSERT INTO wf_accs_unit (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, kb_code, mouse_code, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, %(kb_code)s, %(mouse_code)s, asl.serial_number, %(last_user)s FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = %(serial_number)s AND wls.device_reg = %(device_reg)s AND wls.device_footprint = %(device_footprint)s;"},
+                    {"list_data":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = %(serial_number)s ORDER BY wlt.step_sq DESC"}
                 ]
             }
         },
@@ -950,8 +950,8 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg AND wls.is_active = 1"},
-                    {"table_data":"SELECT DISTINCT wpu.container_code, wpu.line_id, wl.title as line_title, wpu.order_id, o.title as order_title, wpc.quantity FROM wf_pack_unit wpu INNER JOIN wf_line wl ON wpu.line_id = wl.eid INNER JOIN orders o ON wpu.order_id = o.eid INNER JOIN (SELECT wpu.container_code, wpu.line_order_id, wpu.line_station_id, count(wpu.container_code) as quantity FROM wf_pack_unit wpu GROUP BY wpu.container_code, wpu.line_order_id, wpu.line_station_id) wpc ON wpu.container_code = wpc.container_code WHERE wpu.device_footprint = :device_footprint AND o.status = 'onorder'"}
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = %(device_footprint)s AND wls.device_reg = %(device_reg)s AND wls.is_active = true;"},
+                    {"table_data":"SELECT DISTINCT wpu.container_code, wpu.line_id, wl.title as line_title, wpu.order_id, o.title as order_title, wpc.quantity FROM wf_pack_unit wpu INNER JOIN wf_line wl ON wpu.line_id = wl.eid INNER JOIN orders o ON wpu.order_id = o.eid INNER JOIN (SELECT wpu.container_code, wpu.line_order_id, wpu.line_station_id, count(wpu.container_code) as quantity FROM wf_pack_unit wpu GROUP BY wpu.container_code, wpu.line_order_id, wpu.line_station_id) wpc ON wpu.container_code = wpc.container_code WHERE wpu.device_footprint = %(device_footprint)s AND o.status = 'onorder'"}
                 ]
             }
         },
@@ -999,8 +999,8 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg AND wls.is_active = 1"},
-                    {"table_data":"SELECT * FROM wf_pack_unit wpu WHERE wpu.container_code = :container_code"}
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = %(device_footprint)s AND wls.device_reg = %(device_reg)s AND wls.is_active = true;"},
+                    {"table_data":"SELECT * FROM wf_pack_unit wpu WHERE wpu.container_code = %(container_code)s;"}
                 ]
             }
         },
@@ -1011,14 +1011,14 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg"},
-                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = :serial_number AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = :device_reg)"},
-                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = :serial_number"},
-                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
-                    {"line_track_id":"INSERT INTO wf_line_track (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
-                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = :serial_number AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_track wlt WHERE wlt.eid = :line_track_id)"},
-                    {"pack_unit_id":"INSERT INTO wf_pack_unit (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, container_code, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, :container_code, asl.serial_number, :last_user FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = :serial_number AND wls.device_reg = :device_reg AND wls.device_footprint = :device_footprint"},
-                    {"table_data":"SELECT * FROM wf_pack_unit wpu WHERE wpu.container_code = :container_code"}
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = %(device_footprint)s AND wls.device_reg = %(device_reg)s;"},
+                    {"duplicate_stop":"SELECT * FROM wf_line_track WHERE unit_serial = %(serial_number)s AND step_sq = (SELECT wls.step_sq FROM wf_line_station wls WHERE wls.device_reg = %(device_reg)s);"},
+                    {"sn_notfoundstop":"SELECT * FROM assm_serial WHERE serial_number = %(serial_number)s;"},
+                    {"line_order_notfoundstop":"SELECT wlo.* FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = %(serial_number)s AND wls.device_reg = %(device_reg)s AND wls.device_footprint = %(device_footprint)s;"},
+                    {"line_track_id":"INSERT INTO wf_line_track (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, asl.serial_number, %(last_user)s FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = %(serial_number)s AND wls.device_reg = %(device_reg)s AND wls.device_footprint = %(device_footprint)s;"},
+                    {"prev_step_notfoundstop":"SELECT * FROM wf_line_track wlt WHERE wlt.unit_serial = %(serial_number)s AND wlt.step_sq = (SELECT CASE step_sq WHEN 1 THEN 1 ELSE step_sq-1 END as last_step FROM wf_line_track wlt WHERE wlt.eid = %(line_track_id)s);"},
+                    {"pack_unit_id":"INSERT INTO wf_pack_unit (line_station_id, line_id, set_id, set_step_id, step_sq, device_footprint, line_order_id, order_id, container_code, unit_serial, create_user) SELECT wls.eid, wls.line_id, wls.set_id, wls.set_step_id, wls.step_sq, wls.device_footprint, wlo.eid, wlo.order_id, %(container_code)s, asl.serial_number, %(last_user)s FROM wf_line_order wlo JOIN assm_serial asl ON wlo.order_id = asl.order_id JOIN wf_line_station wls ON wlo.line_id = wls.line_id WHERE asl.serial_number = %(serial_number)s AND wls.device_reg = %(device_reg)s AND wls.device_footprint = %(device_footprint)s;"},
+                    {"table_data":"SELECT * FROM wf_pack_unit wpu WHERE wpu.container_code = %(container_code)s;"}
                 ]
             }
         },
@@ -1058,9 +1058,9 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = :device_footprint AND wls.device_reg = :device_reg AND wls.is_active = 1"},
-                    {"title_data":"SELECT wl.title as line_title, wlo.order_id, o.title as order_title, wls.step_sq, wss.title as step_title, osum.order_count FROM wf_line_order wlo JOIN orders o ON wlo.order_id = o.eid AND o.order_type = 'work' AND o.status = 'onorder' JOIN wf_line wl ON wlo.line_id = wl.eid JOIN wf_line_station wls ON wls.line_id = wl.eid AND wls.device_footprint = :device_footprint JOIN wf_set_step wss ON wss.set_id = wls.set_id AND wss.step_sq = wls.step_sq JOIN (SELECT asl.order_id, count(asl.serial_number) as order_count FROM assm_serial asl GROUP by asl.order_id) AS osum ON wlo.order_id = osum.order_id GROUP BY wlo.line_id, wlo.order_id, wls.step_sq"},
-                    {"table_data":"SELECT wls.line_id, wls.set_id, wls.step_sq, wls.eid, wl.title as line_title, wss.title as step_title, ams.title as order_title, wlc.unit_count, nwlc.next_unit_count, wlc.unit_count - ifnull(nwlc.next_unit_count, 0) as in_station, ams.order_count from wf_line_station wls JOIN wf_line wl ON wl.eid = wls.line_id AND wls.step_sq != 99 JOIN wf_set_step wss ON wss.eid = wls.set_step_id JOIN (SELECT wls.line_id, wls.set_id FROM wf_line_station wls WHERE wls.device_reg = :device_reg) as dwls ON wls.line_id = dwls.line_id AND wls.set_id = dwls.set_id LEFT JOIN (SELECT wlt.line_id, wlt.set_id, wlt.step_sq, wlt.order_id, count(wlt.unit_serial) as unit_count FROM wf_line_track wlt JOIN wf_line_order wlo ON wlt.order_id = wlo.order_id AND wlo.status = 'onorder' GROUP BY wlt.line_id, wlt.set_id, wlt.step_sq, wlt.order_id) AS wlc ON wls.line_id = wlc.line_id AND wls.set_id = wlc.set_id AND wls.step_sq = wlc.step_sq LEFT JOIN (SELECT ams.order_id, o.title, count(ams.serial_number) as order_count FROM assm_serial ams JOIN orders o ON o.eid = ams.order_id GROUP BY ams.order_id, o.title) as ams ON ams.order_id = wlc.order_id LEFT JOIN (SELECT wlt.line_id, wlt.set_id, (wlt.step_sq - 1) as step_sq, wlt.order_id, count(wlt.unit_serial) as next_unit_count FROM wf_line_track wlt JOIN wf_line_order wlo ON wlt.order_id = wlo.order_id AND wlo.status = 'onorder' GROUP BY wlt.line_id, wlt.set_id, wlt.step_sq, wlt.order_id) AS nwlc ON wls.line_id = nwlc.line_id AND wls.set_id = nwlc.set_id AND wls.step_sq = nwlc.step_sq"}
+                    {"registrion_notfoundstop":"SELECT wls.*, wl.title as line_title, wss.title as step_title, wl.title || '- step ' || wss.step_sq as station_title FROM wf_line_station wls INNER JOIN wf_line wl ON wls.line_id = wl.eid INNER JOIN wf_set_step wss ON wls.set_step_id = wss.eid WHERE wls.device_footprint = %(device_footprint)s AND wls.device_reg = %(device_reg)s AND wls.is_active = true;"},
+                    {"title_data":"SELECT wl.title as line_title, wlo.order_id, o.title as order_title, wls.step_sq, wss.title as step_title, osum.order_count FROM wf_line_order wlo JOIN orders o ON wlo.order_id = o.eid AND o.order_type = 'work' AND o.status = 'onorder' JOIN wf_line wl ON wlo.line_id = wl.eid JOIN wf_line_station wls ON wls.line_id = wl.eid AND wls.device_footprint = %(device_footprint)s JOIN wf_set_step wss ON wss.set_id = wls.set_id AND wss.step_sq = wls.step_sq JOIN (SELECT asl.order_id, count(asl.serial_number) as order_count FROM assm_serial asl GROUP by asl.order_id) AS osum ON wlo.order_id = osum.order_id GROUP BY wlo.line_id, wlo.order_id, wls.step_sq;"},
+                    {"table_data":"SELECT wls.line_id, wls.set_id, wls.step_sq, wls.eid, wl.title as line_title, wss.title as step_title, ams.title as order_title, wlc.unit_count, nwlc.next_unit_count, wlc.unit_count - ifnull(nwlc.next_unit_count, 0) as in_station, ams.order_count from wf_line_station wls JOIN wf_line wl ON wl.eid = wls.line_id AND wls.step_sq != 99 JOIN wf_set_step wss ON wss.eid = wls.set_step_id JOIN (SELECT wls.line_id, wls.set_id FROM wf_line_station wls WHERE wls.device_reg = %(device_reg)s) as dwls ON wls.line_id = dwls.line_id AND wls.set_id = dwls.set_id LEFT JOIN (SELECT wlt.line_id, wlt.set_id, wlt.step_sq, wlt.order_id, count(wlt.unit_serial) as unit_count FROM wf_line_track wlt JOIN wf_line_order wlo ON wlt.order_id = wlo.order_id AND wlo.status = 'onorder' GROUP BY wlt.line_id, wlt.set_id, wlt.step_sq, wlt.order_id) AS wlc ON wls.line_id = wlc.line_id AND wls.set_id = wlc.set_id AND wls.step_sq = wlc.step_sq LEFT JOIN (SELECT ams.order_id, o.title, count(ams.serial_number) as order_count FROM assm_serial ams JOIN orders o ON o.eid = ams.order_id GROUP BY ams.order_id, o.title) as ams ON ams.order_id = wlc.order_id LEFT JOIN (SELECT wlt.line_id, wlt.set_id, (wlt.step_sq - 1) as step_sq, wlt.order_id, count(wlt.unit_serial) as next_unit_count FROM wf_line_track wlt JOIN wf_line_order wlo ON wlt.order_id = wlo.order_id AND wlo.status = 'onorder' GROUP BY wlt.line_id, wlt.set_id, wlt.step_sq, wlt.order_id) AS nwlc ON wls.line_id = nwlc.line_id AND wls.set_id = nwlc.set_id AND wls.step_sq = nwlc.step_sq;"}
                 ]
             }
         },
@@ -1116,7 +1116,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"card_data":"SELECT wlt.line_id, wl.title as line_title, wlt.order_id, o.title as order_title, wlt.step_sq, count(wlt.unit_serial) as scan_count, osum.order_count FROM wf_line_track wlt JOIN orders o ON wlt.order_id = o.eid AND o.order_type = 'work' AND o.status = 'onorder' JOIN wf_line wl ON wlt.line_id = wl.eid JOIN (SELECT asl.order_id, count(asl.serial_number) as order_count FROM assm_serial asl GROUP by asl.order_id) AS osum ON wlt.order_id = osum.order_id GROUP BY wlt.line_id, wlt.order_id, wlt.step_sq"}
+                    {"card_data":"SELECT wlt.line_id, wl.title as line_title, wlt.order_id, o.title as order_title, wlt.step_sq, count(wlt.unit_serial) as scan_count, osum.order_count FROM wf_line_track wlt JOIN orders o ON wlt.order_id = o.eid AND o.order_type = 'work' AND o.status = 'onorder' JOIN wf_line wl ON wlt.line_id = wl.eid JOIN (SELECT asl.order_id, count(asl.serial_number) as order_count FROM assm_serial asl GROUP by asl.order_id) AS osum ON wlt.order_id = osum.order_id GROUP BY wlt.line_id, wlt.order_id, wlt.step_sq;"}
                 ]
             }
         },

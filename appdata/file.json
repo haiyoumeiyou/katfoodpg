@@ -3,7 +3,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "generate_pdf",
-                "query": "SELECT * FROM shipments WHERE eid = :eid",
+                "query": "SELECT * FROM shipments WHERE eid = %(eid)s;",
                 "file_handle": "palletLabelHalfA4",
                 "content_type": "application/pdf",
                 "file_name": "ship_label.pdf"
@@ -16,7 +16,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "generate_pdf",
-                "query": "SELECT asl.*, o.title FROM assm_serial asl JOIN orders o ON asl.order_id = o.eid WHERE asl.order_id = :eid",
+                "query": "SELECT asl.*, o.title FROM assm_serial asl JOIN orders o ON asl.order_id = o.eid WHERE asl.order_id = %(eid)s;",
                 "file_handle": "serialListA4",
                 "content_type": "application/pdf",
                 "file_name": "print_serial.pdf"
@@ -29,7 +29,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "generate_pdf",
-                "query": "SELECT asl.*, o.title FROM assm_serial asl JOIN orders o ON asl.order_id = o.eid WHERE asl.order_id = :eid",
+                "query": "SELECT asl.*, o.title FROM assm_serial asl JOIN orders o ON asl.order_id = o.eid WHERE asl.order_id = %(eid)s;",
                 "file_handle": "serialListUline8599",
                 "content_type": "application/pdf",
                 "file_name": "print_serial.pdf"
@@ -42,7 +42,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "generate_pdf",
-                "query": "SELECT * FROM wf_pack_unit wpu WHERE wpu.container_code = :container_code",
+                "query": "SELECT * FROM wf_pack_unit wpu WHERE wpu.container_code = %(container_code)s;",
                 "file_handle": "palletShipLabelA4",
                 "content_type": "application/pdf",
                 "file_name": "pallet_ship_label.pdf"
@@ -55,7 +55,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "generate_pdf",
-                "query": "SELECT o.title as order_title, i.category, i.v_sku, i.v_name, i.v_description, ol.quantity, s.pallet_count, a.acct_name as vendor_title, t.acct_name as trucker_title FROM order_lines ol INNER JOIN orders o ON ol.order_id = o.eid INNER JOIN items i ON ol.item_id = i.eid INNER JOIN accounts a ON o.vendor_id = a.eid LEFT OUTER JOIN shipments s ON o.link_order = s.work_id LEFT OUTER JOIN accounts t ON s.trucker_id = t.eid AND t.acct_type = 'truck' WHERE ol.order_id = :eid",
+                "query": "SELECT o.title as order_title, i.category, i.v_sku, i.v_name, i.v_description, ol.quantity, s.pallet_count, a.acct_name as vendor_title, t.acct_name as trucker_title FROM order_lines ol INNER JOIN orders o ON ol.order_id = o.eid INNER JOIN items i ON ol.item_id = i.eid INNER JOIN accounts a ON o.vendor_id = a.eid LEFT OUTER JOIN shipments s ON o.link_order = s.work_id LEFT OUTER JOIN accounts t ON s.trucker_id = t.eid AND t.acct_type = 'truck' WHERE ol.order_id = %(eid)s;",
                 "file_handle": "packingListA4",
                 "content_type": "application/pdf",
                 "file_name": "ship_packing_list.pdf"
@@ -68,7 +68,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "generate_pdf",
-                "query": "SELECT o.title as order_title, i.category, i.v_sku, i.v_name, ol.quantity, s.pallet_count, a.acct_name as vendor_title, t.acct_name as trucker_title FROM order_lines ol INNER JOIN orders o ON ol.order_id = o.eid INNER JOIN items i ON ol.item_id = i.eid INNER JOIN accounts a ON o.vendor_id = a.eid LEFT OUTER JOIN shipments s ON o.link_order = s.work_id LEFT OUTER JOIN accounts t ON s.trucker_id = t.eid AND t.acct_type = 'truck' WHERE ol.order_id = :eid",
+                "query": "SELECT o.title as order_title, i.category, i.v_sku, i.v_name, ol.quantity, s.pallet_count, a.acct_name as vendor_title, t.acct_name as trucker_title FROM order_lines ol INNER JOIN orders o ON ol.order_id = o.eid INNER JOIN items i ON ol.item_id = i.eid INNER JOIN accounts a ON o.vendor_id = a.eid LEFT OUTER JOIN shipments s ON o.link_order = s.work_id LEFT OUTER JOIN accounts t ON s.trucker_id = t.eid AND t.acct_type = 'truck' WHERE ol.order_id = %(eid)s;",
                 "file_handle": "accessoryBarcodeA4",
                 "content_type": "application/pdf",
                 "file_name": "print_accs_label.pdf"
@@ -81,7 +81,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "serial_upload",
-                "query": "SELECT * FROM shipments WHERE eid = :eid",
+                "query": "SELECT * FROM shipments WHERE eid = %(eid)s;",
                 "file_handle": "palletLabelHalfA4",
                 "content_type": "application/pdf",
                 "file_name": "ship_label.pdf"
@@ -94,7 +94,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "sndfk_upload",
-                "query": "SELECT * FROM shipments WHERE eid = :eid",
+                "query": "SELECT * FROM shipments WHERE eid = %(eid)s;",
                 "file_handle": "palletLabelHalfA4",
                 "content_type": "application/pdf",
                 "file_name": "ship_label.pdf"

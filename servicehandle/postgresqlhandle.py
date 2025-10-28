@@ -8,7 +8,7 @@ class PostgresqlHandle(object):
 
     def _create_conn(self):
         return psycopg2.connect(
-            dbname=self.settings.pg_dbname, 
+            dbname=self.settings.pg_dbname_test, 
             user=self.settings.pg_user, 
             password=self.settings.pg_password, 
             host=self.settings.pg_host, 
@@ -31,7 +31,7 @@ class PostgresqlHandle(object):
     def _read(self, query, params=None):
         try:
             conn = psycopg2.connect(
-                dbname=self.settings.pg_dbname, 
+                dbname=self.settings.pg_dbname_test, 
                 user=self.settings.pg_user, 
                 password=self.settings.pg_password, 
                 host=self.settings.pg_host, 
@@ -60,7 +60,7 @@ class PostgresqlHandle(object):
                     else:
                         c.execute(query)
                     result = c.fetchall()
-                    print(result, query, params)
+                    # print(result, query, params)
                     return 'ok', result
         except psycopg2.Error as e:
             return 'ko', str(e)
@@ -116,6 +116,73 @@ class PostgresqlHandle(object):
                     return 'ok', c_msg
         except psycopg2.Error as e:
             # print(str(e))
+            return 'ko', str(e)
+
+    def _query_queue(self, queries, q_params):
+        if not isinstance(queries, list):
+            return 'ko', "Input must be a list."
+
+        try:
+            with self._create_conn() as conn:
+                conn.autocommit = False  # Explicit transaction control
+                with conn.cursor(cursor_factory=RealDictCursor) as c:
+                    c_msgs = []
+                    c_rsts = {}
+                    exec_step = 0
+
+                    for query in queries:
+                        exec_step += 1
+                        for k, q in query.items():
+                            c.execute(q, q_params)
+
+                            if k == 'return_data':
+                                all_rows = c.fetchall()
+                                if not all_rows:
+                                    conn.rollback()
+                                    return 'ko', 'No result found'
+                                return 'ok', all_rows
+
+                            if k.endswith('_stop'):
+                                exist_rows = c.fetchall()
+                                if exist_rows:
+                                    conn.rollback()
+                                    return 'ko', f'stop error: {k}'
+
+                            if k.endswith('_notfoundstop'):
+                                exist_rows = c.fetchall()
+                                if not exist_rows:
+                                    conn.rollback()
+                                    return 'ko', f'stop error: {k}'
+                                c_rsts[k] = exist_rows
+
+                            if k.endswith('_data'):
+                                all_rows = c.fetchall()
+                                c_rsts[k] = all_rows
+
+                            if k.endswith('_option'):
+                                if 'options' not in c_rsts:
+                                    c_rsts['options'] = {}
+                                all_rows = c.fetchall()
+                                c_rsts['options'][k] = all_rows
+
+                            # Fetch one row and all rows for dynamic param updates
+                            return_row = c.fetchone()
+                            all_row = c.fetchall()
+
+                            if return_row:
+                                q_params[k] = list(return_row.values())[0]
+
+                            if k.endswith('_count') and all_row:
+                                q_params[k] = len(all_row)
+
+                            c_msg = f"worked {c.rowcount} data row(s) in step {exec_step}"
+                            c_msgs.append(c_msg)
+
+                    conn.commit()
+                    return ('ok', c_rsts) if c_rsts else ('ok', '; '.join(c_msgs))
+
+        except psycopg2.Error as e:
+            conn.rollback()
             return 'ko', str(e)
 
     def _build_where_clause(and_conditions=None, or_conditions=None):
