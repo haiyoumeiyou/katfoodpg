@@ -63,7 +63,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM rw_orders WHERE eid = :eid"
+                "query": "SELECT * FROM rw_orders WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -92,7 +92,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT rc.*, ro.order_type, ruc.quantity FROM rw_containers rc INNER JOIN rw_orders ro ON rc.rw_order_id = ro.eid LEFT OUTER JOIN (SELECT rus.rw_container_id, count(*) as quantity FROM rw_unit_serials rus GROUP BY rus.rw_container_id) as ruc ON rc.eid = ruc.rw_container_id WHERE rc.rw_order_id = :eid ORDER BY eid DESC"
+                "query": "SELECT rc.*, ro.order_type, ruc.quantity FROM rw_containers rc INNER JOIN rw_orders ro ON rc.rw_order_id = ro.eid LEFT OUTER JOIN (SELECT rus.rw_container_id, count(*) as quantity FROM rw_unit_serials rus GROUP BY rus.rw_container_id) as ruc ON rc.eid = ruc.rw_container_id WHERE rc.rw_order_id = %(eid)s ORDER BY eid DESC;"
             }
         },
         "auth": ["admin"]
@@ -159,11 +159,11 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"rw_container_id":"INSERT INTO rw_containers (title, rw_order_id, container_sq) SELECT ro.title || '-' || (MAX(IFNULL(rc.container_sq, 0))+1) as c_title, ro.eid, (MAX(IFNULL(rc.container_sq, 0))+1) as seq FROM rw_orders ro LEFT OUTER JOIN rw_containers rc WHERE ro.eid = :eid"},
-                    {"validate_data":"SELECT rst.sn_startswith, rst.sn_contains, rst.sn_length FROM rw_sn_type rst INNER JOIN rw_orders ro ON rst.eid = ro.rw_sn_type_id WHERE ro.eid = :eid"},
-                    {"title_data":"SELECT ro.eid as rw_order_id, ro.title, rm.title as model, rc.eid as rw_container_id, rc.title as container, rc.container_sq as seq FROM rw_orders ro INNER JOIN rw_containers rc ON ro.eid = rc.rw_order_id LEFT JOIN rw_model rm ON ro.rw_model_id = rm.eid WHERE rc.eid = :rw_container_id"},
-                    {"table_data":"SELECT * FROM rw_unit_serials rus WHERE rus.rw_container_id = :rw_container_id"},
-                    {"summ_data":"SELECT count(*) as quantity FROM rw_unit_serials rus WHERE rus.rw_container_id = :rw_container_id"}
+                    {"rw_container_id":"INSERT INTO rw_containers (title, rw_order_id, container_sq) SELECT ro.title || '-' || (MAX(COALESCE(rc.container_sq, 0))+1) as c_title, ro.eid, (MAX(COALESCE(rc.container_sq, 0))+1) as seq FROM rw_orders ro LEFT OUTER JOIN rw_containers rc WHERE ro.eid = %(eid)s;"},
+                    {"validate_data":"SELECT rst.sn_startswith, rst.sn_contains, rst.sn_length FROM rw_sn_type rst INNER JOIN rw_orders ro ON rst.eid = ro.rw_sn_type_id WHERE ro.eid = %(eid)s;"},
+                    {"title_data":"SELECT ro.eid as rw_order_id, ro.title, rm.title as model, rc.eid as rw_container_id, rc.title as container, rc.container_sq as seq FROM rw_orders ro INNER JOIN rw_containers rc ON ro.eid = rc.rw_order_id LEFT JOIN rw_model rm ON ro.rw_model_id = rm.eid WHERE rc.eid = %(rw_container_id)s;"},
+                    {"table_data":"SELECT * FROM rw_unit_serials rus WHERE rus.rw_container_id = %(rw_container_id)s;"},
+                    {"summ_data":"SELECT count(*) as quantity FROM rw_unit_serials rus WHERE rus.rw_container_id = %(rw_container_id)s;"}
                 ]
             }
         },
@@ -193,7 +193,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT rc.*, ro.order_type, ruc.quantity FROM rw_containers rc INNER JOIN rw_orders ro ON rc.rw_order_id = ro.eid LEFT OUTER JOIN (SELECT rus.rw_container_id, count(*) as quantity FROM rw_unit_serials rus GROUP BY rus.rw_container_id) as ruc ON rc.eid = ruc.rw_container_id WHERE rc.rw_order_id = :eid ORDER BY eid DESC"
+                "query": "SELECT rc.*, ro.order_type, ruc.quantity FROM rw_containers rc INNER JOIN rw_orders ro ON rc.rw_order_id = ro.eid LEFT OUTER JOIN (SELECT rus.rw_container_id, count(*) as quantity FROM rw_unit_serials rus GROUP BY rus.rw_container_id) as ruc ON rc.eid = ruc.rw_container_id WHERE rc.rw_order_id = %(eid)s ORDER BY eid DESC;"
             }
         },
         "auth": ["admin"]
@@ -210,7 +210,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM rw_orders WHERE eid = :eid"
+                "query": "SELECT * FROM rw_orders WHERE eid = %(eid)s;"
             }
         },
         "auth": []
@@ -218,7 +218,7 @@
     "::order_vendor": {
         "data_endpoint": {
             "data": {
-                "handler": "_query", "q_type":"select", "q_table":"accounts", "q_fields":["eid", "acct_name"], "q_keyes":["acct_type", "is_active"], "q_params":{"acct_type":"rework", "is_active":1}
+                "handler": "_query", "q_type":"select", "q_table":"accounts", "q_fields":["eid", "acct_name"], "q_keyes":["acct_type", "is_active"], "q_params":{"acct_type":"rework", "is_active":true}
             }
         },
         "auth": ["admin"]
@@ -226,7 +226,7 @@
     "::order_model": {
         "data_endpoint": {
             "data": {
-                "handler": "_query", "q_type":"select", "q_table":"rw_model", "q_fields":["eid", "title"], "q_keyes":["is_active"], "q_params":{"is_active":1}
+                "handler": "_query", "q_type":"select", "q_table":"rw_model", "q_fields":["eid", "title"], "q_keyes":["is_active"], "q_params":{"is_active":true}
             }
         },
         "auth": ["admin"]
@@ -234,7 +234,7 @@
     "::order_sn_type": {
         "data_endpoint": {
             "data": {
-                "handler": "_query", "q_type":"select", "q_table":"rw_sn_type", "q_fields":["eid", "title"], "q_keyes":["is_active"], "q_params":{"is_active":1}
+                "handler": "_query", "q_type":"select", "q_table":"rw_sn_type", "q_fields":["eid", "title"], "q_keyes":["is_active"], "q_params":{"is_active":true}
             }
         },
         "auth": ["admin"]
@@ -260,11 +260,11 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"rw_unit_serial_id":"INSERT INTO rw_unit_serials (rw_unit_sn, rw_order_id, rw_container_id) VALUES (:rw_unit_sn, :rw_order_id, :rw_container_id)"},
-                    {"validate_data":"SELECT rst.sn_startswith, rst.sn_contains, rst.sn_length FROM rw_sn_type rst INNER JOIN rw_orders ro ON rst.eid = ro.rw_sn_type_id WHERE ro.eid = :rw_order_id"},
-                    {"title_data":"SELECT ro.title, rm.title as model, rc.title as container, rc.container_sq as seq FROM rw_orders ro INNER JOIN rw_containers rc ON ro.eid = rc.rw_order_id LEFT JOIN rw_model rm ON ro.rw_model_id = rm.eid WHERE rc.eid = :rw_container_id"},
-                    {"table_data":"SELECT * FROM rw_unit_serials rus WHERE rus.rw_container_id = :rw_container_id"},
-                    {"summ_data":"SELECT count(*) as quantity FROM rw_unit_serials rus WHERE rus.rw_container_id = :rw_container_id"}
+                    {"rw_unit_serial_id":"INSERT INTO rw_unit_serials (rw_unit_sn, rw_order_id, rw_container_id) VALUES (%(rw_unit_sn)s, %(rw_order_id)s, %(rw_container_id)s);"},
+                    {"validate_data":"SELECT rst.sn_startswith, rst.sn_contains, rst.sn_length FROM rw_sn_type rst INNER JOIN rw_orders ro ON rst.eid = ro.rw_sn_type_id WHERE ro.eid = %(rw_order_id)s;"},
+                    {"title_data":"SELECT ro.title, rm.title as model, rc.title as container, rc.container_sq as seq FROM rw_orders ro INNER JOIN rw_containers rc ON ro.eid = rc.rw_order_id LEFT JOIN rw_model rm ON ro.rw_model_id = rm.eid WHERE rc.eid = %(rw_container_id)s;"},
+                    {"table_data":"SELECT * FROM rw_unit_serials rus WHERE rus.rw_container_id = %(rw_container_id)s;"},
+                    {"summ_data":"SELECT count(*) as quantity FROM rw_unit_serials rus WHERE rus.rw_container_id = %(rw_container_id)s;"}
                 ]
             }
         },
@@ -360,7 +360,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM rw_sn_type WHERE eid = :eid"
+                "query": "SELECT * FROM rw_sn_type WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -460,7 +460,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM rw_model WHERE eid = :eid"
+                "query": "SELECT * FROM rw_model WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]

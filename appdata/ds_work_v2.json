@@ -166,7 +166,7 @@
     },
     "sql_templates": {
         "order_base_query": {
-            "sql": "SELECT o.*, DATE(o.create_date, '-8 hours') AS creation_date, m.title AS model_name, a.quantity AS order_quantity, ps.scan_count, s.status AS ship_status FROM orders o LEFT JOIN model m USING (model_id) LEFT JOIN (SELECT order_id, COUNT(*) AS quantity FROM assm_serial GROUP BY order_id) a USING (order_id) LEFT JOIN (SELECT order_id, COUNT(DISTINCT assm_serial) AS scan_count FROM assm_part_serial GROUP BY order_id) ps USING (order_id) LEFT JOIN shipping_status s USING (order_id) WHERE o.order_type = :order_type",
+            "sql": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') AS creation_date, m.title AS model_name, a.quantity AS order_quantity, ps.scan_count, s.status AS ship_status FROM orders o LEFT JOIN model m USING (model_id) LEFT JOIN (SELECT order_id, COUNT(*) AS quantity FROM assm_serial GROUP BY order_id) a USING (order_id) LEFT JOIN (SELECT order_id, COUNT(DISTINCT assm_serial) AS scan_count FROM assm_part_serial GROUP BY order_id) ps USING (order_id) LEFT JOIN shipping_status s USING (order_id) WHERE o.order_type = %(order_type)s;",
             "parameters": ["order_type"]
         }
     },

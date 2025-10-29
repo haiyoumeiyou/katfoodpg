@@ -67,7 +67,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT eid, user_name, first_name, last_name, title, default_page, report_to, roles FROM users WHERE eid = :eid"
+                "query": "SELECT eid, user_name, first_name, last_name, title, default_page, report_to, roles FROM users WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -93,7 +93,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "insert",
-                "query": "INSERT INTO users (user_name, first_name, last_name, title, default_page, report_to, roles) VALUES (:user_name, :first_name, :last_name, :title, :default_page, :report_to, :roles) RETURNING eid"
+                "query": "INSERT INTO users (user_name, first_name, last_name, title, default_page, report_to, roles) VALUES (%(user_name)s, %(first_name)s, %(last_name)s, %(title)s, %(default_page)s, %(report_to)s, %(roles)s) RETURNING eid;"
             }
         },
         "auth": ["admin"]
@@ -102,7 +102,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT eid, user_name, first_name, last_name, title, default_page, report_to, vendor_of FROM users WHERE eid like :search or user_name like :search or first_name like :search or last_name like :search"
+                "query": "SELECT eid, user_name, first_name, last_name, title, default_page, report_to, vendor_of FROM users WHERE eid like %(search)s or user_name like %(search)s or first_name like %(search)s or last_name like %(search)s;"
             }
         },
         "auth": []
@@ -111,7 +111,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "modify",
-                "query": "UPDATE users SET user_name = :user_name, first_name = :first_name, last_name = :last_name, title = :title, default_page = :default_page, report_to = :report_to, vendor_of = :vendor_of, roles = :roles, last_user = :last_user, last_update = :last_update WHERE eid = :eid"
+                "query": "UPDATE users SET user_name = %(user_name)s, first_name = %(first_name)s, last_name = %(last_name)s, title = %(title)s, default_page = %(default_page)s, report_to = %(report_to)s, vendor_of = %(vendor_of)s, roles = %(roles)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -150,7 +150,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT eid, user_name, first_name, last_name, title, report_to FROM users WHERE eid = :eid"
+                "query": "SELECT eid, user_name, first_name, last_name, title, report_to FROM users WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -159,7 +159,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "set_password",
-                "query": "UPDATE users SET hash = :hash, last_user = :last_user, last_update = :last_update WHERE eid = :eid"
+                "query": "UPDATE users SET hash = %(hash)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -181,7 +181,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "login",
-                "query": "SELECT eid, user_name, hash FROM users WHERE user_name = :user_name"
+                "query": "SELECT eid, user_name, hash FROM users WHERE user_name = %(user_name)s;"
             }
         }
     },
@@ -197,7 +197,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "modify",
-                "query": "DELETE FROM user_token WHERE token = :token"
+                "query": "DELETE FROM user_token WHERE token = %(token)s;"
             }
         }
     },
@@ -251,7 +251,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM roles WHERE eid = :eid"
+                "query": "SELECT * FROM roles WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -272,7 +272,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "insert",
-                "query": "INSERT INTO roles (role_name, description, is_active) VALUES (:role_name, :description, :is_active) RETURNING eid"
+                "query": "INSERT INTO roles (role_name, description, is_active) VALUES (%(role_name)s, %(description)s, %(is_active)s) RETURNING eid;"
             }
         },
         "auth": ["admin"]
@@ -281,7 +281,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM roles WHERE eid like :search or role_name like :search or description like :search"
+                "query": "SELECT * FROM roles WHERE eid like %(search)s or role_name like %(search)s or description like %(search)s;"
             }
         },
         "auth": []
@@ -350,7 +350,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM data_codes WHERE eid = :eid"
+                "query": "SELECT * FROM data_codes WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -382,7 +382,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM data_codes WHERE eid like :search or refer_entity like :search or refer_column like :search or option_abbr like :search or option_description like :search"
+                "query": "SELECT * FROM data_codes WHERE eid like %(search)s or refer_entity like %(search)s or refer_column like %(search)s or option_abbr like %(search)s or option_description like %(search)s;"
             }
         },
         "auth": []
@@ -449,7 +449,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM accounts WHERE eid = :eid"
+                "query": "SELECT * FROM accounts WHERE eid = %(eid)s;"
             }
         },
         "auth": ["admin"]
@@ -480,7 +480,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM accounts WHERE eid like :search or acct_code like :search or acct_name like :search or comment like :search or acct_type like :search"
+                "query": "SELECT * FROM accounts WHERE eid like %(search)s or acct_code like %(search)s or acct_name like %(search)s or comment like %(search)s or acct_type like %(search)s;"
             }
         },
         "auth": []

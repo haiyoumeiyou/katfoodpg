@@ -261,7 +261,7 @@ class PostgresqlHandle(object):
                     else:
                         c_rst = c.execute(query, params)
                 conn.commit()
-                c_msg = "{} {} data row with {}.".format(str(query).split(' ')[0], str(c_rst.rowcount), params)
+                c_msg = "{} {} data row with {}.".format(str(query).split(' ')[0], str(c.rowcount), params)
                 return 'ok', c_msg
             except psycopg2.Error as e:
                 return 'ko', str(e)
@@ -364,7 +364,7 @@ class PostgresqlHandle(object):
             return self.execute_command(q_cmd, q_params)
         if q_type == 'select':
             q_cmd = self.prepare_select_statement(q_table, changing_fields, lookup_fields)
-            # print(q_cmd, q_keyes, lookup_fields)
+            print(q_cmd, q_keyes, lookup_fields)
             return self.execute_query(q_cmd, q_params)
         if q_type == 'delete':
             q_cmd = self.prepare_delete_statement(q_table, lookup_fields)
