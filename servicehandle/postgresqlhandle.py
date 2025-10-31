@@ -415,7 +415,7 @@ class PostgresqlHandle(object):
         value_field_list = []
 
         for changing_field in changing_fields:
-            value_field_list.append('%({changing_field})s')  # psycopg2 uses %s as placeholder
+            value_field_list.append(f"%({changing_field})s")  # psycopg2 uses %s as placeholder
             insert_field_list.append(changing_field)
 
         insert_field_string = ', '.join(insert_field_list)
@@ -429,7 +429,7 @@ class PostgresqlHandle(object):
         if lookup_fields and len(lookup_fields) > 0:
             return_statement = f"RETURNING {lookup_fields[0]}"
             skeleton_statement = f"{skeleton_statement} {return_statement}"
-
+        print(skeleton_statement)
         return skeleton_statement
     
     def prepare_upsert_statement(self, insert_table, changing_fields, lookup_fields):

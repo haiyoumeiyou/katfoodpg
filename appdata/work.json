@@ -570,7 +570,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, m.title as model_name, ac.acct_name, COALESCE(scan.scan_count, 0) || '/' || COALESCE(asm.quantity, 0) as quantity, scan.scan_count, shp.ship_status FROM orders o LEFT JOIN model m ON o.model_id = m.eid LEFT JOIN accounts ac ON o.vendor_id = ac.eid LEFT JOIN (SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id LEFT JOIN (SELECT count(DISTINCT aps.assm_serial) as scan_count, a.order_id FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number GROUP BY a.order_id) as scan on o.eid = scan.order_id LEFT JOIN (SELECT title, status || '_' || strftime('%Y-%m-%d', datetime(last_update)) ship_status FROM orders WHERE order_type = 'ship') as shp ON o.title = shp.title WHERE (o.eid LIKE %(search)s OR o.title LIKE %(search)s OR o.status LIKE %(search)s OR o.remark LIKE %(search)s) and o.order_type = 'work' ORDER BY o.eid DESC"
+                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, m.title as model_name, ac.acct_name, COALESCE(scan.scan_count, 0) || '/' || COALESCE(asm.quantity, 0) as quantity, scan.scan_count, shp.ship_status FROM orders o LEFT JOIN model m ON o.model_id = m.eid LEFT JOIN accounts ac ON o.vendor_id = ac.eid LEFT JOIN (SELECT COUNT(*) as quantity, order_id FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id LEFT JOIN (SELECT count(DISTINCT aps.assm_serial) as scan_count, a.order_id FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number GROUP BY a.order_id) as scan on o.eid = scan.order_id LEFT JOIN (SELECT title, status || '_' || strftime('%Y-%m-%d', datetime(last_update)) ship_status FROM orders WHERE order_type = 'ship') as shp ON o.title = shp.title WHERE (o.title LIKE %(search)s OR o.status LIKE %(search)s OR o.remark LIKE %(search)s) and o.order_type = 'work' ORDER BY o.eid DESC"
             }
         },
         "auth": []
@@ -892,7 +892,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM assembly WHERE (eid like %(search)s or title like %(search)s or status like %(search)s or remark like %(search)s);"
+                "query": "SELECT * FROM assembly WHERE (title like %(search)s or status like %(search)s or remark like %(search)s);"
             }
         },
         "auth": []
@@ -1024,7 +1024,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM model WHERE (eid like %(search)s or title like %(search)s or remark like %(search)s);"
+                "query": "SELECT * FROM model WHERE (title like %(search)s or remark like %(search)s);"
             }
         },
         "auth": []

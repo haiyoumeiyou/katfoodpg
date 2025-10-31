@@ -281,7 +281,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM roles WHERE eid like %(search)s or role_name like %(search)s or description like %(search)s;"
+                "query": "SELECT * FROM roles WHERE role_name like %(search)s or description like %(search)s;"
             }
         },
         "auth": []
@@ -382,7 +382,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM data_codes WHERE eid like %(search)s or refer_entity like %(search)s or refer_column like %(search)s or option_abbr like %(search)s or option_description like %(search)s;"
+                "query": "SELECT * FROM data_codes WHERE refer_entity like %(search)s or refer_column like %(search)s or option_abbr like %(search)s or option_description like %(search)s;"
             }
         },
         "auth": []
@@ -480,7 +480,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM accounts WHERE eid like %(search)s or acct_code like %(search)s or acct_name like %(search)s or comment like %(search)s or acct_type like %(search)s;"
+                "query": "SELECT * FROM accounts WHERE acct_code like %(search)s or acct_name like %(search)s or comment like %(search)s or acct_type like %(search)s;"
             }
         },
         "auth": []

@@ -149,7 +149,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT *, TO_CHAR(create_date, 'YYYY-MM-DD') as CreationDate FROM orders WHERE (eid like %(search)s or title like %(search)s or order_type like %(search)s or status like %(search)s or remark like %(search)s) AND order_type = 'rma';"
+                "query": "SELECT *, TO_CHAR(create_date, 'YYYY-MM-DD') as CreationDate FROM orders WHERE (title like %(search)s or order_type like %(search)s or status like %(search)s or remark like %(search)s) AND order_type = 'rma';"
             }
         },
         "auth": []

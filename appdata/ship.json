@@ -152,7 +152,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a ON o.vendor_id = a.eid WHERE (o.eid LIKE %(search)s OR o.title LIKE %(search)s OR o.order_type LIKE %(search)s OR o.status LIKE %(search)s OR o.remark LIKE %(search)s) AND o.order_type = 'ship' ORDER BY o.eid DESC;"
+                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a ON o.vendor_id = a.eid WHERE (o.title LIKE %(search)s OR o.order_type LIKE %(search)s OR o.status LIKE %(search)s OR o.remark LIKE %(search)s) AND o.order_type = 'ship' ORDER BY o.eid DESC;"
             }
         },
         "auth": []
@@ -378,7 +378,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM accounts WHERE (eid like %(search)s or acct_code like %(search)s or acct_name like %(search)s or comment like %(search)s) AND acct_type = 'truck';"
+                "query": "SELECT * FROM accounts WHERE (acct_code like %(search)s or acct_name like %(search)s or comment like %(search)s) AND acct_type = 'truck';"
             }
         },
         "auth": []

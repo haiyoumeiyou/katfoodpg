@@ -166,6 +166,7 @@ class View {
             thr.append(th);         
         } 
         if (tableData) {
+            // console.log('table data: ', tableData);
             tableData.forEach(row => {
                 const tr = this.ui_handle.createElement('tr');
                 tableTemplate.fields.forEach(field => {

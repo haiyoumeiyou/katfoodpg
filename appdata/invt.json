@@ -205,7 +205,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM items WHERE eid like %(search)s or v_sku like %(search)s or v_name like %(search)s or category like %(search)s or equivalent like %(search)s or v_description like %(search)s;"
+                "query": "SELECT * FROM items WHERE v_sku like %(search)s or v_name like %(search)s or category like %(search)s or equivalent like %(search)s or v_description like %(search)s;"
             }
         },
         "auth": []
@@ -364,7 +364,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM data_codes WHERE (eid like %(search)s or option_code like %(search)s or option_abbr like %(search)s or option_description like %(search)s) and refer_entity = 'items' and refer_column = 'category';"
+                "query": "SELECT * FROM data_codes WHERE (option_code like %(search)s or option_abbr like %(search)s or option_description like %(search)s) and refer_entity = 'items' and refer_column = 'category';"
             }
         },
         "auth": []
@@ -523,7 +523,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM orders WHERE (eid like %(search)s or title like %(search)s or order_type like %(search)s or status like %(search)s or remark like %(search)s) AND order_type = 'adjt';"
+                "query": "SELECT * FROM orders WHERE (title like %(search)s or order_type like %(search)s or status like %(search)s or remark like %(search)s) AND order_type = 'adjt';"
             }
         },
         "auth": []
