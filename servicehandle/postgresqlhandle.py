@@ -185,6 +185,44 @@ class PostgresqlHandle(object):
             conn.rollback()
             return 'ko', str(e)
 
+    
+    def _query_option(self, queries, q_params):
+        with self._create_conn() as conn:
+            with conn.cursor() as c:
+                try:
+                    if isinstance(queries, list):
+                        param_set = []
+                        for k, v in q_params.items():
+                            if v and not k.startswith('last_'):
+                                param_set.append(k)
+                        for query in queries:
+                            for k, q in query.items():
+                                # Extract parameter names from query string
+                                # param_in_q = [t.translate({ord(i): None for i in ':)'}) for t in q.split() if t.startswith(':')]
+                                # unique_param_in_q = list(set(param_in_q))
+                                # if sorted(param_set) == sorted(unique_param_in_q):
+                                #     # Replace :param with %s for psycopg2
+                                #     for param in unique_param_in_q:
+                                #         q = q.replace(f":{param}", "%s")
+                                #     # Prepare parameters in correct order
+                                #     param_values = [q_params[param] for param in unique_param_in_q]
+                                #     c.execute(q, param_values)
+                                #     c_rst = c.fetchall()
+                                #     if isinstance(c_rst, list):
+                                #         columns = [desc[0] for desc in c.description]
+                                #         r_set = [dict(zip(columns, row)) for row in c_rst]
+                                #         return 'ok', r_set
+                                #     return 'ko', c_rst
+                                c.execute(q, q_params)
+                                c_rst = c.fetchall()
+                                if isinstance(c_rst, list):
+                                    columns = [desc[0] for desc in c.description]
+                                    r_set = [dict(zip(columns, row)) for row in c_rst]
+                                    return 'ok', r_set
+                                return 'ko', c_rst
+                except psycopg2.Error as e:
+                    return 'ko', str(e)
+
     def _build_where_clause(and_conditions=None, or_conditions=None):
         clauses = []
         params = []
@@ -364,7 +402,7 @@ class PostgresqlHandle(object):
             return self.execute_command(q_cmd, q_params)
         if q_type == 'select':
             q_cmd = self.prepare_select_statement(q_table, changing_fields, lookup_fields)
-            print(q_cmd, q_keyes, lookup_fields)
+            # print(q_cmd, q_keyes, lookup_fields)
             return self.execute_query(q_cmd, q_params)
         if q_type == 'delete':
             q_cmd = self.prepare_delete_statement(q_table, lookup_fields)

@@ -246,7 +246,7 @@
     "::order_vendor": {
         "data_endpoint": {
             "data": {
-                "handler": "_query", "q_type":"select", "q_table":"accounts", "q_fields":["eid", "acct_name"], "q_keyes":["acct_type", "is_active"], "q_params":{"acct_type":"vendor", "is_active":1}
+                "handler": "_query", "q_type":"select", "q_table":"accounts", "q_fields":["eid", "acct_name"], "q_keyes":["acct_type", "is_active"], "q_params":{"acct_type":"vendor", "is_active":true}
             }
         },
         "auth": ["admin","manager","prsentry"]
