@@ -82,9 +82,11 @@ class PostgresqlHandle(object):
                         c.rowcount,
                         params
                     )
+                    print(c_msg)
                     return 'ok', c_msg
         except psycopg2.Error as e:
             conn.rollback()  # Roll back the transaction on error
+            print(str(e))
             return 'ko', str(e)
 
     def insert(self, query, params=None):
@@ -133,6 +135,7 @@ class PostgresqlHandle(object):
                     for query in queries:
                         exec_step += 1
                         for k, q in query.items():
+                            print(k, q, q_params, c_msgs)
                             c.execute(q, q_params)
 
                             if k == 'return_data':
@@ -177,12 +180,12 @@ class PostgresqlHandle(object):
 
                             c_msg = f"worked {c.rowcount} data row(s) in step {exec_step}"
                             c_msgs.append(c_msg)
-
                     conn.commit()
                     return ('ok', c_rsts) if c_rsts else ('ok', '; '.join(c_msgs))
 
         except psycopg2.Error as e:
             conn.rollback()
+            # print(str(e))
             return 'ko', str(e)
 
     
