@@ -121,6 +121,7 @@ class PostgresqlHandle(object):
             return 'ko', str(e)
 
     def _query_queue(self, queries, q_params):
+        # print(queries, q_params)
         if not isinstance(queries, list):
             return 'ko', "Input must be a list."
 
@@ -169,9 +170,18 @@ class PostgresqlHandle(object):
                                 c_rsts['options'][k] = all_rows
 
                             # Fetch one row and all rows for dynamic param updates
-                            return_row = c.fetchone()
-                            all_row = c.fetchall()
-
+                            # print('printing... fetchone')
+                            # return_row = c.fetchone()
+                            # print('printing... fetchall')
+                            # all_row = c.fetchall()
+                            try:
+                                return_row = c.fetchone()
+                            except psycopg2.ProgrammingError:
+                                return_row = None
+                            try:
+                                all_row = c.fetchall()
+                            except psycopg2.ProgrammingError:
+                                all_row = None
                             if return_row:
                                 q_params[k] = list(return_row.values())[0]
 

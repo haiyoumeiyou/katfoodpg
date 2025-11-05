@@ -35,13 +35,23 @@ pg_handle._test_conn()
 # rst = pg_handle._read(q_cmd)
 
 q_cmd = """
-    UPDATE order_lines 
-    SET quantity = %(quantity)s, last_user = %(last_user)s, last_update = %(last_update)s 
-    WHERE eid = %(eid)s;
+    INSERT INTO orders (title, order_type, status, model_id, vendor_id, create_date, create_user) 
+    SELECT %(title)s, order_type, %(order_status)s, model_id, vendor_id, %(last_update)s, %(last_user)s 
+    FROM orders WHERE eid = %(from_id)s RETURNING eid
 """
-q_params = {'order_id': 1764, 'eid': 29871, 'quantity': 90, 'last_user': 'metaadmin', 'last_update': '2025-11-03 15:16:17', 'direction': 'internal', 'status': 'inproduction'}
+q_params = {'from_id': 1764, 'eid': None, 'title': 'CLO-10005792', 'remark': None, 'last_user': 'metaadmin', 'last_update': '2025-11-04 15:18:54', 'order_status': 'onorder', 'tran_status': 'inproduction'}
 
 pg_handle.modify(q_cmd, q_params)
+
+# q_queries = [
+#     {'line_id': 'UPDATE order_lines SET quantity = %(quantity)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = %(eid)s;'}, 
+#     {'tran_id': 'UPDATE transactions SET quantity = %(quantity)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = (SELECT tran_id FROM order_lines WHERE eid = %(eid)s);'}, 
+#     {'return_data': 'SELECT ol.*, i.v_description, i.category FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(order_id)s ORDER BY ol.eid ASC'}
+# ] 
+
+# q_params = {'order_id': 1764, 'eid': 29871, 'quantity': 45, 'last_user': 'metaadmin', 'last_update': '2025-11-04 12:59:49', 'direction': 'internal', 'status': 'inproduction'}
+
+# pg_handle._query_queue(q_queries, q_params)
 
 # print(rst)
 
