@@ -153,7 +153,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a ON o.vendor_id = a.eid WHERE (o.title LIKE %(search)s OR o.order_type LIKE %(search)s OR o.status LIKE %(search)s OR o.remark LIKE %(search)s) AND o.order_type = 'recv' ORDER BY o.eid DESC;"
+                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a ON o.vendor_id = a.eid WHERE (o.title ILIKE %(search)s OR o.order_type ILIKE %(search)s OR o.status ILIKE %(search)s OR o.remark ILIKE %(search)s) AND o.order_type = 'recv' ORDER BY o.eid DESC;"
             }
         },
         "auth": []
@@ -215,7 +215,7 @@
                 "query":[
                     {"tran_id":"DELETE FROM order_lines WHERE order_id = %(order_id)s AND tran_id = %(tran_id)s;"},
                     {"line_id":"DELETE FROM transactions WHERE eid = %(tran_id)s;"},
-                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(order_id)s;"}
+                    {"return_data":"SELECT ol.*, i.v_description, i.category FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(order_id)s;"}
                 ]
             }
         },
@@ -228,7 +228,7 @@
                 "query":[
                     {"line_id":"UPDATE order_lines SET quantity = %(quantity)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = %(eid)s;"},
                     {"tran_id":"UPDATE transactions SET quantity = %(quantity)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = (SELECT tran_id FROM order_lines WHERE eid = %(eid)s);"},
-                    {"return_data":"SELECT ol.*, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(order_id)s ORDER BY ol.eid ASC;"}
+                    {"return_data":"SELECT ol.*, i.v_description, i.category FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(order_id)s ORDER BY ol.eid ASC;"}
                 ],
                 "q_params": {"direction":"inbound", "status":"onorder"}
             }
@@ -289,7 +289,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(order_id)s) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = %(order_id)s) v on v.acct_code = i.vendor_code WHERE i.v_sku like %(search)s or i.v_name like %(search)s or i.category like %(search)s;"
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(order_id)s) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = %(order_id)s) v on v.acct_code = i.vendor_code WHERE i.v_sku Ilike %(search)s or i.v_name Ilike %(search)s or i.category Ilike %(search)s;"
             }
         },
         "auth": ["admin","manager","prsentry"]
@@ -331,7 +331,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a ON o.vendor_id = a.eid WHERE (o.eid LIKE %(search)s OR o.title LIKE %(search)s OR o.order_type LIKE %(search)s OR o.status LIKE %(search)s OR o.remark LIKE %(search)s) AND o.order_type = 'recv' ORDER BY o.eid DESC;"
+                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a ON o.vendor_id = a.eid WHERE (o.title ILIKE %(search)s OR o.order_type ILIKE %(search)s OR o.status ILIKE %(search)s OR o.remark ILIKE %(search)s) AND o.order_type = 'recv' ORDER BY o.eid DESC;"
             }
         },
         "auth": []

@@ -152,7 +152,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a ON o.vendor_id = a.eid WHERE (o.title LIKE %(search)s OR o.order_type LIKE %(search)s OR o.status LIKE %(search)s OR o.remark LIKE %(search)s) AND o.order_type = 'ship' ORDER BY o.eid DESC;"
+                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, a.acct_name FROM orders o LEFT JOIN accounts a ON o.vendor_id = a.eid WHERE (o.title iLIKE %(search)s OR o.order_type iLIKE %(search)s OR o.status iLIKE %(search)s OR o.remark iLIKE %(search)s) AND o.order_type = 'ship' ORDER BY o.eid DESC;"
             }
         },
         "auth": []
@@ -288,7 +288,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(order_id)s) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = %(order_id)s) v on v.acct_code = i.vendor_code WHERE i.v_sku like %(search)s or i.v_name like %(search)s or i.category like %(search)s;"
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(order_id)s) ol on i.eid = ol.item_id join (select acct_code from accounts a join orders o on a.eid = o.vendor_id where o.eid = %(order_id)s) v on v.acct_code = i.vendor_code WHERE i.v_sku ilike %(search)s or i.v_name ilike %(search)s or i.category ilike %(search)s;"
             }
         },
         "auth": ["admin","manager","prsentry"]
@@ -378,7 +378,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM accounts WHERE (acct_code like %(search)s or acct_name like %(search)s or comment like %(search)s) AND acct_type = 'truck';"
+                "query": "SELECT * FROM accounts WHERE (acct_code ilike %(search)s or acct_name ilike %(search)s or comment ilike %(search)s) AND acct_type = 'truck';"
             }
         },
         "auth": []

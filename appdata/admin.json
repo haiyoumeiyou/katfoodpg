@@ -102,7 +102,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT eid, user_name, first_name, last_name, title, default_page, report_to, vendor_of FROM users WHERE eid like %(search)s or user_name like %(search)s or first_name like %(search)s or last_name like %(search)s;"
+                "query": "SELECT eid, user_name, first_name, last_name, title, default_page, report_to, vendor_of FROM users WHERE eid ilike %(search)s or user_name ilike %(search)s or first_name ilike %(search)s or last_name ilike %(search)s;"
             }
         },
         "auth": []
@@ -281,7 +281,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM roles WHERE role_name like %(search)s or description like %(search)s;"
+                "query": "SELECT * FROM roles WHERE role_name ilike %(search)s or description ilike %(search)s;"
             }
         },
         "auth": []
@@ -382,7 +382,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM data_codes WHERE refer_entity like %(search)s or refer_column like %(search)s or option_abbr like %(search)s or option_description like %(search)s;"
+                "query": "SELECT * FROM data_codes WHERE refer_entity ilike %(search)s or refer_column ilike %(search)s or option_abbr ilike %(search)s or option_description ilike %(search)s;"
             }
         },
         "auth": []
@@ -480,7 +480,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM accounts WHERE acct_code like %(search)s or acct_name like %(search)s or comment like %(search)s or acct_type like %(search)s;"
+                "query": "SELECT * FROM accounts WHERE acct_code ilike %(search)s or acct_name ilike %(search)s or comment ilike %(search)s or acct_type ilike %(search)s;"
             }
         },
         "auth": []

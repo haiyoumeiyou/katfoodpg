@@ -100,7 +100,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT * FROM items WHERE (v_sku like %(search)s or v_name like %(search)s or category like %(search)s or equivalent like %(search)s or v_description like %(search)s) AND vendor_code in (SELECT acct_code FROM accounts JOIN users ON accounts.eid = users.vendor_of WHERE users.user_name = %(last_user)s);"
+                "query": "SELECT * FROM items WHERE (v_sku ilike %(search)s or v_name ilike %(search)s or category ilike %(search)s or equivalent ilike %(search)s or v_description ilike %(search)s) AND vendor_code in (SELECT acct_code FROM accounts JOIN users ON accounts.eid = users.vendor_of WHERE users.user_name = %(last_user)s);"
             }
         },
         "auth": ["admin","manager","vendor"]

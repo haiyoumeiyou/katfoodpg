@@ -149,7 +149,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT *, TO_CHAR(create_date, 'YYYY-MM-DD') as CreationDate FROM orders WHERE (title like %(search)s or order_type like %(search)s or status like %(search)s or remark like %(search)s) AND order_type = 'rma';"
+                "query": "SELECT *, TO_CHAR(create_date, 'YYYY-MM-DD') as CreationDate FROM orders WHERE (title ilike %(search)s or order_type ilike %(search)s or status ilike %(search)s or remark ilike %(search)s) AND order_type = 'rma';"
             }
         },
         "auth": []
@@ -277,7 +277,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(order_id)s) ol on i.eid = ol.item_id WHERE i.v_sku like %(search)s or i.v_name like %(search)s or i.category like %(search)s;"
+                "query": "SELECT i.eid, i.v_sku, i.v_name, i.category, i.equivalent, i.vendor_code, ol.item_id FROM items i LEFT OUTER JOIN (SELECT item_id FROM order_lines WHERE order_id = %(order_id)s) ol on i.eid = ol.item_id WHERE i.v_sku ilike %(search)s or i.v_name ilike %(search)s or i.category ilike %(search)s;"
             }
         },
         "auth": ["admin","manager"]

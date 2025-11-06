@@ -39,7 +39,7 @@ q_cmd = """
     SELECT %(title)s, order_type, %(order_status)s, model_id, vendor_id, %(last_update)s, %(last_user)s 
     FROM orders WHERE eid = %(from_id)s RETURNING eid
 """
-q_params = {'from_id': 1764, 'eid': None, 'title': 'CLO-10005792', 'remark': None, 'last_user': 'metaadmin', 'last_update': '2025-11-04 15:18:54', 'order_status': 'onorder', 'tran_status': 'inproduction'}
+q_params = {'from_id': 1764, 'eid': None, 'title': 'CLO-10005794', 'remark': None, 'last_user': 'metaadmin', 'last_update': '2025-11-04 15:18:54', 'order_status': 'onorder', 'tran_status': 'inproduction'}
 
 pg_handle.modify(q_cmd, q_params)
 

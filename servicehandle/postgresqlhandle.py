@@ -55,6 +55,7 @@ class PostgresqlHandle(object):
         try:
             with self._create_conn() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as c:
+                    # print(query, params)
                     if params:
                         c.execute(query, params)
                     else:
@@ -76,17 +77,19 @@ class PostgresqlHandle(object):
                             c.executemany(query, params)
                         else:
                             c.execute(query, params)
+                    # result = c.fetchone()
+                    # print(result, query, params)
                     conn.commit()
                     c_msg = "{} {} data row with {}.".format(
                         str(query).split(' ')[0],
                         c.rowcount,
                         params
                     )
-                    print(c_msg)
+                    # print(c_msg)
                     return 'ok', c_msg
         except psycopg2.Error as e:
             conn.rollback()  # Roll back the transaction on error
-            print(str(e))
+            # print(str(e))
             return 'ko', str(e)
 
     def insert(self, query, params=None):

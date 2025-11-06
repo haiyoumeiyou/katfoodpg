@@ -61,7 +61,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"table_data":"SELECT * FROM wf_action WHERE (eid like %(search)s or title like %(search)s or remark like %(search)s) ORDER BY eid DESC"}
+                    {"table_data":"SELECT * FROM wf_action WHERE (title ilike %(search)s or remark ilike %(search)s) ORDER BY eid DESC"}
                 ]
             }
         },
@@ -170,7 +170,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"table_data":"SELECT * FROM wf_set WHERE (eid like %(search)s or title like %(search)s or remark like %(search)s) ORDER BY eid DESC;"}
+                    {"table_data":"SELECT * FROM wf_set WHERE (title ilike %(search)s or remark ilike %(search)s) ORDER BY eid DESC;"}
                 ]
             }
         },
@@ -278,7 +278,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"table_data":"SELECT * FROM wf_set_step WHERE (eid like %(search)s or title like %(search)s or remark like %(search)s) ORDER BY eid DESC;"}
+                    {"table_data":"SELECT * FROM wf_set_step WHERE (title ilike %(search)s or remark ilike %(search)s) ORDER BY eid DESC;"}
                 ]
             }
         },
@@ -406,7 +406,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"table_data":"SELECT wl.*, ws.title as default_set_title FROM wf_line wl LEFT JOIN wf_set ws ON wl.default_set = ws.eid WHERE (wl.eid like %(search)s or wl.title like %(search)s or wl.remark like %(search)s) ORDER BY wl.eid DESC"}
+                    {"table_data":"SELECT wl.*, ws.title as default_set_title FROM wf_line wl LEFT JOIN wf_set ws ON wl.default_set = ws.eid WHERE (wl.title ilike %(search)s or wl.remark ilike %(search)s) ORDER BY wl.eid DESC"}
                 ]
             }
         },
@@ -523,7 +523,7 @@
             "data": {
                 "handler": "_query_queue",
                 "query": [
-                    {"table_data":"SELECT wlo.*, wl.title as line_title, ws.title as set_title, o.title as order_title FROM wf_line_order wlo INNER JOIN wf_line wl ON wlo.line_id = wl.eid INNER JOIN wf_set ws ON wlo.set_id = ws.eid INNER JOIN orders o ON wlo.order_id = o.eid WHERE (wlo.eid like %(search)s or wlo.title like %(search)s or wlo.remark like %(search)s) ORDER BY wlo.eid DESC"}
+                    {"table_data":"SELECT wlo.*, wl.title as line_title, ws.title as set_title, o.title as order_title FROM wf_line_order wlo INNER JOIN wf_line wl ON wlo.line_id = wl.eid INNER JOIN wf_set ws ON wlo.set_id = ws.eid INNER JOIN orders o ON wlo.order_id = o.eid WHERE (wlo.title ilike %(search)s or wlo.remark ilike %(search)s) ORDER BY wlo.eid DESC"}
                 ]
             }
         },

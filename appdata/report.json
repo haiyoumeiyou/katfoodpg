@@ -44,9 +44,9 @@
             "data": {
                 "handler": "_query_option",
                 "query":[
-                    {"option_3":"SELECT a.acct_name, wpu.order_id, wpu.container_code, count(wpu.unit_serial) as quantity FROM wf_pack_unit wpu JOIN orders o on wpu.order_id = o.eid JOIN accounts a on o.vendor_id = a.eid WHERE wpu.order_id in (SELECT order_id FROM orders WHERE vendor_id = %(vendor_id)s) AND wpu.order_id in (SELECT order_id FROM wf_pack_unit WHERE unit_serial LIKE %(search)s) GROUP BY a.acct_name, wpu.order_id, wpu.container_code ORDER BY wpu.order_id DESC;"},
+                    {"option_3":"SELECT a.acct_name, wpu.order_id, wpu.container_code, count(wpu.unit_serial) as quantity FROM wf_pack_unit wpu JOIN orders o on wpu.order_id = o.eid JOIN accounts a on o.vendor_id = a.eid WHERE wpu.order_id in (SELECT order_id FROM orders WHERE vendor_id = %(vendor_id)s) AND wpu.order_id in (SELECT order_id FROM wf_pack_unit WHERE unit_serial ILIKE %(search)s) GROUP BY a.acct_name, wpu.order_id, wpu.container_code ORDER BY wpu.order_id DESC;"},
                     {"option_2":"SELECT a.acct_name, wpu.order_id, wpu.container_code, count(wpu.unit_serial) as quantity FROM wf_pack_unit wpu JOIN orders o on wpu.order_id = o.eid JOIN accounts a on o.vendor_id = a.eid WHERE wpu.order_id in (SELECT order_id FROM orders WHERE vendor_id = %(vendor_id)s) GROUP BY a.acct_name, wpu.order_id, wpu.container_code ORDER BY wpu.order_id DESC;"},
-                    {"option_1":"SELECT a.acct_name, wpu.order_id, wpu.container_code, count(wpu.unit_serial) as quantity FROM wf_pack_unit wpu JOIN orders o on wpu.order_id = o.eid JOIN accounts a on o.vendor_id = a.eid WHERE wpu.order_id in (SELECT order_id FROM wf_pack_unit WHERE unit_serial LIKE %(search)s) GROUP BY a.acct_name, wpu.order_id, wpu.container_code ORDER BY wpu.order_id DESC;"}
+                    {"option_1":"SELECT a.acct_name, wpu.order_id, wpu.container_code, count(wpu.unit_serial) as quantity FROM wf_pack_unit wpu JOIN orders o on wpu.order_id = o.eid JOIN accounts a on o.vendor_id = a.eid WHERE wpu.order_id in (SELECT order_id FROM wf_pack_unit WHERE unit_serial ILIKE %(search)s) GROUP BY a.acct_name, wpu.order_id, wpu.container_code ORDER BY wpu.order_id DESC;"}
                 ] 
             }
         },
@@ -93,8 +93,8 @@
             "data": {
                 "handler": "_query_option",
                 "query":[
-                    {"option_3":"SELECT wau.*, o.title FROM wf_accs_unit wau JOIN orders o ON wau.order_id = o.eid WHERE (wau.unit_serial LIKE %(search)s OR wau.kb_code LIKE %(search)s OR wau.mouse_code LIKE %(search)s or wau.accs_code LIKE %(search)s) AND o.eid = %(order_id)s;"},
-                    {"option_2":"SELECT wau.*, o.title FROM wf_accs_unit wau JOIN orders o ON wau.order_id = o.eid WHERE wau.unit_serial LIKE %(search)s OR wau.kb_code LIKE %(search)s OR wau.mouse_code LIKE %(search)s or wau.accs_code LIKE %(search)s;"},
+                    {"option_3":"SELECT wau.*, o.title FROM wf_accs_unit wau JOIN orders o ON wau.order_id = o.eid WHERE (wau.unit_serial ILIKE %(search)s OR wau.kb_code ILIKE %(search)s OR wau.mouse_code ILIKE %(search)s or wau.accs_code ILIKE %(search)s) AND o.eid = %(order_id)s;"},
+                    {"option_2":"SELECT wau.*, o.title FROM wf_accs_unit wau JOIN orders o ON wau.order_id = o.eid WHERE wau.unit_serial ILIKE %(search)s OR wau.kb_code ILIKE %(search)s OR wau.mouse_code ILIKE %(search)s or wau.accs_code ILIKE %(search)s;"},
                     {"option_1":"SELECT wau.*, o.title FROM wf_accs_unit wau JOIN orders o ON wau.order_id = o.eid WHERE o.eid = %(order_id)s;"}
                 ] 
             }

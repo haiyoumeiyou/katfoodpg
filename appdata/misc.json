@@ -82,7 +82,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT *, TO_CHAR(create_date, 'YYYY-MM-DD') as CreationDate FROM misc_orders WHERE (eid like %(search)s or title like %(search)s or status like %(search)s or remark like %(search)s);"
+                "query": "SELECT *, TO_CHAR(create_date, 'YYYY-MM-DD') as CreationDate FROM misc_orders WHERE (title ilike %(search)s or status ilike %(search)s or remark ilike %(search)s);"
             }
         },
         "auth": []
@@ -159,7 +159,7 @@
         "data_endpoint": {
             "data": {
                 "handler": "read",
-                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate FROM misc_orders o WHERE (o.eid LIKE %(search)s OR o.title LIKE %(search)s OR o.status LIKE %(search)s OR o.remark LIKE %(search)s) ORDER BY o.eid DESC;"
+                "query": "SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate FROM misc_orders o WHERE (o.title iLIKE %(search)s OR o.status iLIKE %(search)s OR o.remark iLIKE %(search)s) ORDER BY o.eid DESC;"
             }
         },
         "auth": []
