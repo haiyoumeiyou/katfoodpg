@@ -606,7 +606,7 @@
                     {"tran_id":"UPDATE transactions SET status = %(status)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE order_id = %(eid)s;"},
                     {"order_id":"UPDATE orders SET status = %(status)s, last_user = %(last_user)s, last_update = %(last_update)s WHERE eid = %(eid)s;"},
                     {"item_id":"UPDATE items SET last_user = %(last_user)s, last_update = %(last_update)s, quantity = (SELECT sum(CASE WHEN direction in ('inbound', 'adjustment') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) - sum(CASE WHEN direction in ('outbound') AND status in ('fulfilled', 'onorder') THEN t.quantity ELSE 0 END) FROM transactions as t WHERE items.eid =  t.item_id) WHERE eid in (SELECT item_id FROM transactions WHERE order_id = %(eid)s);"},
-                    {"new_order_id":"INSERT into orders (title, order_type, status, link_order, vendor_id, create_date, create_user) SELECT title, %(order_type)s, %(ship_status)s, eid, vendor_id, %(last_update)s, %(last_user)s FROM orders WHERE eid = %(eid)s;"},
+                    {"new_order_id":"INSERT into orders (title, order_type, status, link_order, vendor_id, create_date, create_user) SELECT title, %(order_type)s, %(ship_status)s, eid, vendor_id, %(last_update)s, %(last_user)s FROM orders WHERE eid = %(eid)s RETURNING eid;"},
                     {"new_tran":"INSERT INTO transactions (order_id, item_id, direction, status, quantity, create_date, create_user) select %(new_order_id)s, item_id, %(direction)s, %(ship_status)s, quantity, %(last_update)s, %(last_user)s FROM transactions WHERE order_id = %(eid)s;"},
                     {"new_line":"INSERT INTO order_lines (order_id, v_sku, item_id, tran_id, quantity, status, create_date, create_user) select t.order_id, i.v_sku, t.item_id, t.eid, t.quantity, t.status, %(last_update)s, %(last_user)s from transactions t inner join items i on t.item_id = i.eid where t.order_id = %(new_order_id)s;"},
                     {"return_data":"SELECT ol.*, i.v_description, i.category FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(eid)s;"}
@@ -854,8 +854,8 @@
             "fields": [
                 {"f_id":"category", "d_name":"Category", "f_element":"select", "f_data":"/api/invt/item_category", "f_option_text":"option_abbr", "f_option_val":"option_code", "f_attr":"disabled"},
                 {"f_id":"slot", "d_name":"Slot", "f_element":"input", "f_type":"text", "f_data_id":"eid", "f_data":"/api/work/assm_config_update", "f_attr":"disabled"},
-                {"f_id":"is_scan", "d_name":"Scan", "f_element":"input", "f_type":"checkbox", "f_checked_val":"1", "f_data_id":"eid", "f_data":"/api/work/assm_config_update"},
-                {"f_id":"is_unique", "d_name":"Unique", "f_element":"input", "f_type":"checkbox", "f_checked_val":"1", "f_data_id":"eid", "f_data":"/api/work/assm_config_update"}
+                {"f_id":"is_scan", "d_name":"Scan", "f_element":"input", "f_type":"checkbox", "f_checked_val":"true", "f_data_id":"eid", "f_data":"/api/work/assm_config_update"},
+                {"f_id":"is_unique", "d_name":"Unique", "f_element":"input", "f_type":"checkbox", "f_checked_val":"true", "f_data_id":"eid", "f_data":"/api/work/assm_config_update"}
             ],
             "events":[
                 {"f_id":"eid", "d_name":"Remove", "f_type":"button", "f_event_id":"remove", "f_data_val":"eid", "handler": "self", "meta_endpoint": "/api/meta/route_meta", "meta_section": "work.json::assm_config_remove"}
