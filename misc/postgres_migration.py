@@ -50,7 +50,7 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS roles (
-                eid	INTEGER PRIMARY KEY,
+                eid	BIGINT PRIMARY KEY,
                 role_name TEXT NOT NULL UNIQUE,
                 description	TEXT,
                 landing_page TEXT,
@@ -65,9 +65,9 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE user_role (
-                eid	INTEGER PRIMARY KEY,
-                user_id	INTEGER NOT NULL,
-                role_id	INTEGER NOT NULL,
+                eid	BIGINT PRIMARY KEY,
+                user_id	BIGINT NOT NULL,
+                role_id	BIGINT NOT NULL,
                 is_primary	BOOLEAN,
                 is_active	BOOLEAN NOT NULL DEFAULT TRUE,
                 create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -80,7 +80,7 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS accounts (
-                eid	INTEGER PRIMARY KEY,
+                eid	BIGINT PRIMARY KEY,
                 acct_code	TEXT NOT NULL UNIQUE,
                 acct_name	TEXT NOT NULL,
                 is_active	BOOLEAN NOT NULL DEFAULT TRUE,
@@ -96,7 +96,7 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS items (
-                eid	INTEGER PRIMARY KEY,
+                eid	BIGINT PRIMARY KEY,
                 v_sku	TEXT NOT NULL UNIQUE,
                 v_name	TEXT NOT NULL,
                 category	TEXT NOT NULL,
@@ -115,9 +115,9 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS transactions (
-                eid	INTEGER PRIMARY KEY,
-                order_id	INTEGER NOT NULL,
-                item_id	INTEGER NOT NULL,
+                eid	BIGINT PRIMARY KEY,
+                order_id	BIGINT NOT NULL,
+                item_id	BIGINT NOT NULL,
                 direction	TEXT NOT NULL,
                 quantity	INTEGER NOT NULL DEFAULT 0,
                 status	TEXT NOT NULL,
@@ -133,8 +133,8 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS trans_journal (
-                eid	INTEGER PRIMARY KEY,
-                tran_id	INTEGER NOT NULL,
+                eid	BIGINT PRIMARY KEY,
+                tran_id	BIGINT NOT NULL,
                 journal_date	TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 status_code	TEXT NOT NULL,
                 create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -148,13 +148,13 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS orders (
-                eid	INTEGER PRIMARY KEY,
+                eid	BIGINT PRIMARY KEY,
                 title	TEXT NOT NULL,
                 order_type	TEXT NOT NULL,
                 status	TEXT NOT NULL DEFAULT 'init',
-                link_order	INTEGER,
-                vendor_id	INTEGER,
-                model_id	INTEGER,
+                link_order	BIGINT,
+                vendor_id	BIGINT,
+                model_id	BIGINT,
                 remark	TEXT,
                 create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 create_user TEXT,
@@ -167,12 +167,12 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS order_lines (
-                eid	INTEGER PRIMARY KEY,
-                order_id	INTEGER NOT NULL,
+                eid	BIGINT PRIMARY KEY,
+                order_id	BIGINT NOT NULL,
                 v_sku	TEXT NOT NULL,
                 quantity	INTEGER NOT NULL,
-                item_id	INTEGER,
-                tran_id	INTEGER,
+                item_id	BIGINT,
+                tran_id	BIGINT,
                 status	TEXT NOT NULL,
                 create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 create_user TEXT,
@@ -185,13 +185,13 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS shipments (
-                eid	INTEGER PRIMARY KEY,
-                work_id	INTEGER NOT NULL UNIQUE,
+                eid	BIGINT PRIMARY KEY,
+                work_id	BIGINT NOT NULL UNIQUE,
                 title	TEXT NOT NULL,
                 status	TEXT NOT NULL,
                 pallet_count	INTEGER,
-                ship_id	INTEGER,
-                trucker_id	INTEGER,
+                ship_id	BIGINT,
+                trucker_id	BIGINT,
                 ship_date	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 remark	TEXT,
                 unit_per_container	INTEGER,
@@ -205,7 +205,7 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS assembly (
-                eid	INTEGER PRIMARY KEY,
+                eid	BIGINT PRIMARY KEY,
                 title	TEXT NOT NULL UNIQUE,
                 remark	TEXT,
                 is_active	BOOLEAN NOT NULL DEFAULT TRUE,
@@ -219,13 +219,14 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS model (
-                eid	INTEGER PRIMARY KEY,
+                eid	BIGINT PRIMARY KEY,
                 title	TEXT NOT NULL UNIQUE,
-                assm_id	INTEGER NOT NULL,
-                vendor_id	INTEGER,
+                assm_id	BIGINT NOT NULL,
+                vendor_id	BIGINT,
                 remark	TEXT,
                 is_active	BOOLEAN NOT NULL DEFAULT TRUE,
                 unit_per_container	INTEGER,
+                type_code TEXT,
                 create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 create_user TEXT,
                 last_update TIMESTAMP,
@@ -236,8 +237,8 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS assm_config (
-                eid	INTEGER PRIMARY KEY,
-                assm_id	INTEGER NOT NULL,
+                eid	BIGINT PRIMARY KEY,
+                assm_id	BIGINT NOT NULL,
                 category	TEXT NOT NULL,
                 slot	INTEGER NOT NULL DEFAULT (1),
                 is_scan	BOOLEAN NOT NULL DEFAULT TRUE,
@@ -253,8 +254,8 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS assm_serial (
-                eid	INTEGER PRIMARY KEY,
-                order_id	INTEGER NOT NULL,
+                eid	BIGINT PRIMARY KEY,
+                order_id	BIGINT NOT NULL,
                 serial_number	TEXT NOT NULL UNIQUE,
                 activation_key	TEXT,
                 create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -267,9 +268,9 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS assm_part_serial (
-                eid	INTEGER PRIMARY KEY,
+                eid	BIGINT PRIMARY KEY,
                 assm_serial	TEXT NOT NULL,
-                assm_conf_id	INTEGER NOT NULL,
+                assm_conf_id	BIGINT NOT NULL,
                 category	TEXT NOT NULL,
                 part_sn	TEXT NOT NULL,
                 create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -284,13 +285,13 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS assm_part_change_log (
-                eid	INTEGER PRIMARY KEY,
+                eid	BIGINT PRIMARY KEY,
                 assm_serial	TEXT NOT NULL,
-                assm_conf_id	INTEGER NOT NULL,
+                assm_conf_id	BIGINT NOT NULL,
                 swap_in_sn	TEXT NOT NULL,
                 swap_out_sn	TEXT NOT NULL,
                 rma_no	TEXT,
-                change_reason	TEXT NOT NULL DEFAULT repair,
+                change_reason	TEXT NOT NULL DEFAULT 'repair',
                 change_date	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 create_user TEXT,
@@ -304,7 +305,7 @@ class DataModel(object):
         self.db.execute_query(
             """
             CREATE TABLE IF NOT EXISTS file_store_dir (
-                eid	INTEGER PRIMARY KEY,
+                eid	BIGINT PRIMARY KEY,
                 file_name	TEXT NOT NULL UNIQUE,
                 file_ext	TEXT NOT NULL,
                 file_path	TEXT NOT NULL,
@@ -322,7 +323,7 @@ class DataModel(object):
             """
             CREATE TABLE IF NOT EXISTS user_token (
                 eid	SERIAL,
-                user_id	INTEGER NOT NULL,
+                user_id	BIGINT NOT NULL,
                 token	TEXT NOT NULL,
                 token_ip	TEXT NOT NULL,
                 token_time	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -416,7 +417,7 @@ class DataMigrate(DataModel):
         ))
         msg.append(self.db.execute_query(
             """
-            COPY model(eid,title,assm_id,vendor_id,remark,is_active,create_date,create_user,last_update,last_user,unit_per_container)
+            COPY model(eid,title,assm_id,vendor_id,remark,is_active,create_date,create_user,last_update,last_user,unit_per_container, type_code)
             FROM 'C:\python\katfoodtwo\local/model.csv'
             WITH (FORMAT csv, HEADER true);
             """
@@ -467,293 +468,293 @@ class DataMigrate(DataModel):
 
     def post_migrate(self):
         msg = []
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM data_codes;
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM data_codes;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE data_codes_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE data_codes_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE data_codes ALTER COLUMN eid SET DEFAULT nextval(''data_codes_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM users;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE data_codes ALTER COLUMN eid SET DEFAULT nextval(''data_codes_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM users;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE users_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE users_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE users ALTER COLUMN eid SET DEFAULT nextval(''users_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM roles;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE users ALTER COLUMN eid SET DEFAULT nextval(''users_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM roles;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE roles_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE roles_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE roles ALTER COLUMN eid SET DEFAULT nextval(''roles_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM accounts;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE roles ALTER COLUMN eid SET DEFAULT nextval(''roles_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM accounts;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE accounts_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE accounts_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE accounts ALTER COLUMN eid SET DEFAULT nextval(''accounts_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM items;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE accounts ALTER COLUMN eid SET DEFAULT nextval(''accounts_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM items;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE items_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE items_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE items ALTER COLUMN eid SET DEFAULT nextval(''items_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM transactions;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE items ALTER COLUMN eid SET DEFAULT nextval(''items_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM transactions;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE transactions_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE transactions_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE transactions ALTER COLUMN eid SET DEFAULT nextval(''transactions_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM trans_journal;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE transactions ALTER COLUMN eid SET DEFAULT nextval(''transactions_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM trans_journal;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE trans_journal_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE trans_journal_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE trans_journal ALTER COLUMN eid SET DEFAULT nextval(''trans_journal_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM orders;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE trans_journal ALTER COLUMN eid SET DEFAULT nextval(''trans_journal_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM orders;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE orders_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE orders_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE orders ALTER COLUMN eid SET DEFAULT nextval(''orders_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM order_lines;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE orders ALTER COLUMN eid SET DEFAULT nextval(''orders_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM order_lines;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE order_lines_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE order_lines_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE order_lines ALTER COLUMN eid SET DEFAULT nextval(''order_lines_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM shipments;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE order_lines ALTER COLUMN eid SET DEFAULT nextval(''order_lines_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM shipments;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE shipments_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE shipments_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE shipments ALTER COLUMN eid SET DEFAULT nextval(''shipments_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM assembly;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE shipments ALTER COLUMN eid SET DEFAULT nextval(''shipments_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM assembly;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE assembly_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE assembly_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE assembly ALTER COLUMN eid SET DEFAULT nextval(''assembly_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM model;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE assembly ALTER COLUMN eid SET DEFAULT nextval(''assembly_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM model;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE model_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE model_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE model ALTER COLUMN eid SET DEFAULT nextval(''model_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM assm_config;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE model ALTER COLUMN eid SET DEFAULT nextval(''model_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM assm_config;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE assm_config_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE assm_config_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE assm_config ALTER COLUMN eid SET DEFAULT nextval(''assm_config_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM assm_serial;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE assm_config ALTER COLUMN eid SET DEFAULT nextval(''assm_config_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM assm_serial;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE assm_serial_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE assm_serial_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE assm_serial ALTER COLUMN eid SET DEFAULT nextval(''assm_serial_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM assm_part_serial;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE assm_serial ALTER COLUMN eid SET DEFAULT nextval(''assm_serial_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM assm_part_serial;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE assm_part_serial_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE assm_part_serial_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE assm_part_serial ALTER COLUMN eid SET DEFAULT nextval(''assm_part_serial_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM assm_part_change_log;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE assm_part_serial ALTER COLUMN eid SET DEFAULT nextval(''assm_part_serial_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM assm_part_change_log;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE assm_part_change_log_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE assm_part_change_log_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE assm_part_change_log ALTER COLUMN eid SET DEFAULT nextval(''assm_part_change_log_eid_seq'')';
-            END $$;
-            """
-        ))
-        msg.append(self.db.execute_query(
-            """
-            DO $$
-            DECLARE
-                max_eid INTEGER;
-            BEGIN
-                -- Get the current maximum eid
-                SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM file_store_dir;
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE assm_part_change_log ALTER COLUMN eid SET DEFAULT nextval(''assm_part_change_log_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
+        # msg.append(self.db.execute_query(
+        #     """
+        #     DO $$
+        #     DECLARE
+        #         max_eid INTEGER;
+        #     BEGIN
+        #         -- Get the current maximum eid
+        #         SELECT COALESCE(MAX(eid), 0) INTO max_eid FROM file_store_dir;
 
-                -- Create the sequence starting from max_eid + 1
-                EXECUTE format('CREATE SEQUENCE file_store_dir_eid_seq START WITH %s', max_eid + 1);
+        #         -- Create the sequence starting from max_eid + 1
+        #         EXECUTE format('CREATE SEQUENCE file_store_dir_eid_seq START WITH %s', max_eid + 1);
 
-                -- Set the default for eid to use the new sequence
-                EXECUTE 'ALTER TABLE file_store_dir ALTER COLUMN eid SET DEFAULT nextval(''file_store_dir_eid_seq'')';
-            END $$;
-            """
-        ))
+        #         -- Set the default for eid to use the new sequence
+        #         EXECUTE 'ALTER TABLE file_store_dir ALTER COLUMN eid SET DEFAULT nextval(''file_store_dir_eid_seq'')';
+        #     END $$;
+        #     """
+        # ))
         

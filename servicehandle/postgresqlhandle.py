@@ -198,7 +198,7 @@ class PostgresqlHandle(object):
 
         except psycopg2.Error as e:
             conn.rollback()
-            # print(str(e))
+            print(str(e))
             return 'ko', str(e)
 
     

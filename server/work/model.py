@@ -9,8 +9,8 @@ class WorkService:
 
     def order_search(self, title=None, vendor=None, model=None, begin_date=None, end_date=None):
         q_cmd = """
-            SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate, 
-                m.title as model_name, m.type_code, ac.acct_name, ifnull(scan.scan_count, 0) || '/' || ifnull(asm.quantity, 0) as quantity, 
+            SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, 
+                m.title as model_name, m.type_code, ac.acct_name, COALESCE(scan.scan_count, 0) || '/' || COALESCE(asm.quantity, 0) as quantity, 
                 scan.scan_count, shp.ship_status 
             FROM orders o 
                 LEFT JOIN model m ON o.model_id = m.eid 
@@ -19,18 +19,18 @@ class WorkService:
                             FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id 
                 LEFT JOIN (SELECT count(DISTINCT aps.assm_serial) as scan_count, a.order_id 
                             FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number GROUP BY a.order_id) as scan on o.eid = scan.order_id 
-                LEFT JOIN (SELECT title, status || '_' || strftime('%Y-%m-%d', datetime(last_update, '-08:00')) ship_status FROM orders WHERE order_type = 'ship') as shp ON o.title = shp.title 
+                LEFT JOIN (SELECT title, status || '_' || TO_CHAR(last_update, 'YYYY-MM-DD') ship_status FROM orders WHERE order_type = 'ship') as shp ON o.title = shp.title 
             WHERE o.order_type = 'work' 
         """
         params_list = []
         if title:
-            q_cmd += f" AND o.title LIKE ?"
+            q_cmd += f" AND o.title ILIKE ?"
             params_list.append('%{}%'.format(title))
         if vendor:
-            q_cmd += f" AND ac.acct_code LIKE ?"
+            q_cmd += f" AND ac.acct_code ILIKE ?"
             params_list.append('%{}%'.format(vendor))
         if model:
-            q_cmd += f" AND m.title LIKE ?"
+            q_cmd += f" AND m.title ILIKE ?"
             params_list.append('%{}%'.format(model))
         if begin_date:
             q_cmd += f" AND o.create_date >= ?"

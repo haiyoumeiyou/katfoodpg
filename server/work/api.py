@@ -22,7 +22,7 @@ def add_endpoint(cls, method):
         check_pass = cherrypy.request.ep_data['check_pass'] if 'check_pass' in cherrypy.request.ep_data else None
         if not check_pass:
             data = ('ia', 'invalid access')
-            return json.dumps({'endpoint':str(method), 'data':data})
+            return json.dumps({'endpoint':str(method), 'data':data}, default=str)
 
         params = cherrypy.request.json or {}
 
@@ -34,10 +34,10 @@ def add_endpoint(cls, method):
         filtered_params = {k: v for k, v in params.items() if k in objMethod_params}
         # print(filtered_params)
         data = objMethod(**filtered_params)
-        return json.dumps({'endpoint':str(method), 'data': data})
+        return json.dumps({'endpoint':str(method), 'data': data}, default=str)
     endpointFunc.__name__=str(method)
     setattr(cls, endpointFunc.__name__, classmethod(endpointFunc))
 
 for method in user_defined_methods:
-    print(method)
+    # print(method)
     add_endpoint(WorkV2Rest, method)
