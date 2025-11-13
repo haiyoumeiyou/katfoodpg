@@ -33,10 +33,10 @@ class Model {
         this.onTableDataChange = callback;
     }
     async navbarActionData(event, container, param) {
-        console.log('navbar event model action: ', event, event.target, param);
+        // console.log('navbar event model action: ', event, event.target, param);
         const action_list = this.section_meta.nav_bar;
         const action = action_list.find(item => item.f_event_id === event.target.event_id);
-        console.log(action);
+        // console.log(action);
         if (action) {
             if (action.handler === 'json' && action.container === 'self') {
                 const endpoint = await this.router.constructor.metaSectionToDataEndpoint(action.meta_section)
@@ -86,13 +86,13 @@ class Model {
         this._commit(this.table_data);
     }
     async tableData(event, container, param) {
-        console.log('view event: ', event, event.target, event.target.data_id);
+        // console.log('view event: ', event, event.target, event.target.data_id);
         const action_list = this.section_meta.table_template.events;
         const action = action_list.find(item => item.f_event_id === event.target.event_id);
         if (action) {
             // console.log('view action: ', action);
             action.param = param;
-            console.log('view action:', action, param);
+            // console.log('view action:', action, param);
             const component_module = action.handler;
             const { render } = await import(component_module);
             await render(action, container, this.router);

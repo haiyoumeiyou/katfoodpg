@@ -1,8 +1,20 @@
-from servicehandle.sqlitehandle import SqliteHandle
+from servicehandle.postgresqlhandle import PostgresqlHandle
+from appdata import Settings
+
+settings = Settings()
+db = PostgresqlHandle(settings)
 
 class WorkService:
-    def __init__(self, db_path='local/data.sqlite'):
-        self.db = SqliteHandle(db_path=db_path)
+    version = 'webapp_0.0a'
+    obj_class = 'Auth DB Handler'
+    cls_attrs = ('user_id', 'role_id', 'menu_id', 'link_id')
+
+    def __str__(self):
+        return f"""
+            schema version: {self.version}, 
+            class: {self.obj_class}, 
+            attrs: {self.cls_attrs}
+        """
 
     def order(self):
         return []
@@ -24,23 +36,23 @@ class WorkService:
         """
         params_list = []
         if title:
-            q_cmd += f" AND o.title ILIKE ?"
+            q_cmd += f" AND o.title ILIKE %s"
             params_list.append('%{}%'.format(title))
         if vendor:
-            q_cmd += f" AND ac.acct_code ILIKE ?"
+            q_cmd += f" AND ac.acct_code ILIKE %s"
             params_list.append('%{}%'.format(vendor))
         if model:
-            q_cmd += f" AND m.title ILIKE ?"
+            q_cmd += f" AND m.title ILIKE %s"
             params_list.append('%{}%'.format(model))
         if begin_date:
-            q_cmd += f" AND o.create_date >= ?"
+            q_cmd += f" AND o.create_date >= %s"
             params_list.append('{}'.format(begin_date))   
         if end_date:
-            q_cmd += f" AND o.create_date <= ?"
+            q_cmd += f" AND o.create_date <= %s"
             params_list.append('{}'.format(end_date))     
         order_clause = " ORDER BY o.eid DESC"
         q_cmd += order_clause
         params = tuple(params_list)
         # print(q_cmd, params)
-        return self.db.execute_query(query=q_cmd, params=params)
+        return db.execute_query(query=q_cmd, params=params)
         

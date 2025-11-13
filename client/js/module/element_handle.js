@@ -250,7 +250,7 @@ element_build.tableGrid = (config, data) => {
 }
 
 element_build.tableWithEvent = (config, data) => {
-    console.log(config);
+    // console.log(config);
     // const fields = config.filter(obj => !obj.hasOwnProperty('f_event_id'));
     // const events = config.filter(obj => obj.hasOwnProperty('f_event_id'));
     const fields = config.fields;

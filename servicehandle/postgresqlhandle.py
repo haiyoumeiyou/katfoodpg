@@ -142,11 +142,13 @@ class PostgresqlHandle(object):
                             print(k, q, q_params, c_msgs)
                             c.execute(q, q_params)
 
+                            print('printing... after execute')
+
                             if k == 'return_data':
                                 all_rows = c.fetchall()
-                                if not all_rows:
-                                    conn.rollback()
-                                    return 'ko', 'No result found'
+                                # if not all_rows:
+                                #     conn.rollback()
+                                #     return 'ko', 'No result found'
                                 return 'ok', all_rows
 
                             if k.endswith('_stop'):
@@ -173,7 +175,7 @@ class PostgresqlHandle(object):
                                 c_rsts['options'][k] = all_rows
 
                             # Fetch one row and all rows for dynamic param updates
-                            # print('printing... fetchone')
+                            print('printing... fetchone')
                             # return_row = c.fetchone()
                             # print('printing... fetchall')
                             # all_row = c.fetchall()
@@ -181,6 +183,7 @@ class PostgresqlHandle(object):
                                 return_row = c.fetchone()
                             except psycopg2.ProgrammingError:
                                 return_row = None
+                            print('printing... fetchall')
                             try:
                                 all_row = c.fetchall()
                             except psycopg2.ProgrammingError:
