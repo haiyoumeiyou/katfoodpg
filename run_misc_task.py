@@ -7,10 +7,10 @@ pg_handle = postgresqlhandle.PostgresqlHandle(settings)
 
 pg_handle._test_conn()
 
-# from misc.postgres_migration import DataMigrate
-# migrate = DataMigrate(pg_handle)
+from misc.postgres_migration import DataMigrate
+migrate = DataMigrate(pg_handle)
 
-# migrate.migrate()
+migrate.post_migrate()
 
 # q_cmd = """
 #     SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') AS CreationDate, m.title AS model_name, ac.acct_name, COALESCE(scan.scan_count, 0)::text || '/' || COALESCE(asm.quantity, 0)::text AS quantity, scan.scan_count, shp.ship_status 
@@ -43,16 +43,16 @@ pg_handle._test_conn()
 
 # pg_handle.modify(q_cmd, q_params)
 
-q_queries = [
-    {"tran_id":"DELETE FROM order_lines WHERE order_id = %(order_id)s AND tran_id = %(tran_id)s;"},
-    {"line_id":"DELETE FROM transactions WHERE eid = %(tran_id)s;"},
-    {"return_data":"SELECT ol.*, i.category, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(order_id)s;"}
-]
+# q_queries = [
+#     {"tran_id":"DELETE FROM order_lines WHERE order_id = %(order_id)s AND tran_id = %(tran_id)s;"},
+#     {"line_id":"DELETE FROM transactions WHERE eid = %(tran_id)s;"},
+#     {"return_data":"SELECT ol.*, i.category, i.v_description FROM order_lines ol INNER JOIN items i ON ol.item_id = i.eid WHERE order_id = %(order_id)s;"}
+# ]
 
-q_params = {'order_id': 7690, 'tran_id': 107103, 'last_user': 'metaadmin', 'last_update': '2025-11-10 15:52:07'}
+# q_params = {'order_id': 7690, 'tran_id': 107103, 'last_user': 'metaadmin', 'last_update': '2025-11-10 15:52:07'}
 
-rst = pg_handle._query_queue(q_queries, q_params)
+# rst = pg_handle._query_queue(q_queries, q_params)
 
-print(rst)
+# print(rst)
 
 

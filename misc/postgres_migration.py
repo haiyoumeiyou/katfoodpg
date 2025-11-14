@@ -75,6 +75,7 @@ class DataModel(object):
                 last_update TIMESTAMP,
                 last_user TEXT,
                 UNIQUE("user_id","role_id")
+            );
             """
         )
         self.db.execute_query(
@@ -757,4 +758,122 @@ class DataMigrate(DataModel):
         #     END $$;
         #     """
         # ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE users
+            ADD CONSTRAINT fk_users_report_to
+            FOREIGN KEY (report_to) REFERENCES users(eid);
+            """
+        ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE user_role
+            ADD CONSTRAINT fk_user_role_user
+            FOREIGN KEY (user_id) REFERENCES users(eid),
+            ADD CONSTRAINT fk_user_role_role
+            FOREIGN KEY (role_id) REFERENCES roles(eid);
+            """
+        ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE items
+            ADD CONSTRAINT fk_item_acct
+            FOREIGN KEY ("vendor_code") REFERENCES accounts("acct_code"),
+            ADD CONSTRAINT fk_item_equivalent
+            FOREIGN KEY ("equivalent") REFERENCES items("v_sku");
+            """
+        ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE transactions
+            ADD CONSTRAINT fk_transactions_item
+            FOREIGN KEY ("item_id") REFERENCES items("eid");
+            """
+        ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE trans_journal
+            ADD CONSTRAINT fk_trans_journal_transactions
+            FOREIGN KEY ("tran_id") REFERENCES transactions("eid");
+            """
+        ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE orders
+            ADD CONSTRAINT fk_orders_accounts
+            FOREIGN KEY ("vendor_id") REFERENCES accounts("eid"),
+            ADD CONSTRAINT fk_orders_model
+            FOREIGN KEY ("model_id") REFERENCES model("eid"),
+            ADD CONSTRAINT fk_orders_orders
+            FOREIGN KEY ("link_order") REFERENCES orders("eid");
+            """
+        ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE order_lines
+            ADD CONSTRAINT fk_order_lines_transactions
+            FOREIGN KEY ("tran_id") REFERENCES transactions("eid"),
+            ADD CONSTRAINT fk_order_lines_items
+            FOREIGN KEY ("item_id") REFERENCES items("eid"),
+            ADD CONSTRAINT fk_order_lines_orders
+            FOREIGN KEY ("order_id") REFERENCES orders("eid");
+            """
+        ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE shipments
+            ADD CONSTRAINT fk_shipments_accounts
+            FOREIGN KEY ("trucker_id") REFERENCES accounts("eid"),
+            ADD CONSTRAINT fk_shipments_orders
+            FOREIGN KEY ("work_id") REFERENCES orders("eid");
+            """
+        ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE model
+            ADD CONSTRAINT fk_model_accounts
+            FOREIGN KEY ("vendor_id") REFERENCES accounts("eid"),
+            ADD CONSTRAINT fk_model_assembly
+            FOREIGN KEY ("assm_id") REFERENCES assembly("eid");
+            """
+        ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE assm_config
+            ADD CONSTRAINT fk_assm_config_assembly
+            FOREIGN KEY ("assm_id") REFERENCES assembly("eid");
+            """
+        ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE assm_serial
+            ADD CONSTRAINT fk_assm_serial_orders
+            FOREIGN KEY ("order_id") REFERENCES orders("eid");
+            """
+        ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE assm_part_serial
+            ADD CONSTRAINT fk_assm_part_serial_assm_serial
+            FOREIGN KEY ("assm_serial") REFERENCES assm_serial("serial_number"),
+            ADD CONSTRAINT fk_assm_part_serial_assm_config
+            FOREIGN KEY ("assm_conf_id") REFERENCES assm_config("eid");
+            """
+        ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE assm_part_change_log
+            ADD CONSTRAINT fk_assm_part_change_log_assm_serail
+            FOREIGN KEY ("assm_serial") REFERENCES assm_serial("serial_number"),
+            ADD CONSTRAINT fk_assm_part_change_log_assm_config
+            FOREIGN KEY ("assm_conf_id") REFERENCES assm_config("eid");
+            """
+        ))
+        msg.append(self.db.execute_query(
+            """
+            ALTER TABLE user_token
+            ADD CONSTRAINT fk_user_token_users
+            FOREIGN KEY ("user_id") REFERENCES users("eid");
+            """
+        ))
         

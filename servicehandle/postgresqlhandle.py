@@ -300,10 +300,12 @@ class PostgresqlHandle(object):
                 if isinstance(c_rst, list):
                     columns = [tuple[0] for tuple in c.description]
                     r_set = [dict(zip(columns, row)) for row in c_rst]
-                    # print(r_set)
+                    # print(r_set, query)
                     return 'ok', r_set
+                # print(c_rst, query)
                 return 'ko', c_rst
             except psycopg2.Error as e:
+                # print(str(e), query)
                 return 'ko', "Error message: {}, query is {}".format(str(e), query)
 
     def execute_command(self, query, params=None):
