@@ -333,6 +333,361 @@ class DataModel(object):
             """
         )
 
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS rw_orders (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                title TEXT NOT NULL,
+                order_type TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'init',
+                vendor_id INTEGER,
+                rw_model_id INTEGER,
+                rw_sn_type_id INTEGER,
+                remark TEXT,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT,
+                UNIQUE (title, order_type)
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS rw_sn_type (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                title TEXT NOT NULL UNIQUE,
+                sn_startswith TEXT,
+                sn_contains TEXT,
+                sn_length INTEGER,
+                remark TEXT,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS rw_containers (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                title TEXT NOT NULL UNIQUE,
+                rw_order_id INTEGER,
+                container_sq INTEGER,
+                unit_per_container INTEGER,
+                remark TEXT,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS rw_unit_serials (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                rw_unit_sn TEXT NOT NULL UNIQUE,
+                rw_order_id INTEGER,
+                rw_container_id INTEGER,
+                remark TEXT,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS rw_model (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                title TEXT NOT NULL UNIQUE,
+                unit_per_container INTEGER,
+                remark TEXT,
+                is_unique BOOLEAN NOT NULL DEFAULT TRUE,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS wf_action (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                title TEXT NOT NULL UNIQUE,
+                ui_handle TEXT,
+                data_handle TEXT,
+                remark TEXT,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS wf_set (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                title TEXT NOT NULL UNIQUE,
+                remark TEXT,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS wf_set_step (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                title TEXT NOT NULL UNIQUE,
+                set_id INTEGER NOT NULL,
+                action_id INTEGER NOT NULL,
+                step_sq INTEGER NOT NULL,
+                is_required BOOLEAN NOT NULL DEFAULT TRUE,
+                remark TEXT,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS wf_line (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                title TEXT NOT NULL UNIQUE,
+                default_set INTEGER,
+                remark TEXT,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS wf_line_station (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                line_id INTEGER NOT NULL,
+                set_id INTEGER NOT NULL,
+                set_step_id INTEGER NOT NULL,
+                step_sq INTEGER NOT NULL,
+                device_reg TEXT NOT NULL UNIQUE,
+                device_footprint TEXT NOT NULL,
+                default_user TEXT,
+                remark TEXT,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT,
+                UNIQUE (line_id, set_id, set_step_id)
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS wf_line_order (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                line_id INTEGER NOT NULL,
+                set_id INTEGER NOT NULL,
+                order_id INTEGER NOT NULL,
+                status TEXT,
+                remark TEXT,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS wf_line_track (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                line_station_id INTEGER NOT NULL,
+                line_id INTEGER NOT NULL,
+                set_id INTEGER NOT NULL,
+                set_step_id INTEGER NOT NULL,
+                step_sq INTEGER NOT NULL,
+                device_footprint TEXT NOT NULL,
+                line_order_id INTEGER NOT NULL,
+                order_id INTEGER NOT NULL,
+                unit_serial TEXT NOT NULL,
+                remark TEXT,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT,
+                UNIQUE (line_id, set_id, set_step_id, unit_serial)
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS wf_pack_unit (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                line_station_id INTEGER NOT NULL,
+                line_id INTEGER NOT NULL,
+                set_id INTEGER NOT NULL,
+                set_step_id INTEGER NOT NULL,
+                step_sq INTEGER NOT NULL,
+                device_footprint TEXT NOT NULL,
+                line_order_id INTEGER NOT NULL,
+                order_id INTEGER NOT NULL,
+                container_code TEXT NOT NULL,
+                unit_serial TEXT NOT NULL,
+                remark TEXT,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT,
+                UNIQUE (line_id, set_id, set_step_id, container_code, unit_serial)
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS containers (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                title TEXT NOT NULL UNIQUE,
+                order_id INTEGER,
+                container_sq INTEGER,
+                unit_per_container INTEGER,
+                remark TEXT,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS wf_accs_unit (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                line_station_id INTEGER NOT NULL,
+                line_id INTEGER NOT NULL,
+                set_id INTEGER NOT NULL,
+                set_step_id INTEGER NOT NULL,
+                step_sq INTEGER NOT NULL,
+                device_footprint TEXT NOT NULL,
+                line_order_id INTEGER NOT NULL,
+                order_id INTEGER NOT NULL,
+                accs_code TEXT NOT NULL,
+                unit_serial TEXT NOT NULL,
+                remark TEXT,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT,
+                kb_code TEXT,
+                mouse_code TEXT,
+                UNIQUE (line_id, set_id, set_step_id, accs_code, unit_serial)
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS recv_serial (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                order_id INTEGER NOT NULL,
+                serial_number TEXT NOT NULL UNIQUE,
+                vendor_id INTEGER,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS misc_orders (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                title TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'init',
+                vendor_id INTEGER,
+                link_order INTEGER,
+                remark TEXT,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS misc_serial (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                order_id INTEGER NOT NULL,
+                serial_number TEXT NOT NULL UNIQUE,
+                vendor_id INTEGER,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT,
+                FOREIGN KEY (order_id) REFERENCES misc_orders (eid)
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS ff_orders (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                title TEXT NOT NULL,
+                order_type TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'init',
+                link_order INTEGER,
+                vendor_id INTEGER,
+                model_id INTEGER,
+                remark TEXT,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT,
+                UNIQUE (title, order_type),
+                FOREIGN KEY (link_order) REFERENCES orders (eid),
+                FOREIGN KEY (vendor_id) REFERENCES accounts (eid),
+                FOREIGN KEY (model_id) REFERENCES model (eid)
+            );
+            """
+        )
+        self.db.execute_query(
+            """
+            CREATE TABLE IF NOT EXISTS ff_unit_serial (
+                eid INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                src_order_id INTEGER NOT NULL,
+                serial_number TEXT NOT NULL UNIQUE,
+                dst_order_id INTEGER,
+                container_code TEXT,
+                fulfill_date TIMESTAMP,
+                create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                create_user TEXT,
+                last_update TIMESTAMP,
+                last_user TEXT,
+                FOREIGN KEY (dst_order_id) REFERENCES ff_orders (eid),
+                FOREIGN KEY (src_order_id) REFERENCES ff_orders (eid)
+            );
+            """
+        )
+
 class DataMigrate(DataModel):
     def __init__(self, db) -> None:
         super().__init__(db)
