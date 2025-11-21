@@ -31,7 +31,7 @@ class UtilREST:
         upload_path = data_path
         original_name = uploaded_file.filename
         uploaded_filename, upload_fileext = os.path.splitext(original_name)
-        wo_cmd = "SELECT title FROM orders WHERE eid = :order_id"
+        wo_cmd = "SELECT title FROM orders WHERE eid = %(order_id)s"
         wo_param = json.loads(work_order)
         # print(wo_param, work_order)
         wo = db.read(wo_cmd, wo_param)
@@ -63,7 +63,7 @@ class UtilREST:
             fdir_params = {**h_data, **ep_data}
             fdir_cmd = """
                 INSERT INTO file_store_dir (file_name, file_ext, file_path, file_size, file_content_type, original_name, create_date, last_update, last_user) 
-                VALUES (:file_name, :file_ext, :file_path, :file_size, :file_content_type, :original_name, :create_date, :last_update, :last_user)
+                VALUES (%(file_name)s, %(file_ext)s, %(file_path)s, %(file_size)s, %(file_content_type)s, %(original_name)s, %(create_date)s, %(last_update)s, %(last_user)s)
                 ON CONFLICT(file_name) DO UPDATE SET file_ext=excluded.file_ext, file_path=excluded.file_path, file_size=excluded.file_size, file_content_type=excluded.file_content_type, create_date=excluded.create_date, last_update=excluded.last_update, last_user=excluded.last_user;
             """
             h_rst = db.insert(fdir_cmd, fdir_params)
@@ -89,7 +89,7 @@ class UtilREST:
                     q_list.append(q_params)
                 as_cmd = """
                     INSERT INTO assm_serial (order_id, serial_number, create_date, last_user, last_update) 
-                    VALUES (:order_id, :serial_number, :create_date, :last_user, :last_update)
+                    VALUES (%(order_id)s, %(serial_number)s, %(create_date)s, %(last_user)s, %(last_update)s)
                     ON CONFLICT(serial_number) DO UPDATE SET order_id=excluded.order_id, last_update=excluded.last_update, last_user=excluded.last_user;
                 """
                 q_rst = db.insert(as_cmd, q_list)
@@ -118,7 +118,7 @@ class UtilREST:
         original_name = uploaded_file.filename
         uploaded_filename, upload_fileext = os.path.splitext(original_name)
 
-        wo_cmd = "SELECT title FROM orders WHERE eid = :order_id"
+        wo_cmd = "SELECT title FROM orders WHERE eid = %(order_id)s"
         wo_param = json.loads(work_order)
         # print(wo_param, work_order)
         wo = db.read(wo_cmd, wo_param)
@@ -150,7 +150,7 @@ class UtilREST:
             # print(fdir_params)
             fdir_cmd = """
                 INSERT INTO file_store_dir (file_name, file_ext, file_path, file_size, file_content_type, original_name, create_date, last_update, last_user) 
-                VALUES (:file_name, :file_ext, :file_path, :file_size, :file_content_type, :original_name, :create_date, :last_update, :last_user)
+                VALUES (%(file_name)s, %(file_ext)s, %(file_path)s, %(file_size)s, %(file_content_type)s, %(original_name)s, %(create_date)s, %(last_update)s, %(last_user)s)
                 ON CONFLICT(file_name) DO UPDATE SET file_ext=excluded.file_ext, file_path=excluded.file_path, file_size=excluded.file_size, file_content_type=excluded.file_content_type, create_date=excluded.create_date, last_update=excluded.last_update, last_user=excluded.last_user;
             """
             h_rst = db.insert(fdir_cmd, fdir_params)
@@ -173,10 +173,10 @@ class UtilREST:
         q_params = cherrypy.request.json
         print(q_params)
         title_query = """
-            SELECT o.title FROM orders o WHERE o.eid = :eid
+            SELECT o.title FROM orders o WHERE o.eid = %(eid)s;
         """
         file_query = """
-            SELECT * FROM file_store_dir WHERE file_name LIKE :file_name;
+            SELECT * FROM file_store_dir WHERE file_name LIKE %(file_name)s;
         """
         
         wo = db.read(title_query, q_params)
@@ -222,7 +222,7 @@ class UtilREST:
         q_params = cherrypy.request.json
         # print(q_params)
         title_query = """
-            SELECT o.title FROM orders o WHERE o.eid = :eid
+            SELECT o.title FROM orders o WHERE o.eid = %(eid)s
         """
         columns_query = """
             SELECT DISTINCT ac.eid, ac.category || ' (' || ac.slot || ')' as title 
@@ -231,14 +231,14 @@ class UtilREST:
                 LEFT OUTER JOIN (SELECT i.v_name, i.category 
                                 FROM order_lines ol INNER JOIN items i on ol.item_id = i.eid 
                                 WHERE ol.order_id = 2) as i on ac.category = i.category 
-            WHERE o.eid = :eid
+            WHERE o.eid = %(eid)s
             ORDER BY ac.eid ASC
         """
         part_query = """
             SELECT aps.*, ac.category || ' (' || ac.slot || ')' as field 
             FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number
                     INNER JOIN assm_config ac ON aps.assm_conf_id = ac.eid
-            WHERE a.order_id = :eid
+            WHERE a.order_id = %(eid)s
             ORDER BY aps.assm_serial, ac.eid ASC
         """
 
@@ -287,12 +287,12 @@ class UtilREST:
         q_params = cherrypy.request.json
         # print(q_params)
         queries = [
-            {"option_6":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND category = :category and vendor_code = :vendor_code and (eid like :search or v_sku like :search or v_name like :search or v_description like :search)"},
-            {"option_5":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND vendor_code = :vendor_code and (eid like :search or v_sku like :search or v_name like :search or v_description like :search)"},
-            {"option_4":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND (eid like :search or v_sku like :search or v_name like :search or v_description like :search)"},
-            {"option_3":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND vendor_code = :vendor_code and category = :category"},
-            {"option_2":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND vendor_code = :vendor_code"},
-            {"option_1":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND category = :category"}
+            {"option_6":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND category = %(category)s and vendor_code = %(vendor_code)s and (v_sku like %(search)s or v_name like %(search)s or v_description like %(search)s);"},
+            {"option_5":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND vendor_code = %(vendor_code)s and (v_sku like %(search)s or v_name like %(search)s or v_description like %(search)s);"},
+            {"option_4":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND (v_sku like %(search)s or v_name like %(search)s or v_description like %(search)s);"},
+            {"option_3":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND vendor_code = %(vendor_code)s and category = %(category)s;"},
+            {"option_2":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND vendor_code = %(vendor_code)s;"},
+            {"option_1":"SELECT * FROM items WHERE eid in (SELECT DISTINCT item_id FROM transactions) AND category = %(category)s;"}
         ] 
 
         wo = db._query_option(queries, q_params)
@@ -333,7 +333,7 @@ class UtilREST:
         filtered_params = {k: v for k, v in q_params.items() if k in params_list}
         def order_search(title=None, vendor=None, model=None, begin_date=None, end_date=None):
             q_cmd = """
-                SELECT o.*, strftime('%Y-%m-%d', datetime(o.create_date, '-08:00')) as CreationDate, 
+                SELECT o.*, TO_CHAR(o.create_date, 'YYYY-MM-DD') as CreationDate, 
                     m.title as model_name, ac.acct_name, ifnull(scan.scan_count, 0) || '/' || ifnull(asm.quantity, 0) as quantity, 
                     ifnull(scan.scan_count, 0) as scan_count, shp.ship_status 
                 FROM orders o 
@@ -343,24 +343,24 @@ class UtilREST:
                                 FROM assm_serial GROUP BY order_id) as asm ON o.eid = asm.order_id 
                     LEFT JOIN (SELECT count(DISTINCT aps.assm_serial) as scan_count, a.order_id 
                                 FROM assm_part_serial aps INNER JOIN assm_serial a ON aps.assm_serial = a.serial_number GROUP BY a.order_id) as scan on o.eid = scan.order_id 
-                    LEFT JOIN (SELECT title, status || '_' || strftime('%Y-%m-%d', datetime(last_update, '-08:00')) ship_status FROM orders WHERE order_type = 'ship') as shp ON o.title = shp.title 
+                    LEFT JOIN (SELECT title, status || '_' || TO_CHAR(last_update, 'YYYY-MM-DD') as ship_status FROM orders WHERE order_type = 'ship') as shp ON o.title = shp.title 
                 WHERE o.order_type = 'work' 
             """
             params_list = []
             if title:
-                q_cmd += f" AND o.title LIKE ?"
+                q_cmd += f" AND o.title LIKE %s"
                 params_list.append('%{}%'.format(title))
             if vendor:
-                q_cmd += f" AND ac.acct_code LIKE ?"
+                q_cmd += f" AND ac.acct_code LIKE %s"
                 params_list.append('%{}%'.format(vendor))
             if model:
-                q_cmd += f" AND m.title LIKE ?"
+                q_cmd += f" AND m.title LIKE %s"
                 params_list.append('%{}%'.format(model))
             if begin_date:
-                q_cmd += f" AND o.create_date >= ?"
+                q_cmd += f" AND o.create_date >= %s"
                 params_list.append('{}'.format(begin_date))   
             if end_date:
-                q_cmd += f" AND o.create_date <= ?"
+                q_cmd += f" AND o.create_date <= %s"
                 params_list.append('{}'.format(end_date))     
             order_clause = " ORDER BY o.eid DESC"
             q_cmd += order_clause
